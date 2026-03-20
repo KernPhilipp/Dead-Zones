@@ -1,0 +1,13 @@
+63f7b34db8d8cdea90c76aacccf841ec
+::res://::1774001544
+README.md::TextFile::-1::1773999596::0::1::::<><><>0<>0<><>::
+::res://scenes/::1774001067
+hud.tscn::PackedScene::398730266376::1774000995::0::1::::<><><>0<>0<><>::res://scripts/hud.gd
+main.tscn::PackedScene::630662069864::1774001067::0::1::::<><><>0<>0<><>::res://scenes/player.tscn<>res://scenes/hud.tscn<>res://scripts/game_manager.gd
+player.tscn::PackedScene::27365761918488::1774000927::0::1::::<><><>0<>0<><>::res://scripts/player.gd
+zombie.tscn::PackedScene::45398768490512::1774000951::0::1::::<><><>0<>0<><>::res://scripts/zombie.gd
+::res://scripts/::1774001010
+game_manager.gd::GDScript::1107880702585157809::1774001010::0::1::::<>Node<><>0<>0<><>::
+hud.gd::GDScript::3632510194491325148::1774000962::0::1::::<>CanvasLayer<><>0<>0<><>::
+player.gd::GDScript::6052148405131812736::1774000910::0::1::::<>CharacterBody3D<><>0<>0<><>::
+zombie.gd::GDScript::8113008695442845544::1774000943::0::1::::<>CharacterBody3D<><>0<>0<><>::
