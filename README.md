@@ -3,17 +3,25 @@
 Shooter COD Zombie Style
 
 Aufgabenbereiche:
-
 - map
 - charakter (first person, movement, ...)
 - gegner
 - waffen
 - projektile
-- wallen von gegner (game loop)
+- wellen von gegner (game loop)
 - loot system
 - inventar und co
 - ui und Menü
 
-Wir verwenden GODOT
+Framework: GODOT
 
-Soundmanager: Philipp Wilding
+Aufgabenbereich:
+- Lukas Baier - Render Expert
+- Luka Dragic -
+- Tobias Halwax - Base Builder
+- Philipp Kern -
+- Daniel Rehrl -
+- Eneas Zuckerstätter -
+- Gabriel Schönauer -
+- Mohammad Nazari -
+- Philipp Wilding -
