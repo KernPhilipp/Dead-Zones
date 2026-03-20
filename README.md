@@ -17,7 +17,7 @@ Framework: GODOT
 
 Aufgabenbereich:
 - Lukas Baier - Render Expert
-- Luka Dragic -
+- Luka Dragic(Goty) - 
 - Tobias Halwax - Base Builder
 - Philipp Kern -
 - Daniel Rehrl -
