@@ -1,26 +1,132 @@
-# Spiel HTL Projekt
+# 🧟 Dead Zones
 
-Shooter COD Zombie Style
+**Dead Zones** ist ein First-Person Zombie-Shooter im Stil klassischer COD-Zombies-Modi.  
+Der Fokus liegt auf **Wellen-basiertem Survival**, **Erkundung von Lost Places** sowie einem **Loot- und Upgrade-System**.
 
-Aufgabenbereiche:
-- map
-- charakter (first person, movement, ...)
-- gegner
-- waffen
-- projektile
-- wellen von gegner (game loop)
-- loot system
-- inventar und co
-- ui und Menü
+---
 
-Framework: GODOT
+## 🎮 Spielkonzept
 
-Aufgabenbereich:
-- Lukas Baier - Render Expert
-- Luka Dragic(Goty) - 
-- Tobias Halwax - Base Builder
-- Philipp Kern -
-- Daniel Rehrl -
-- Eneas Zuckerstätter -
-- Gabriel Schönauer -
-- Philipp Wilding -
+Der Spieler kämpft in verlassenen, düsteren Umgebungen („Lost Places“) ums Überleben.  
+Mit jeder Welle werden die Gegner stärker und zahlreicher.
+
+### 🔁 Core Gameplay Loop
+1. Gegnerwelle startet  
+2. Spieler bekämpft Zombies  
+3. Loot & Ressourcen sammeln  
+4. Waffen / Equipment verbessern  
+5. Nächste (schwierigere) Welle startet  
+
+---
+
+## ⚙️ Features (geplant)
+
+- 🧟 Zombie-KI & Gegnerwellen  
+- 🔫 Waffensystem (verschiedene Waffen + Upgrades)  
+- 🎒 Loot- & Inventarsystem  
+- 🏚️ Atmosphärische Lost Places Maps  
+- 🌦️ Dynamisches Wetter  
+- 🌙 Tag-/Nachtzyklus  
+- 🧍 First-Person Movement  
+- 🧱 Barrikaden / Base-Elemente  
+- 🖥️ UI & Menüsystem  
+
+---
+
+## 🧰 Technologie
+
+- **Engine:** Godot  
+- **Genre:** First-Person Shooter / Survival  
+- **Setting:** Lost Places / Post-Apokalypse  
+
+---
+
+## 👥 Team & Aufgabenbereiche
+
+### 🎨 Grafik & Design
+- **Lukas Baier**  
+  → UI/UX Design  
+  → Deployment über *Render* (Hosting / Bereitstellung des Spiels im Web)
+
+- **Luka Dragic (Goty)**  
+  → 3D-Modelle für Lost Places  
+  → Map-Komponenten  
+
+- **Gabriel Schönauer**  
+  → Charaktermodelle (Spieler + Gegner)
+
+---
+
+### 🗺️ Map & Welt
+- **Daniel Rehrl**  
+  → Map Design  
+  → Levelstruktur und Umgebung  
+
+- **Philipp Wilding**  
+  → Dynamisches Wetter  
+  → Tag-/Nachtzyklus  
+
+---
+
+### 🧠 Gameplay & Systeme
+- **Eneas Zuckerstätter**  
+  → Gegner-KI  
+  → Wellen-System  
+
+---
+
+### ⚙️ Projekt & Integration
+- **Tobias Halwax**  
+  → Projektverwaltung  
+  → Git / Merging  
+  → Struktur & Organisation des Projekts  
+
+---
+
+### 💻 Core Development
+- **Philipp Kern**  
+  → First-Person Player Controller  
+  → Waffenmechaniken  
+  → Loot- & Inventarsystem  
+  → Game Loop  
+  → Integration aller Systeme  
+
+---
+
+## 📦 Systemübersicht
+
+| System | Verantwortlich |
+|--------|---------------|
+| Map / Level Design | Daniel |
+| 3D Assets (Map) | Luka |
+| Charakter & Gegner Modelle | Gabriel |
+| UI / UX & Deployment | Lukas |
+| Player Movement | Philipp Kern |
+| Waffen | Philipp Kern |
+| Gegner / KI | Eneas |
+| Wellen-System | Eneas |
+| Loot & Inventar | Philipp Kern |
+| Projektmanagement / Merging | Tobias |
+| Wetter / Tageszeit | Philipp Wilding |
+
+---
+
+## 🚀 Ziel
+
+Ein stabiles, spielbares und erweiterbares Zombie-Survival-Spiel mit klarem Gameplay-Loop und solider technischer Basis.
+
+---
+
+## 🧩 Mögliche Erweiterungen
+
+- Multiplayer (LAN / Online)  
+- Skill-System  
+- Story / Missionen  
+- Boss-Gegner  
+- Mehrere Maps  
+
+---
+
+## ⚠️ Hinweis
+
+Dieses Projekt wird im Rahmen eines Schulprojekts entwickelt und dient primär Lern- und Demonstrationszwecken.
