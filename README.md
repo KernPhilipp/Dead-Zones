@@ -23,5 +23,4 @@ Aufgabenbereich:
 - Daniel Rehrl -
 - Eneas Zuckerstätter -
 - Gabriel Schönauer -
-- Mohammad Nazari -
 - Philipp Wilding -
