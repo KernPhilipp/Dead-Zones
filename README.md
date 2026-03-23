@@ -75,11 +75,12 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 
 ---
 
-### ⚙️ Projekt & Integration
+### ⚙️ Projekt, Integration & Deployment to Web
 - **Tobias Halwax**  
   → Projektverwaltung  
   → Git / Merging  
-  → Struktur & Organisation des Projekts  
+  → Struktur & Organisation des Projekts
+  → Web Deployment (CICD)
 
 ---
 
@@ -106,7 +107,7 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 | Gegner / KI | Eneas |
 | Wellen-System | Eneas |
 | Loot & Inventar | Philipp Kern |
-| Projektmanagement / Merging | Tobias |
+| Projektmanagement / DevOps | Tobias |
 | Wetter / Tageszeit | Philipp Wilding |
 
 ---
