@@ -36,7 +36,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: /home/runner/.local/share/godot/builds/web
+          publish_dir: /home/runner/.local/share/godot/builds/Web
           publish_branch: render-deploy
           force_orphan: true
           commit_message: "Deploy: ${{ github.sha }}"
