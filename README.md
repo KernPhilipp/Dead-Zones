@@ -97,15 +97,15 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 | System | Verantwortlich |
 |--------|---------------|
 | Map / Level Design | Daniel |
-| 3D Assets (Map) | Luka |
+| 3D Assets (Map) | Luka und Moritz |
 | Charakter & Gegner Modelle | Gabriel |
-| UI / UX & Deployment | Lukas |
+| UI / UX | Lukas |
 | Player Movement | Philipp Kern |
 | Waffen | Philipp Kern |
 | Gegner / KI | Eneas |
 | Wellen-System | Eneas |
 | Loot & Inventar | Philipp Kern |
-| Projektmanagement / DevOps | Tobias |
+| Projektmanagement / DevOps / Deployment | Tobias |
 | Wetter / Tageszeit | Philipp Wilding |
 
 ---
