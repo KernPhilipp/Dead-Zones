@@ -46,9 +46,8 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 ### 🎨 Grafik & Design
 - **Lukas Baier**  
   → UI/UX Design  
-  → Deployment über *Render* (Hosting / Bereitstellung des Spiels im Web)
 
-- **Luka Dragic (Goty)**  
+- **Luka Dragic (Goty) und Moritz Wieland (Russischer Doppelagent)**  
   → 3D-Modelle für Lost Places  
   → Map-Komponenten  
 
@@ -78,9 +77,8 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 ### ⚙️ Projekt, Integration & Deployment to Web
 - **Tobias Halwax**  
   → Projektverwaltung  
-  → Git / Merging  
-  → Struktur & Organisation des Projekts
-  → Web Deployment (CICD)
+  → Git / Merging
+  → Deployment über *Render* (Hosting / Bereitstellung des Spiels im Web)
 
 ---
 
