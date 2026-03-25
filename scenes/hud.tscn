@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://hud00001"]
+[gd_scene load_steps=8 format=3 uid="uid://hud00001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://scenes/handbook_book.tscn" id="2_handbook_book"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_health"]
 font_size = 24
@@ -13,6 +14,14 @@ font_color = Color(1, 1, 1, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_gameover"]
 font_size = 64
 font_color = Color(1, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_pause"]
+font_size = 48
+font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hint"]
+font_size = 18
+font_color = Color(0.85, 0.85, 0.85, 1)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -88,3 +97,55 @@ layout_mode = 2
 size_flags_horizontal = 4
 custom_minimum_size = Vector2(200, 50)
 text = "Restart"
+
+[node name="PausePanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PausePanel"]
+layout_mode = 2
+alignment = 1
+
+[node name="PauseLabel" type="Label" parent="PausePanel/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "PAUSIERT"
+label_settings = SubResource("LabelSettings_pause")
+
+[node name="ResumeButton" type="Button" parent="PausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(240, 48)
+text = "WEITERSPIELEN"
+
+[node name="HandbookButton" type="Button" parent="PausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(240, 48)
+text = "HANDBUCH"
+
+[node name="SettingsButton" type="Button" parent="PausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(240, 48)
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="PausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(240, 48)
+text = "BEENDEN"
+
+[node name="SettingsHintLabel" type="Label" parent="PausePanel/VBoxContainer"]
+visible = false
+layout_mode = 2
+horizontal_alignment = 1
+text = "SETTINGS ist noch ohne Funktion."
+label_settings = SubResource("LabelSettings_hint")
+
+[node name="HandbookBook" parent="." instance=ExtResource("2_handbook_book")]
+process_mode = 3

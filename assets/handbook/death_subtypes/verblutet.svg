@@ -1,0 +1,14 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 320 460'>
+  <defs>
+    <linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0%' stop-color='#744747'/>
+      <stop offset='100%' stop-color='#111111'/>
+    </linearGradient>
+  </defs>
+  <rect x='0' y='0' width='320' height='460' fill='url(#bg)'/>
+  <rect x='16' y='16' width='288' height='428' fill='none' stroke='rgba(255,255,255,0.26)' stroke-width='2'/>
+  <circle cx='160' cy='210' r='68' fill='#360F0F' opacity='0.9'/>
+  <path d='M128 262 L192 262 L205 360 L115 360 Z' fill='rgba(0,0,0,0.28)'/>
+  <text x='160' y='58' text-anchor='middle' font-size='24' font-family='Verdana,Arial,sans-serif' fill='#F5EED8'>VERBLUTET</text>
+  <text x='160' y='423' text-anchor='middle' font-size='13' font-family='Verdana,Arial,sans-serif' fill='#E7DDC4'>Death Subtype Placeholder</text>
+</svg>
