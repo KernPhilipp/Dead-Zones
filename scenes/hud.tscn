@@ -1,374 +1,44 @@
-[gd_scene load_steps=13 format=3 uid="uid://hud00001"]
+[gd_scene load_steps=8 format=3 uid="uid://hud00001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
-[ext_resource type="Texture2D" path="res://assets/ui/blood_overlay.svg" id="2_blood"]
+[ext_resource type="PackedScene" path="res://scenes/handbook_book.tscn" id="2_handbook_book"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_health"]
-font_size = 14
-font_color = Color(0.78, 0.84, 0.9, 1)
-outline_size = 1
-outline_color = Color(0, 0, 0, 0.7)
+font_size = 24
+font_color = Color(1, 0.2, 0.2, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_ammo"]
-font_size = 40
-font_color = Color(0.98, 0.99, 1, 1)
-outline_size = 2
-outline_color = Color(0, 0, 0, 0.8)
-
-[sub_resource type="LabelSettings" id="LabelSettings_weapon"]
-font_size = 18
-font_color = Color(0.88, 0.92, 0.96, 1)
-outline_size = 1
-outline_color = Color(0, 0, 0, 0.72)
-
-[sub_resource type="LabelSettings" id="LabelSettings_status"]
-font_size = 14
-font_color = Color(0.9, 0.18, 0.16, 1)
-outline_size = 1
-outline_color = Color(0, 0, 0, 0.72)
-
-[sub_resource type="LabelSettings" id="LabelSettings_wave"]
-font_size = 22
-font_color = Color(0.9, 0.94, 0.98, 1)
-outline_size = 2
-outline_color = Color(0, 0, 0, 0.82)
-
-[sub_resource type="LabelSettings" id="LabelSettings_wave_announce"]
-font_size = 68
-font_color = Color(0.93, 0.96, 1, 1)
-outline_size = 8
-outline_color = Color(0.22, 0.02, 0.02, 0.98)
+font_size = 24
+font_color = Color(1, 1, 1, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_gameover"]
 font_size = 64
-font_color = Color(0.95, 0.08, 0.08, 1)
-outline_size = 4
-outline_color = Color(0, 0, 0, 0.86)
+font_color = Color(1, 0, 0, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_weapon_panel"]
-bg_color = Color(0.02, 0.03, 0.04, 0.74)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.86, 0.08, 0.08, 0.55)
-shadow_color = Color(0, 0, 0, 0.42)
-shadow_size = 18
+[sub_resource type="LabelSettings" id="LabelSettings_pause"]
+font_size = 48
+font_color = Color(1, 1, 1, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hit_marker"]
-bg_color = Color(0, 0, 0, 0)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_info_panel"]
-bg_color = Color(0.02, 0.03, 0.04, 0.7)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.86, 0.08, 0.08, 0.45)
-shadow_color = Color(0, 0, 0, 0.38)
-shadow_size = 16
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause_panel"]
-bg_color = Color(0.02, 0.02, 0.03, 0.94)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.1, 0.1, 0.45)
-shadow_color = Color(0, 0, 0, 0.45)
-shadow_size = 22
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_damage_popup"]
-bg_color = Color(0.92, 0.09, 0.08, 0.58)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_color = Color(0.45, 0.02, 0.02, 0.35)
-shadow_size = 18
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_panel"]
-bg_color = Color(0.02, 0.03, 0.04, 0.74)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.86, 0.08, 0.08, 0.5)
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 18
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_under"]
-bg_color = Color(0.1, 0.02, 0.02, 0.98)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
-bg_color = Color(0.86, 0.08, 0.08, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_damage_fill"]
-bg_color = Color(0.95, 0.92, 0.92, 0.42)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+[sub_resource type="LabelSettings" id="LabelSettings_hint"]
+font_size = 18
+font_color = Color(0.85, 0.85, 0.85, 1)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
-[node name="DamageFlash" type="ColorRect" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.65, 0.04, 0.04, 0)
-
-[node name="LowHealthOverlay" type="ColorRect" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.18, 0, 0, 0)
-
-[node name="BloodOverlay" type="TextureRect" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("2_blood")
-expand_mode = 1
-stretch_mode = 6
-
-
-
-
-
-[node name="WaveAnnounceLabel" type="Label" parent="."]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -210.0
-offset_right = 230.0
-offset_bottom = -120.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_alignment = 1
-text = "WAVE 1"
-label_settings = SubResource("LabelSettings_wave_announce")
-
-[node name="CombatFeed" type="VBoxContainer" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -132.0
-offset_right = 160.0
-offset_bottom = -18.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-theme_override_constants/separation = -2
-
-[node name="CombatTextPrimary" type="Label" parent="CombatFeed"]
-layout_mode = 2
-horizontal_alignment = 1
-text = ""
-label_settings = SubResource("LabelSettings_wave")
-
-[node name="CombatTextSecondary" type="Label" parent="CombatFeed"]
-layout_mode = 2
-horizontal_alignment = 1
-text = ""
-label_settings = SubResource("LabelSettings_status")
-
-[node name="DamageCompass" type="Control" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -150.0
-offset_right = 150.0
-offset_bottom = 150.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="DamageCompassMarker" type="Panel" parent="DamageCompass"]
-visible = false
-offset_left = 134.0
-offset_top = 132.0
-offset_right = 166.0
-offset_bottom = 168.0
-rotation = 0.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_damage_popup")
-
-[node name="DamageIndicatorTop" type="Panel" parent="."]
-visible = false
-anchors_preset = 10
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -52.0
-offset_top = 26.0
-offset_right = 52.0
-offset_bottom = 94.0
-grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_damage_popup")
-
-[node name="DamageIndicatorBottom" type="Panel" parent="."]
-visible = false
-anchors_preset = 12
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -52.0
-offset_top = -94.0
-offset_right = 52.0
-offset_bottom = -26.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_damage_popup")
-
-[node name="DamageIndicatorLeft" type="Panel" parent="."]
-visible = false
-anchors_preset = 13
-anchor_top = 0.5
-anchor_right = 0.0
-anchor_bottom = 0.5
-offset_left = 24.0
-offset_top = -52.0
-offset_right = 92.0
-offset_bottom = 52.0
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_damage_popup")
-
-[node name="DamageIndicatorRight" type="Panel" parent="."]
-visible = false
-anchors_preset = 14
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -92.0
-offset_top = -52.0
-offset_right = -24.0
-offset_bottom = 52.0
-grow_horizontal = 0
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_damage_popup")
-
-[node name="WavePanel" type="PanelContainer" parent="."]
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 260.0
-offset_bottom = 84.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_info_panel")
-
-[node name="MarginContainer" type="MarginContainer" parent="WavePanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 12
-
-[node name="VBoxContainer" type="VBoxContainer" parent="WavePanel/MarginContainer"]
-layout_mode = 2
-
-[node name="WaveLabel" type="Label" parent="WavePanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Wave 1"
-label_settings = SubResource("LabelSettings_wave")
-
-[node name="ZombieLabel" type="Label" parent="WavePanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Zombies: 0  Incoming: 0"
-label_settings = SubResource("LabelSettings_status")
-
-[node name="HealthPanel" type="PanelContainer" parent="."]
+[node name="HealthLabel" type="Label" parent="."]
 anchors_preset = 2
 anchor_left = 0.0
 anchor_top = 1.0
 anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -72.0
-offset_right = 228.0
+offset_top = -50.0
+offset_right = 200.0
 offset_bottom = -20.0
 grow_horizontal = 1
 grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_health_panel")
-
-[node name="MarginContainer" type="MarginContainer" parent="HealthPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 10
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HealthPanel/MarginContainer"]
-layout_mode = 2
-
-[node name="HealthHeader" type="Label" parent="HealthPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "VITALS"
-label_settings = SubResource("LabelSettings_health")
-
-[node name="HealthBar" type="ProgressBar" parent="HealthPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 14)
-max_value = 100.0
-value = 100.0
-show_percentage = false
-theme_override_styles/background = SubResource("StyleBoxFlat_health_under")
-theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
-
-[node name="HealthDamageBar" type="ProgressBar" parent="HealthPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 8)
-max_value = 100.0
-value = 100.0
-show_percentage = false
-theme_override_styles/background = SubResource("StyleBoxFlat_health_under")
-theme_override_styles/fill = SubResource("StyleBoxFlat_health_damage_fill")
-
-[node name="HealthValueLabel" type="Label" parent="HealthPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "100 / 100"
+text = "HP: 100"
 label_settings = SubResource("LabelSettings_health")
 
 [node name="AmmoLabel" type="Label" parent="."]
@@ -377,14 +47,14 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -240.0
-offset_top = -54.0
+offset_left = -200.0
+offset_top = -50.0
 offset_right = -20.0
 offset_bottom = -20.0
 grow_horizontal = 0
 grow_vertical = 0
 horizontal_alignment = 2
-text = "030 | 120"
+text = "Ammo: 30/30"
 label_settings = SubResource("LabelSettings_ammo")
 
 [node name="Crosshair" type="CenterContainer" parent="."]
@@ -393,245 +63,16 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -16.0
-offset_top = -16.0
-offset_right = 16.0
-offset_bottom = 16.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CrosshairRoot" type="Control" parent="Crosshair"]
-custom_minimum_size = Vector2(32, 32)
-layout_mode = 2
-
-[node name="HorizontalLeft" type="ColorRect" parent="Crosshair/CrosshairRoot"]
-offset_left = 4.0
-offset_top = 15.0
-offset_right = 9.0
-offset_bottom = 17.0
-color = Color(0.95, 0.97, 1, 0.92)
-
-[node name="HorizontalRight" type="ColorRect" parent="Crosshair/CrosshairRoot"]
-offset_left = 23.0
-offset_top = 15.0
-offset_right = 28.0
-offset_bottom = 17.0
-color = Color(0.95, 0.97, 1, 0.92)
-
-[node name="VerticalTop" type="ColorRect" parent="Crosshair/CrosshairRoot"]
-offset_left = 15.0
-offset_top = 4.0
-offset_right = 17.0
-offset_bottom = 9.0
-color = Color(0.95, 0.97, 1, 0.92)
-
-[node name="VerticalBottom" type="ColorRect" parent="Crosshair/CrosshairRoot"]
-offset_left = 15.0
-offset_top = 23.0
-offset_right = 17.0
-offset_bottom = 28.0
-color = Color(0.95, 0.97, 1, 0.92)
-
-[node name="Dot" type="ColorRect" parent="Crosshair/CrosshairRoot"]
-offset_left = 15.0
-offset_top = 15.0
-offset_right = 17.0
-offset_bottom = 17.0
-color = Color(0.95, 0.97, 1, 1)
-
-[node name="WeaponPanel" type="PanelContainer" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -240.0
-offset_top = -142.0
-offset_right = -20.0
-offset_bottom = -78.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_panel")
-
-[node name="MarginContainer" type="MarginContainer" parent="WeaponPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 10
-
-[node name="WeaponRow" type="HBoxContainer" parent="WeaponPanel/MarginContainer"]
-layout_mode = 2
-
-[node name="WeaponIcon" type="Control" parent="WeaponPanel/MarginContainer/WeaponRow"]
-custom_minimum_size = Vector2(44, 22)
-layout_mode = 2
-
-[node name="Grip" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 7.0
-offset_top = 9.0
-offset_right = 13.0
-offset_bottom = 22.0
-rotation = -0.35
-color = Color(1, 0.85, 0.45, 1)
-
-[node name="Body" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 10.0
-offset_top = 6.0
-offset_right = 31.0
-offset_bottom = 11.0
-color = Color(1, 0.85, 0.45, 1)
-
-[node name="Slide" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 15.0
-offset_top = 3.0
-offset_right = 33.0
-offset_bottom = 7.0
-color = Color(1, 1, 1, 0.9)
-
-[node name="Muzzle" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 30.0
-offset_top = 5.0
-offset_right = 36.0
-offset_bottom = 9.0
-color = Color(1, 0.55, 0.2, 1)
-
-[node name="WeaponText" type="VBoxContainer" parent="WeaponPanel/MarginContainer/WeaponRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 1
-
-[node name="WeaponLabel" type="Label" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponText"]
-layout_mode = 2
-horizontal_alignment = 2
-text = "PISTOL"
-label_settings = SubResource("LabelSettings_weapon")
-
-[node name="WeaponSlotRow" type="HBoxContainer" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponText"]
-layout_mode = 2
-alignment = 2
-
-[node name="SlotLabelOne" type="Label" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponText/WeaponSlotRow"]
-layout_mode = 2
-text = "1"
-label_settings = SubResource("LabelSettings_status")
-
-[node name="SlotSpacer" type="Label" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponText/WeaponSlotRow"]
-layout_mode = 2
-text = "  "
-label_settings = SubResource("LabelSettings_status")
-
-[node name="SlotLabelTwo" type="Label" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponText/WeaponSlotRow"]
-layout_mode = 2
-text = "2"
-label_settings = SubResource("LabelSettings_status")
-
-[node name="ReserveLabel" type="Label" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponText"]
-layout_mode = 2
-horizontal_alignment = 2
-text = "Reserve: 90"
-label_settings = SubResource("LabelSettings_status")
-
-[node name="StatusLabel" type="Label" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -240.0
-offset_top = -188.0
-offset_right = -20.0
-offset_bottom = -170.0
-grow_horizontal = 0
-grow_vertical = 0
-horizontal_alignment = 2
-text = "READY"
-label_settings = SubResource("LabelSettings_status")
-
-[node name="ReloadPanel" type="PanelContainer" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -240.0
-offset_top = -222.0
-offset_right = -20.0
-offset_bottom = -196.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_info_panel")
-
-[node name="MarginContainer" type="MarginContainer" parent="ReloadPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 8
-
-[node name="ReloadBar" type="ProgressBar" parent="ReloadPanel/MarginContainer"]
-layout_mode = 2
-max_value = 100.0
-value = 35.0
-show_percentage = false
-
-[node name="HitMarker" type="Control" parent="."]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="KillConfirmLabel" type="Label" parent="."]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 20.0
-offset_top = 12.0
-offset_right = 132.0
-offset_bottom = 34.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_alignment = 1
-text = "KILL +100"
-label_settings = SubResource("LabelSettings_status")
-
-[node name="LineA" type="ColorRect" parent="HitMarker"]
-offset_left = 9.0
-offset_top = 18.0
-offset_right = 18.0
-offset_bottom = 20.0
-rotation = -0.75
-color = Color(1, 0.35, 0.35, 0.95)
-
-[node name="LineB" type="ColorRect" parent="HitMarker"]
-offset_left = 22.0
-offset_top = 18.0
-offset_right = 31.0
-offset_bottom = 20.0
-rotation = 0.75
-color = Color(1, 0.35, 0.35, 0.95)
-
-[node name="PauseDimmer" type="ColorRect" parent="."]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-modulate = Color(1, 1, 1, 0)
-color = Color(0.02, 0.01, 0.01, 0.74)
+[node name="Dot" type="ColorRect" parent="Crosshair"]
+custom_minimum_size = Vector2(4, 4)
+color = Color(1, 1, 1, 0.8)
 
 [node name="GameOverPanel" type="PanelContainer" parent="."]
 visible = false
@@ -640,7 +81,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-modulate = Color(1, 1, 1, 0)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="GameOverPanel"]
 layout_mode = 2
@@ -652,17 +92,6 @@ horizontal_alignment = 1
 text = "GAME OVER"
 label_settings = SubResource("LabelSettings_gameover")
 
-[node name="Divider" type="ColorRect" parent="GameOverPanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 3)
-layout_mode = 2
-color = Color(0.75, 0.08, 0.08, 0.9)
-
-[node name="GameOverStatsLabel" type="Label" parent="GameOverPanel/VBoxContainer"]
-layout_mode = 2
-horizontal_alignment = 1
-text = "Wave 1 | Kills 0 | Accuracy 0%"
-label_settings = SubResource("LabelSettings_status")
-
 [node name="RestartButton" type="Button" parent="GameOverPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -671,18 +100,11 @@ text = "Restart"
 
 [node name="PausePanel" type="PanelContainer" parent="."]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -170.0
-offset_top = -120.0
-offset_right = 170.0
-offset_bottom = 120.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_pause_panel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PausePanel"]
 layout_mode = 2
@@ -691,18 +113,39 @@ alignment = 1
 [node name="PauseLabel" type="Label" parent="PausePanel/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
-text = "PAUSED"
-label_settings = SubResource("LabelSettings_wave")
+text = "PAUSIERT"
+label_settings = SubResource("LabelSettings_pause")
 
 [node name="ResumeButton" type="Button" parent="PausePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-custom_minimum_size = Vector2(180, 46)
-text = "Resume"
+custom_minimum_size = Vector2(240, 48)
+text = "WEITERSPIELEN"
 
-[node name="PauseRestartButton" type="Button" parent="PausePanel/VBoxContainer"]
+[node name="HandbookButton" type="Button" parent="PausePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-custom_minimum_size = Vector2(180, 46)
-text = "Restart"
+custom_minimum_size = Vector2(240, 48)
+text = "HANDBUCH"
 
+[node name="SettingsButton" type="Button" parent="PausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(240, 48)
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="PausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(240, 48)
+text = "BEENDEN"
+
+[node name="SettingsHintLabel" type="Label" parent="PausePanel/VBoxContainer"]
+visible = false
+layout_mode = 2
+horizontal_alignment = 1
+text = "SETTINGS ist noch ohne Funktion."
+label_settings = SubResource("LabelSettings_hint")
+
+[node name="HandbookBook" parent="." instance=ExtResource("2_handbook_book")]
+process_mode = 3
