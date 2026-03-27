@@ -130,7 +130,7 @@ func _update_hud():
 	if hud.has_method("update_health"):
 		hud.update_health(player.health)
 	if hud.has_method("update_ammo"):
-		hud.update_ammo(player.ammo, player.max_ammo)
+		hud.update_ammo(player.ammo, player.max_ammo, player.reserve_ammo)
 
 func _process_intermission(delta: float):
 	if intermission_remaining > 0.0:
