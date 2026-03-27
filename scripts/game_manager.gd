@@ -12,12 +12,12 @@ const SpawnExecutor = preload("res://scripts/wave/spawn_executor.gd")
 const SpecialWaveModifierInterface = preload("res://scripts/wave/special_wave_modifier.gd")
 
 @export_category("Wellen-Budgets")
-@export_range(1, 200, 1) var base_wave_spawn_count: int = 20
-@export_range(1, 200, 1) var alive_cap: int = 12
+@export_range(1, 200, 1) var base_wave_spawn_count: int = 8
+@export_range(1, 200, 1) var alive_cap: int = 5
 @export_range(0.001, 0.2, 0.001) var near_zero_threshold: float = 0.01
 
 @export_category("Spawn-Timing")
-@export_range(0.1, 5.0, 0.05) var base_spawn_interval_seconds: float = 1.2
+@export_range(0.1, 5.0, 0.05) var base_spawn_interval_seconds: float = 2.0
 @export_range(0.05, 2.0, 0.05) var spawn_delay_step_seconds: float = 0.25
 @export_range(0.0, 15.0, 0.1) var intermission_seconds: float = 3.0
 
@@ -34,7 +34,7 @@ const SpecialWaveModifierInterface = preload("res://scripts/wave/special_wave_mo
 @export var wave_start_on_ready := true
 
 @export_category("Debug & Tuning")
-@export var show_wave_debug_overlay := true
+@export var show_wave_debug_overlay := false
 @export var allow_runtime_curve_toggle := true
 @export var use_tuned_wave_curve := false
 
