@@ -85,18 +85,10 @@ func _ready():
 func _process(delta: float):
 	if not game_active:
 		return
-	if hud.is_pause_open():
-		return
 
 	_update_hud()
 	if player and is_instance_valid(player) and player.health <= 0:
 		game_over()
-		return
-	if hud.is_pause_open():
-		return
-
-	if waiting_for_next_wave:
-		start_next_wave()
 		return
 
 	if wave_active:
