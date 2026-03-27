@@ -43,6 +43,8 @@ func take_damage(amount: int):
 	health -= amount
 	if health <= 0:
 		die()
+		return true
+	return false
 
 func die():
 	queue_free()
@@ -50,7 +52,7 @@ func die():
 func _on_damage_area_body_entered(body):
 	if body.is_in_group("player") and can_attack:
 		if body.has_method("take_damage"):
-			body.take_damage(damage)
+			body.take_damage(damage, global_position)
 		can_attack = false
 		attack_timer.start(attack_cooldown)
 
@@ -61,7 +63,7 @@ func _on_attack_timer_timeout():
 		var bodies = $DamageArea.get_overlapping_bodies()
 		for body in bodies:
 			if body.is_in_group("player") and body.has_method("take_damage"):
-				body.take_damage(damage)
+				body.take_damage(damage, global_position)
 				can_attack = false
 				attack_timer.start(attack_cooldown)
 				break
