@@ -1,0 +1,20 @@
+# Godot editor cache
+.godot/imported/
+.godot/shader_cache/
+.godot/exported/
+
+# Web export files
+index.html
+index.js
+index.pck
+index.wasm
+index.png
+index.icon.png
+index.apple-touch-icon.png
+index.audio.worklet.js
+index.audio.position.worklet.js
+index.*.import
+
+# Export credentials
+.godot/export_credentials.cfg
+export_presets.cfg
