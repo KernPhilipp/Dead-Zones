@@ -53,6 +53,7 @@ var intermission_remaining: float = 0.0
 var wave_active: bool = false
 var wave_plan: Dictionary = {}
 var layer_state: Dictionary = {"layers": []}
+var current_alive_cap: int = 0
 
 var runtime_state: Dictionary = {}
 
@@ -69,6 +70,17 @@ var special_wave_modifier: RefCounted = SpecialWaveModifierInterface.new()
 func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	hud = get_node_or_null("../HUD")
+
+	if player != null and hud != null:
+		player.shot_feedback.connect(func(hit): if hud.has_method("show_shot_feedback"): hud.show_shot_feedback(hit))
+		player.kill_feedback.connect(func(): if hud.has_method("show_kill_feedback"): hud.show_kill_feedback())
+		player.reload_feedback.connect(func(msg, col): if hud.has_method("show_status"): hud.show_status(msg, col))
+		player.damage_feedback.connect(func(amt, dir): if hud.has_method("show_damage_feedback"): hud.show_damage_feedback(amt, dir))
+		player.combat_text_feedback.connect(func(msg, col): if hud.has_method("show_combat_text"): hud.show_combat_text(msg, col))
+		if hud.has_method("update_weapon"):
+			hud.update_weapon(player.weapon_name)
+		if hud.has_method("update_weapon_slots"):
+			hud.update_weapon_slots(player.current_weapon_index)
 
 	profile_rng = RandomNumberGenerator.new()
 	profile_rng.randomize()
@@ -131,6 +143,14 @@ func _update_hud():
 		hud.update_health(player.health)
 	if hud.has_method("update_ammo"):
 		hud.update_ammo(player.ammo, player.max_ammo, player.reserve_ammo)
+	if hud.has_method("update_weapon"):
+		hud.update_weapon(player.weapon_name)
+	if hud.has_method("update_weapon_slots"):
+		hud.update_weapon_slots(player.current_weapon_index)
+	if hud.has_method("update_reload"):
+		hud.update_reload(player.is_reloading, player.get_reload_progress())
+	if hud.has_method("update_crosshair"):
+		hud.update_crosshair(player.speed_ratio)
 	if hud.has_method("update_wave"):
 		var total: int = int(wave_plan.get("total_count", 0))
 		var pending: int = int(wave_plan.get("pending_index", 0))
@@ -158,7 +178,7 @@ func _process_active_wave(delta: float):
 		wave_plan,
 		wave_elapsed,
 		alive_count,
-		alive_cap,
+		current_alive_cap,
 		spawn_delay_step_seconds,
 		spawn_retry_limit,
 		Callable(self, "_spawn_wave_entry")
@@ -180,7 +200,12 @@ func _start_next_wave():
 	wave_elapsed = 0.0
 	intermission_remaining = 0.0
 
-	var budget: Dictionary = spawn_budget_model.build_budget(base_wave_spawn_count)
+	var wave_scale: int = current_wave_index - 1
+	var scaled_spawn_count: int = base_wave_spawn_count + wave_scale * 2
+	var scaled_interval: float = maxf(0.5, base_spawn_interval_seconds - wave_scale * 0.15)
+	current_alive_cap = mini(alive_cap + wave_scale, 15)
+
+	var budget: Dictionary = spawn_budget_model.build_budget(scaled_spawn_count)
 	var main_distribution: Dictionary = progression_model.build_distribution(
 		current_wave_index,
 		special_wave_modifier,
@@ -223,7 +248,7 @@ func _start_next_wave():
 	var scheduled_entries: Array[Dictionary] = schedule_builder.build_schedule(
 		entries,
 		current_wave_index,
-		base_spawn_interval_seconds,
+		scaled_interval,
 		special_wave_modifier,
 		profile_rng
 	)
