@@ -1,0 +1,435 @@
+[gd_scene load_steps=13 format=3 uid="uid://kton6sgdjnxg"]
+
+[ext_resource type="Script" path="res://scripts/handbook_book.gd" id="1_handbook_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_book_shell"]
+bg_color = Color(0.12, 0.15, 0.16, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.39, 0.43, 0.35, 1)
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 14
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tabs_bg"]
+bg_color = Color(0.16, 0.18, 0.2, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.34, 0.37, 0.39, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_left_page"]
+bg_color = Color(0.78, 0.73, 0.62, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.33, 0.27, 0.18, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_right_page"]
+bg_color = Color(0.11, 0.11, 0.13, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.29, 0.32, 0.34, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ribbon"]
+bg_color = Color(0.27, 0.17, 0.38, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.31, 0.57, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_body_panel"]
+bg_color = Color(0.15, 0.16, 0.19, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.27, 0.31, 0.33, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_portrait_panel"]
+bg_color = Color(0.19, 0.2, 0.23, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.37, 0.41, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="LabelSettings" id="LabelSettings_book_title"]
+font_size = 30
+font_color = Color(0.84, 0.86, 0.8, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_chapter"]
+font_size = 17
+font_color = Color(0.16, 0.13, 0.09, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_page_title"]
+font_size = 27
+font_color = Color(0.95, 0.94, 0.99, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_button_normal"]
+bg_color = Color(0.24, 0.25, 0.29, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.37, 0.39, 0.46, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_button_pressed"]
+bg_color = Color(0.36, 0.23, 0.5, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.58, 0.42, 0.79, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="HandbookBook" type="Control"]
+visible = false
+process_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+script = ExtResource("1_handbook_script")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.68)
+
+[node name="BookFrame" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -660.0
+offset_top = -360.0
+offset_right = 660.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_book_shell")
+
+[node name="OrnamentTopLine" type="ColorRect" parent="BookFrame"]
+layout_mode = 2
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 22.0
+offset_top = 8.0
+offset_right = -22.0
+offset_bottom = 12.0
+color = Color(0.45, 0.57, 0.54, 0.95)
+
+[node name="OrnamentBottomLine" type="ColorRect" parent="BookFrame"]
+layout_mode = 2
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 22.0
+offset_top = -12.0
+offset_right = -22.0
+offset_bottom = -8.0
+color = Color(0.45, 0.57, 0.54, 0.95)
+
+[node name="OrnamentCornerTL" type="ColorRect" parent="BookFrame"]
+layout_mode = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 22.0
+offset_bottom = 22.0
+color = Color(0.7, 0.82, 0.79, 0.9)
+
+[node name="OrnamentCornerTR" type="ColorRect" parent="BookFrame"]
+layout_mode = 2
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -22.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = 22.0
+grow_horizontal = 0
+color = Color(0.7, 0.82, 0.79, 0.9)
+
+[node name="OrnamentCornerBL" type="ColorRect" parent="BookFrame"]
+layout_mode = 2
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = -6.0
+grow_vertical = 0
+color = Color(0.7, 0.82, 0.79, 0.9)
+
+[node name="OrnamentCornerBR" type="ColorRect" parent="BookFrame"]
+layout_mode = 2
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -22.0
+offset_top = -22.0
+offset_right = -6.0
+offset_bottom = -6.0
+grow_horizontal = 0
+grow_vertical = 0
+color = Color(0.7, 0.82, 0.79, 0.9)
+
+[node name="OuterMargin" type="MarginContainer" parent="BookFrame"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="RootVBox" type="VBoxContainer" parent="BookFrame/OuterMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox"]
+layout_mode = 2
+
+[node name="BookTitle" type="Label" parent="BookFrame/OuterMargin/RootVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "BOOK OF SHADOWS // UNTOTEN-KOMPENDIUM"
+label_settings = SubResource("LabelSettings_book_title")
+
+[node name="CloseButton" type="Button" parent="BookFrame/OuterMargin/RootVBox/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(140, 36)
+text = "SCHLIESSEN"
+
+[node name="ChapterTabsBg" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tabs_bg")
+
+[node name="TabsMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ChapterTabsBg"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="ChapterTabs" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ChapterTabsBg/TabsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ContentRow" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="LeftColumn" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(360, 0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_left_page")
+
+[node name="LeftMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="LeftVBox" type="VBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn/LeftMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="ChapterHeader" type="Label" parent="BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn/LeftMargin/LeftVBox"]
+layout_mode = 2
+text = "NACHSCHLAGWERK"
+label_settings = SubResource("LabelSettings_chapter")
+
+[node name="ChapterLabel" type="Label" parent="BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn/LeftMargin/LeftVBox"]
+layout_mode = 2
+text = "-"
+label_settings = SubResource("LabelSettings_chapter")
+
+[node name="EntryTree" type="Tree" parent="BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn/LeftMargin/LeftVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 1
+hide_root = true
+
+[node name="RightColumn" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_right_page")
+
+[node name="RightMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="RightVBox" type="VBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="TitleRibbon" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ribbon")
+
+[node name="RibbonMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/TitleRibbon"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="PageTitle" type="Label" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/TitleRibbon/RibbonMargin"]
+layout_mode = 2
+text = "Titel"
+label_settings = SubResource("LabelSettings_page_title")
+
+[node name="ContentSplit" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="BodyPanel" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_body_panel")
+
+[node name="BodyMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/BodyPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="PageBody" type="RichTextLabel" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/BodyPanel/BodyMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = true
+text = ""
+
+[node name="PortraitPanel" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit"]
+layout_mode = 2
+custom_minimum_size = Vector2(290, 0)
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait_panel")
+
+[node name="PortraitFrameGlow" type="ColorRect" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/PortraitPanel"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.42, 0.3, 0.63, 0.08)
+
+[node name="PortraitMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/PortraitPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="PageImage" type="TextureRect" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/PortraitPanel/PortraitMargin"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PageImageHint" type="Label" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/PortraitPanel/PortraitMargin"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_alignment = 0
+vertical_alignment = 0
+autowrap_mode = 2
+text = "Kein Bild vorhanden."
+
+[node name="Footer" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GroupLabel" type="Label" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Kapitel: - | Gruppe: -"
+
+[node name="PrevButton" type="Button" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/Footer"]
+layout_mode = 2
+custom_minimum_size = Vector2(52, 30)
+text = "<"
+
+[node name="NextButton" type="Button" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/Footer"]
+layout_mode = 2
+custom_minimum_size = Vector2(52, 30)
+text = ">"
+
+[node name="PageCounter" type="Label" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/Footer"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "Eintrag 1 / 1"
