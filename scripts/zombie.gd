@@ -1158,3 +1158,16 @@ func _on_hurt_timer_timeout():
 
 func _on_corpse_fall_finished():
 	set_physics_process(false)
+	await get_tree().create_timer(5.0).timeout
+	if not is_instance_valid(self):
+		return
+	var tween = create_tween()
+	tween.tween_property(model_root, "scale", Vector3.ZERO, 0.6)
+	tween.tween_callback(queue_free)
+
+func despawn_immediately():
+	if not is_instance_valid(self):
+		return
+	var tween = create_tween()
+	tween.tween_property(model_root, "scale", Vector3.ZERO, 0.3)
+	tween.tween_callback(queue_free)

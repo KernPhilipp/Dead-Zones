@@ -281,6 +281,11 @@ func _finish_wave():
 	wave_active = false
 	intermission_remaining = intermission_seconds
 	runtime_state["intermission_remaining"] = intermission_remaining
+	for corpse in get_tree().get_nodes_in_group("zombie_corpse"):
+		if corpse.has_method("despawn_immediately"):
+			corpse.despawn_immediately()
+		else:
+			corpse.queue_free()
 
 func _is_wave_complete(alive_count: int) -> bool:
 	if not wave_active:
