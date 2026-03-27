@@ -37,8 +37,6 @@ var pause_dimmer: ColorRect
 var pause_panel: PanelContainer
 var resume_button: Button
 var pause_restart_button: Button
-var handbook_button: Button
-var handbook_book: Node
 var game_over_panel: PanelContainer
 var game_over_label: Label
 var game_over_stats_label: Label
@@ -106,7 +104,6 @@ func _ready():
 	resume_button.pressed.connect(_on_resume)
 	pause_restart_button.pressed.connect(_on_restart)
 	restart_button.pressed.connect(_on_restart)
-	handbook_button.pressed.connect(_on_handbook)
 
 func _ensure_nodes():
 	if nodes_initialized:
@@ -149,8 +146,6 @@ func _ensure_nodes():
 	pause_panel = _find_required_node("PausePanel") as PanelContainer
 	resume_button = _find_required_node("ResumeButton") as Button
 	pause_restart_button = _find_required_node("PauseRestartButton") as Button
-	handbook_button = _find_required_node("HandbookButton") as Button
-	handbook_book = find_child("HandbookBook", true, false)
 	game_over_panel = _find_required_node("GameOverPanel") as PanelContainer
 	game_over_label = _find_required_node("GameOverLabel") as Label
 	game_over_stats_label = _find_required_node("GameOverStatsLabel") as Label
@@ -428,11 +423,6 @@ func _hide_legacy_damage_indicators():
 		var indicator: Control = _find_required_node(indicator_name) as Control
 		indicator.visible = false
 		indicator.modulate.a = 0.0
-
-func _on_handbook():
-	_set_pause_menu_visible(false)
-	if handbook_book and handbook_book.has_method("open_book"):
-		handbook_book.call("open_book")
 
 func _on_resume():
 	_set_pause_menu_visible(false)

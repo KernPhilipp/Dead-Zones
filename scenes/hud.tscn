@@ -1,8 +1,7 @@
-[gd_scene load_steps=14 format=3 uid="uid://hud00001"]
+[gd_scene load_steps=13 format=3 uid="uid://hud00001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Texture2D" path="res://assets/ui/blood_overlay.svg" id="2_blood"]
-[ext_resource type="PackedScene" path="res://scenes/handbook_book.tscn" id="3_handbook"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_health"]
 font_size = 14
@@ -706,12 +705,4 @@ layout_mode = 2
 size_flags_horizontal = 4
 custom_minimum_size = Vector2(180, 46)
 text = "Restart"
-
-[node name="HandbookButton" type="Button" parent="PausePanel/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-custom_minimum_size = Vector2(180, 46)
-text = "Handbuch"
-
-[node name="HandbookBook" parent="." instance=ExtResource("3_handbook")]
 
