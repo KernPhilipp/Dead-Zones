@@ -46,9 +46,8 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 ### 🎨 Grafik & Design
 - **Lukas Baier**  
   → UI/UX Design  
-  → Deployment über *Render* (Hosting / Bereitstellung des Spiels im Web)
 
-- **Luka Dragic (Goty)**  
+- **Luka Dragic (Goty) und Moritz Wieland (Russischer Doppelagent)**  
   → 3D-Modelle für Lost Places  
   → Map-Komponenten  
 
@@ -75,11 +74,11 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 
 ---
 
-### ⚙️ Projekt & Integration
+### ⚙️ Projekt, Integration & Deployment to Web
 - **Tobias Halwax**  
   → Projektverwaltung  
-  → Git / Merging  
-  → Struktur & Organisation des Projekts  
+  → Git / Merging
+  → Deployment über *Render* (Hosting / Bereitstellung des Spiels im Web)
 
 ---
 
@@ -98,15 +97,15 @@ Mit jeder Welle werden die Gegner stärker und zahlreicher.
 | System | Verantwortlich |
 |--------|---------------|
 | Map / Level Design | Daniel |
-| 3D Assets (Map) | Luka |
+| 3D Assets (Map) | Luka und Moritz |
 | Charakter & Gegner Modelle | Gabriel |
-| UI / UX & Deployment | Lukas |
+| UI / UX | Lukas |
 | Player Movement | Philipp Kern |
 | Waffen | Philipp Kern |
 | Gegner / KI | Eneas |
 | Wellen-System | Eneas |
 | Loot & Inventar | Philipp Kern |
-| Projektmanagement / Merging | Tobias |
+| Projektmanagement / DevOps / Deployment | Tobias |
 | Wetter / Tageszeit | Philipp Wilding |
 
 ---
