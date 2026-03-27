@@ -131,6 +131,11 @@ func _update_hud():
 		hud.update_health(player.health)
 	if hud.has_method("update_ammo"):
 		hud.update_ammo(player.ammo, player.max_ammo, player.reserve_ammo)
+	if hud.has_method("update_wave"):
+		var total: int = int(wave_plan.get("total_count", 0))
+		var pending: int = int(wave_plan.get("pending_index", 0))
+		var remaining_to_spawn: int = max(0, total - pending)
+		hud.update_wave(current_wave_index, _get_alive_zombie_count(), remaining_to_spawn)
 
 func _process_intermission(delta: float):
 	if intermission_remaining > 0.0:
@@ -239,6 +244,8 @@ func _start_next_wave():
 
 	wave_active = true
 	_initialize_runtime_state()
+	if hud != null and is_instance_valid(hud) and hud.has_method("show_wave_announcement"):
+		hud.show_wave_announcement(current_wave_index)
 	runtime_state["current_wave"] = current_wave_index
 	runtime_state["elapsed_wave_time"] = 0.0
 	runtime_state["pending_index"] = 0
