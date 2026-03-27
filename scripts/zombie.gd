@@ -356,12 +356,12 @@ func _initialize_part_states():
 
 	_apply_starting_part_losses()
 
-func take_damage(amount: int):
-	take_part_damage("torso", amount)
+func take_damage(amount: int) -> bool:
+	return take_part_damage("torso", amount)
 
-func take_part_damage(part: String, amount: int):
+func take_part_damage(part: String, amount: int) -> bool:
 	if state == ZombieState.DEAD or amount <= 0:
-		return
+		return false
 
 	if resolved_behavior_mode == "corpse_feeder" or resolved_behavior_mode == "passive_trigger":
 		behavior_triggered = true
@@ -379,10 +379,11 @@ func take_part_damage(part: String, amount: int):
 
 	if health <= 0 or missing_parts["torso"]:
 		die()
-		return
+		return true
 
 	if state != ZombieState.SPAWN_RISE:
 		_enter_hurt_state()
+	return false
 
 func die():
 	if state == ZombieState.DEAD:
