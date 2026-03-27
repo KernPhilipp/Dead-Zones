@@ -82,8 +82,8 @@ func _on_spawn_timer_timeout():
 
 	var spawn_point = spawn_points.pick_random()
 	var zombie = zombie_scene.instantiate()
-	zombie.global_position = spawn_point.global_position
 	get_tree().current_scene.add_child(zombie)
+	zombie.global_position = spawn_point.global_position
 	spawned_in_wave += 1
 	if spawned_in_wave < zombies_to_spawn_in_wave:
 		spawn_timer.start(spawn_interval)
