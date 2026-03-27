@@ -1,5 +1,7 @@
 # 🧟 Dead Zones
 
+testteset
+
 **Dead Zones** ist ein First-Person Zombie-Shooter im Stil klassischer COD-Zombies-Modi.  
 Der Fokus liegt auf **Wellen-basiertem Survival**, **Erkundung von Lost Places** sowie einem **Loot- und Upgrade-System**.
 
