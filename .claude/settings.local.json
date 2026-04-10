@@ -4,7 +4,18 @@
       "WebSearch",
       "Bash(find C:UsersTobiDocumentsGitHub -name project.godot -o -name *.gd -o -name *.tscn)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(ls scripts/zombie_*.gd scripts/handbook_book.gd)",
+      "Bash(grep -n \"func take_damage\" scripts/*.gd)",
+      "Bash(wc -l scripts/*.gd scripts/wave/*.gd)",
+      "Bash(grep -n \"is_headshot\\\\|_is_headshot\" scripts/*.gd)",
+      "Bash(grep -rn \"\\\\.connect\\\\|emit_signal\\\\|\\\\.emit\" scripts/wave/*.gd)",
+      "Bash(grep -rn \"ERROR\\\\|TODO\\\\|FIXME\\\\|BUG\" scripts/*.gd)",
+      "Bash(grep -rn \"get_tree\\\\|get_node\\\\|find_child\" scripts/*.gd)",
+      "Bash(grep -n \"get_status_label\\\\|get_effect_profile\" scripts/*.gd)",
+      "Bash(grep -rn \"configure_profile\" scripts/*.gd)",
+      "Bash(git fetch:*)",
+      "Bash(git add:*)"
     ]
   }
 }
