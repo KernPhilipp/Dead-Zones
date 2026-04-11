@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://main0001"]
+[gd_scene load_steps=9 format=3 uid="uid://main0001"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="2_hud"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_gm"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/pickup_item.tscn" id="4_pickup"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.35, 0.35, 0.3, 1)
@@ -101,6 +102,27 @@ material = SubResource("StandardMaterial3D_cover")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="PickupTestSpawns" type="Node3D" parent="."]
+
+[node name="PistolAmmoPickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0, -3.2)
+amount = 24
+weapon_slot = 0
+display_name = "Pistol Ammo"
+
+[node name="RifleAmmoPickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.2)
+amount = 45
+weapon_slot = 1
+display_name = "Rifle Ammo"
+
+[node name="MedkitPickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0, -3.2)
+pickup_type = "medkit"
+amount = 1
+weapon_slot = -1
+display_name = "Medkit"
 
 [node name="HUD" parent="." instance=ExtResource("2_hud")]
 process_mode = 3

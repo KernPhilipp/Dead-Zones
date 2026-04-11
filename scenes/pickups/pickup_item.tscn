@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3 uid="uid://pickupitem001"]
+
+[ext_resource type="Script" path="res://scripts/pickups/pickup_item.gd" id="1_pickup_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pickup"]
+size = Vector3(1.1, 0.7, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pickup"]
+size = Vector3(0.9, 0.45, 0.9)
+
+[sub_resource type="LabelSettings" id="LabelSettings_pickup"]
+font_size = 32
+outline_size = 8
+outline_color = Color(0, 0, 0, 0.85)
+
+[node name="PickupItem" type="StaticBody3D" groups=["pickup"]]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_pickup_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("BoxShape3D_pickup")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualRoot"]
+mesh = SubResource("BoxMesh_pickup")
+
+[node name="Label3D" type="Label3D" parent="VisualRoot"]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0.75, 0)
+modulate = Color(1, 1, 1, 1)
+billboard = 1
+text = "PICKUP"
+font_size = 32
+outline_size = 8
+label_settings = SubResource("LabelSettings_pickup")
+horizontal_alignment = 1

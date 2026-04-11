@@ -1,9 +1,0 @@
-res://docs/zombie_handbook.md
-res://scripts/game_manager.gd
-res://scripts/zombie.gd
-res://scripts/zombie_definitions.gd
-res://scripts/zombie_handbook_data.gd
-res://scripts/hud.gd
-res://scripts/handbook_book.gd
-res://docs/death_effects_status.md
-res://docs/wave_runtime.md
