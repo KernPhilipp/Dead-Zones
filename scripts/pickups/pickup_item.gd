@@ -37,8 +37,16 @@ func _process(delta: float):
 	)
 
 func interact(player: Node) -> bool:
-	if player == null or not is_instance_valid(player) or not player.has_method("try_collect_pickup"):
+	if player == null or not is_instance_valid(player):
 		return false
+	if not player.has_method("pickup_item") and not player.has_method("try_collect_pickup"):
+		return false
+
+	if player.has_method("pickup_item"):
+		var collected_with_payload: bool = bool(player.call("pickup_item", get_item_data()))
+		if collected_with_payload:
+			queue_free()
+		return collected_with_payload
 
 	var collected: bool = bool(player.call("try_collect_pickup", pickup_type, amount, weapon_id, item_id, display_name))
 	if collected:
@@ -53,6 +61,15 @@ func get_interaction_prompt() -> String:
 			return "PRESS E: %s x%d" % [display_name, amount]
 		_:
 			return "PRESS E: %s +%d" % [display_name, amount]
+
+func get_item_data() -> Dictionary:
+	return {
+		"pickup_type": pickup_type,
+		"amount": amount,
+		"weapon_id": weapon_id,
+		"item_id": item_id,
+		"display_name": display_name,
+	}
 
 func _apply_visual_style():
 	_runtime_material = StandardMaterial3D.new()
