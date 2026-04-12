@@ -299,8 +299,8 @@ func cycle_selected_item(step: int) -> void:
 	reload_feedback.emit("ITEM %s" % ItemDefinitions.get_display_name(item_id).to_upper(), INFO_STATUS_COLOR)
 	_emit_inventory_changed()
 
-func use_item() -> void:
-	var item_id: String = item_inventory.ensure_selected_item(_get_unlocked_item_ids())
+func use_item(item_id_override: String = "") -> void:
+	var item_id: String = item_id_override if not item_id_override.is_empty() else item_inventory.ensure_selected_item(_get_unlocked_item_ids())
 	if item_id.is_empty():
 		reload_feedback.emit("NO ITEM", ERROR_STATUS_COLOR)
 		return
@@ -314,7 +314,7 @@ func use_item() -> void:
 			if health >= max_health:
 				reload_feedback.emit("HEALTH FULL", WARNING_STATUS_COLOR)
 				return
-			item_inventory.consume_item(item_id)
+			item_inventory.remove_item(item_id, 1)
 			var previous_health := health
 			health = mini(health + int(item_data.get("effect_value", 0)), max_health)
 			reload_feedback.emit("USED MEDKIT", POSITIVE_STATUS_COLOR)
@@ -323,17 +323,25 @@ func use_item() -> void:
 			if armor >= max_armor:
 				reload_feedback.emit("ARMOR FULL", WARNING_STATUS_COLOR)
 				return
-			item_inventory.consume_item(item_id)
+			item_inventory.remove_item(item_id, 1)
 			var previous_armor := armor
 			armor = mini(armor + int(item_data.get("effect_value", 0)), max_armor)
 			reload_feedback.emit("ARMOR RESTORED", POSITIVE_STATUS_COLOR)
 			combat_text_feedback.emit("+%d ARM" % (armor - previous_armor), INFO_STATUS_COLOR)
 			armor_changed.emit(armor, max_armor)
 		"grenade":
-			item_inventory.consume_item(item_id)
+			item_inventory.remove_item(item_id, 1)
 			_throw_grenade()
 			reload_feedback.emit("GRENADE OUT", POSITIVE_STATUS_COLOR)
 	_emit_inventory_changed()
+
+func pickup_item(item_data: Dictionary) -> bool:
+	var pickup_type: String = String(item_data.get("pickup_type", ""))
+	var amount: int = int(item_data.get("amount", 1))
+	var weapon_id: String = String(item_data.get("weapon_id", ""))
+	var item_id: String = String(item_data.get("item_id", ""))
+	var display_name: String = String(item_data.get("display_name", ""))
+	return try_collect_pickup(pickup_type, amount, weapon_id, item_id, display_name)
 
 func take_damage(amount: int, source_position: Vector3 = Vector3.ZERO) -> void:
 	var incoming_damage := maxi(amount, 0)
