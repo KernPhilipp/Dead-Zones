@@ -3,9 +3,12 @@ extends CanvasLayer
 var health_bar: ProgressBar
 var health_damage_bar: ProgressBar
 var health_value_label: Label
+var armor_value_label: Label
 var weapon_label: Label
 var ammo_label: Label
 var reserve_label: Label
+var currency_label: Label
+var inventory_label: Label
 var weapon_grip: ColorRect
 var weapon_body: ColorRect
 var weapon_slide: ColorRect
@@ -84,6 +87,9 @@ func _ready():
 	combat_text_secondary.modulate.a = 0.0
 	health_bar.value = 100.0
 	health_damage_bar.value = 100.0
+	armor_value_label.text = "ARM 000 / 100"
+	currency_label.text = "PTS 00000"
+	inventory_label.text = "MED 0  ARM 0  GRN 0\nSEL MEDKIT"
 	pause_dimmer.visible = false
 	pause_dimmer.modulate.a = 0.0
 	pause_panel.visible = false
@@ -112,9 +118,12 @@ func _ensure_nodes():
 	health_bar = _find_required_node("HealthBar") as ProgressBar
 	health_damage_bar = _find_required_node("HealthDamageBar") as ProgressBar
 	health_value_label = _find_required_node("HealthValueLabel") as Label
+	armor_value_label = _find_required_node("ArmorValueLabel") as Label
 	weapon_label = _find_required_node("WeaponLabel") as Label
 	ammo_label = _find_required_node("AmmoLabel") as Label
 	reserve_label = _find_required_node("ReserveLabel") as Label
+	currency_label = _find_required_node("CurrencyLabel") as Label
+	inventory_label = _find_required_node("InventoryLabel") as Label
 	weapon_grip = _find_required_node("Grip") as ColorRect
 	weapon_body = _find_required_node("Body") as ColorRect
 	weapon_slide = _find_required_node("Slide") as ColorRect
@@ -189,6 +198,24 @@ func update_health(value: int):
 	var health_ratio: float = float(value) / 100.0
 	low_health_strength = clampf((0.35 - health_ratio) / 0.35, 0.0, 0.65)
 
+func update_armor(current: int, max_val: int):
+	_ensure_nodes()
+	armor_value_label.text = "ARM %03d / %03d" % [current, max_val]
+	armor_value_label.modulate = Color(0.4, 0.92, 1.0, 1.0) if current > 0 else Color(0.66, 0.72, 0.78, 1.0)
+
+func update_currency(current_points: int):
+	_ensure_nodes()
+	currency_label.text = "PTS %05d" % current_points
+
+func update_inventory(items_state: Dictionary):
+	_ensure_nodes()
+	var counts: Dictionary = items_state.get("counts", {})
+	var medkits: int = int(counts.get("medkit", 0))
+	var armor_plates: int = int(counts.get("armor_plate", 0))
+	var grenades: int = int(counts.get("grenade", 0))
+	var selected_name: String = String(items_state.get("selected_item_display", "-")).to_upper()
+	inventory_label.text = "MED %d  ARM %d  GRN %d\nSEL %s" % [medkits, armor_plates, grenades, selected_name]
+
 func update_weapon(weapon_name: String):
 	_ensure_nodes()
 	weapon_label.text = weapon_name.to_upper()
@@ -262,6 +289,11 @@ func show_combat_text(message: String, color: Color):
 		_show_combat_label(combat_text_primary, message, color, true)
 	else:
 		_show_combat_label(combat_text_secondary, message, color, false)
+
+func show_unlock_feedback(display_name: String):
+	_ensure_nodes()
+	show_status("UNLOCKED %s" % display_name.to_upper(), Color(0.45, 1.0, 0.55, 1.0), 0.8)
+	show_combat_text("UNLOCKED %s" % display_name.to_upper(), Color(0.45, 1.0, 0.55, 1.0))
 
 func show_kill_feedback():
 	_ensure_nodes()
@@ -441,7 +473,21 @@ func _on_restart():
 
 func _update_weapon_icon(weapon_name: String):
 	var weapon_key: String = weapon_name.to_lower()
-	if weapon_key.contains("rifle"):
+	if weapon_key.contains("shotgun"):
+		weapon_grip.position = Vector2(6.0, 10.0)
+		weapon_grip.size = Vector2(6.0, 11.0)
+		weapon_grip.rotation = -0.22
+		weapon_body.position = Vector2(10.0, 8.0)
+		weapon_body.size = Vector2(24.0, 5.0)
+		weapon_slide.position = Vector2(10.0, 4.0)
+		weapon_slide.size = Vector2(16.0, 4.0)
+		weapon_muzzle.position = Vector2(32.0, 8.0)
+		weapon_muzzle.size = Vector2(9.0, 3.0)
+		weapon_body.color = Color(0.64, 0.54, 0.4, 1.0)
+		weapon_slide.color = Color(0.42, 0.34, 0.28, 1.0)
+		weapon_grip.color = Color(0.18, 0.14, 0.12, 1.0)
+		weapon_muzzle.color = Color(0.92, 0.38, 0.12, 1.0)
+	elif weapon_key.contains("rifle"):
 		weapon_grip.position = Vector2(5.0, 8.0)
 		weapon_grip.size = Vector2(5.0, 14.0)
 		weapon_grip.rotation = -0.18
@@ -534,7 +580,8 @@ func _format_game_over_stats(stats: Dictionary) -> String:
 	var kills: int = int(stats.get("kills", 0))
 	var headshots: int = int(stats.get("headshots", 0))
 	var accuracy: float = float(stats.get("accuracy", 0.0)) * 100.0
+	var points: int = int(stats.get("points", 0))
 	var total_seconds: int = int(stats.get("time_seconds", 0))
 	var minutes: int = total_seconds / 60
 	var seconds: int = total_seconds % 60
-	return "Wave %d  Kills %d  Headshots %d  Accuracy %.0f%%  Time %02d:%02d" % [wave, kills, headshots, accuracy, minutes, seconds]
+	return "Wave %d  Kills %d  Headshots %d  Accuracy %.0f%%  Points %d  Time %02d:%02d" % [wave, kills, headshots, accuracy, points, minutes, seconds]

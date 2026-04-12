@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://main0001"]
+[gd_scene load_steps=10 format=3 uid="uid://main0001"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="2_hud"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_gm"]
 [ext_resource type="PackedScene" path="res://scenes/pickups/pickup_item.tscn" id="4_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/buy_station.tscn" id="5_station"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.35, 0.35, 0.3, 1)
@@ -108,24 +109,77 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 [node name="PistolAmmoPickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0, -3.2)
 amount = 24
-weapon_slot = 0
+weapon_id = "pistol"
 display_name = "Pistol Ammo"
 
 [node name="RifleAmmoPickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.2)
 amount = 45
-weapon_slot = 1
+weapon_id = "rifle"
 display_name = "Rifle Ammo"
 
 [node name="MedkitPickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0, -3.2)
-pickup_type = "medkit"
+pickup_type = "consumable"
 amount = 1
-weapon_slot = -1
+item_id = "medkit"
 display_name = "Medkit"
+
+[node name="ArmorPlatePickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 0, -3.2)
+pickup_type = "consumable"
+amount = 1
+item_id = "armor_plate"
+display_name = "Armor Plate"
+
+[node name="GrenadePickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.2, 0, -3.2)
+pickup_type = "consumable"
+amount = 1
+item_id = "grenade"
+display_name = "Grenade"
+
+[node name="ShotgunPickup" parent="PickupTestSpawns" instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 0, -3.2)
+pickup_type = "weapon"
+weapon_id = "shotgun"
+display_name = "Shotgun"
 
 [node name="HUD" parent="." instance=ExtResource("2_hud")]
 process_mode = 3
+
+[node name="Stations" type="Node3D" parent="."]
+
+[node name="AmmoStation" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -6)
+station_type = "ammo_refill"
+amount = 36
+cost_override = 120
+display_name = "Ammo Refill"
+
+[node name="MedStation" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -6)
+station_type = "consumable_supply"
+item_id = "medkit"
+display_name = "Med Supply"
+
+[node name="ArmorStation" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+station_type = "consumable_supply"
+item_id = "armor_plate"
+display_name = "Armor Supply"
+
+[node name="GrenadeStation" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -6)
+station_type = "consumable_supply"
+item_id = "grenade"
+display_name = "Grenade Supply"
+
+[node name="ShotgunWallBuy" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -6)
+station_type = "weapon_buy"
+weapon_id = "shotgun"
+display_name = "Shotgun Buy"
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 

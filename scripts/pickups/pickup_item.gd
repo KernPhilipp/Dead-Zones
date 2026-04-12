@@ -1,8 +1,9 @@
 extends StaticBody3D
 
-@export_enum("ammo", "medkit") var pickup_type: String = "ammo"
+@export_enum("ammo", "weapon", "consumable") var pickup_type: String = "ammo"
 @export_range(1, 999, 1) var amount: int = 12
-@export_range(-1, 7, 1) var weapon_slot: int = -1
+@export var weapon_id: String = ""
+@export var item_id: String = ""
 @export var display_name: String = "Pistol Ammo"
 @export var rotation_speed: float = 1.4
 @export var hover_amplitude: float = 0.08
@@ -39,15 +40,19 @@ func interact(player: Node) -> bool:
 	if player == null or not is_instance_valid(player) or not player.has_method("try_collect_pickup"):
 		return false
 
-	var collected: bool = bool(player.call("try_collect_pickup", pickup_type, amount, weapon_slot, display_name))
+	var collected: bool = bool(player.call("try_collect_pickup", pickup_type, amount, weapon_id, item_id, display_name))
 	if collected:
 		queue_free()
 	return collected
 
 func get_interaction_prompt() -> String:
-	if pickup_type == "medkit":
-		return "PRESS E: %s x%d" % [display_name, amount]
-	return "PRESS E: %s +%d" % [display_name, amount]
+	match pickup_type:
+		"weapon":
+			return "PRESS E: %s" % display_name
+		"consumable":
+			return "PRESS E: %s x%d" % [display_name, amount]
+		_:
+			return "PRESS E: %s +%d" % [display_name, amount]
 
 func _apply_visual_style():
 	_runtime_material = StandardMaterial3D.new()
@@ -56,12 +61,16 @@ func _apply_visual_style():
 	_runtime_material.emission_enabled = true
 
 	match pickup_type:
-		"medkit":
+		"weapon":
+			_base_color = Color(0.92, 0.66, 0.18, 1.0)
+			_emission_color = Color(0.38, 0.2, 0.04, 1.0)
+			_base_mesh_scale = Vector3(1.0, 0.3, 1.4)
+		"consumable":
 			_base_color = Color(0.84, 0.22, 0.26, 1.0)
 			_emission_color = Color(0.45, 0.08, 0.12, 1.0)
 			_base_mesh_scale = Vector3(0.88, 0.48, 0.88)
 		_:
-			if weapon_slot == 0:
+			if weapon_id == "pistol":
 				_base_color = Color(0.95, 0.72, 0.22, 1.0)
 				_emission_color = Color(0.38, 0.24, 0.04, 1.0)
 				_base_mesh_scale = Vector3(0.8, 0.34, 0.92)
@@ -77,10 +86,13 @@ func _apply_visual_style():
 
 func _update_label():
 	var suffix: String = ""
-	if pickup_type == "medkit":
-		suffix = " x%d" % amount
-	else:
-		suffix = " +%d" % amount
+	match pickup_type:
+		"weapon":
+			suffix = ""
+		"consumable":
+			suffix = " x%d" % amount
+		_:
+			suffix = " +%d" % amount
 	label_3d.text = "%s%s" % [display_name.to_upper(), suffix]
 
 func set_highlighted(active: bool):

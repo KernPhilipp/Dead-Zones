@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://grenade_projectile_001"]
+
+[ext_resource type="Script" path="res://scripts/projectiles/grenade_projectile.gd" id="1_grenade_script"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_grenade"]
+radius = 0.12
+
+[sub_resource type="SphereMesh" id="SphereMesh_grenade"]
+radius = 0.12
+height = 0.24
+
+[node name="GrenadeProjectile" type="CharacterBody3D"]
+collision_layer = 16
+collision_mask = 6
+script = ExtResource("1_grenade_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_grenade")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_grenade")

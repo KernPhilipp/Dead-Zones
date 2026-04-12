@@ -371,6 +371,11 @@ layout_mode = 2
 text = "100 / 100"
 label_settings = SubResource("LabelSettings_health")
 
+[node name="ArmorValueLabel" type="Label" parent="HealthPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "ARM 000 / 100"
+label_settings = SubResource("LabelSettings_health")
+
 [node name="AmmoLabel" type="Label" parent="."]
 anchors_preset = 3
 anchor_left = 1.0
@@ -386,6 +391,22 @@ grow_vertical = 0
 horizontal_alignment = 2
 text = "030 | 120"
 label_settings = SubResource("LabelSettings_ammo")
+
+[node name="CurrencyLabel" type="Label" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -240.0
+offset_top = -252.0
+offset_right = -20.0
+offset_bottom = -230.0
+grow_horizontal = 0
+grow_vertical = 0
+horizontal_alignment = 2
+text = "PTS 00000"
+label_settings = SubResource("LabelSettings_health")
 
 [node name="Crosshair" type="CenterContainer" parent="."]
 anchors_preset = 8
@@ -531,6 +552,32 @@ layout_mode = 2
 horizontal_alignment = 2
 text = "Reserve: 90"
 label_settings = SubResource("LabelSettings_status")
+
+[node name="InventoryPanel" type="PanelContainer" parent="."]
+anchors_preset = 2
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 248.0
+offset_top = -86.0
+offset_right = 474.0
+offset_bottom = -20.0
+grow_horizontal = 1
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="InventoryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="InventoryLabel" type="Label" parent="InventoryPanel/MarginContainer"]
+layout_mode = 2
+text = "MED 0  ARM 0  GRN 0\nSEL MEDKIT"
+label_settings = SubResource("LabelSettings_health")
 
 [node name="StatusLabel" type="Label" parent="."]
 anchors_preset = 3
