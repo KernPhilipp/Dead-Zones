@@ -16,6 +16,7 @@ const WEATHER_PROFILES := {
 		"storminess": 0.04,
 		"blood_tint": 0.22,
 		"toxic_tint": 0.38,
+		"purple_tint": 0.24,
 		"void_depth": 0.55
 	},
 	WEATHER_CLOUDY: {
@@ -27,6 +28,7 @@ const WEATHER_PROFILES := {
 		"storminess": 0.08,
 		"blood_tint": 0.3,
 		"toxic_tint": 0.46,
+		"purple_tint": 0.36,
 		"void_depth": 0.66
 	},
 	WEATHER_FOGGY: {
@@ -38,6 +40,7 @@ const WEATHER_PROFILES := {
 		"storminess": 0.12,
 		"blood_tint": 0.36,
 		"toxic_tint": 0.72,
+		"purple_tint": 0.58,
 		"void_depth": 0.8
 	},
 	WEATHER_RAIN: {
@@ -49,6 +52,7 @@ const WEATHER_PROFILES := {
 		"storminess": 0.48,
 		"blood_tint": 0.48,
 		"toxic_tint": 0.58,
+		"purple_tint": 0.52,
 		"void_depth": 0.88
 	},
 	WEATHER_STORM: {
@@ -60,6 +64,7 @@ const WEATHER_PROFILES := {
 		"storminess": 1.0,
 		"blood_tint": 0.68,
 		"toxic_tint": 0.86,
+		"purple_tint": 0.78,
 		"void_depth": 1.0
 	}
 }
@@ -154,13 +159,13 @@ func _configure_environment_defaults():
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_sky_contribution = 0.0
 	environment.ambient_light_energy = 0.18
-	environment.ambient_light_color = Color(0.08, 0.11, 0.09, 1.0)
+	environment.ambient_light_color = Color(0.11, 0.13, 0.15, 1.0)
 	environment.fog_enabled = true
 	environment.fog_density = 0.03
 	environment.fog_aerial_perspective = 0.28
 	environment.fog_sky_affect = 0.62
-	environment.fog_light_color = Color(0.12, 0.2, 0.14, 1.0)
-	environment.fog_light_energy = 0.35
+	environment.fog_light_color = Color(0.24, 0.34, 0.3, 1.0)
+	environment.fog_light_energy = 0.48
 	sun.shadow_enabled = true
 	sun.light_energy = 0.28
 
@@ -297,6 +302,7 @@ func _apply_environment():
 	var rain_amount := _get_weather_value("rain_amount")
 	var blood_tint := _get_weather_value("blood_tint")
 	var toxic_tint := _get_weather_value("toxic_tint")
+	var purple_tint := _get_weather_value("purple_tint")
 	var void_depth := _get_weather_value("void_depth")
 	var lightning_mix := clampf(lightning_light.light_energy / 5.8, 0.0, 1.0)
 	var horror_daylight := daylight * 0.34
@@ -304,40 +310,47 @@ func _apply_environment():
 	var void_black := Color(0.01, 0.012, 0.01, 1.0)
 	var dead_night := Color(0.02, 0.035, 0.028, 1.0)
 	var toxic_green := Color(0.16, 0.34, 0.18, 1.0)
+	var arcane_purple := Color(0.38, 0.14, 0.44, 1.0)
 	var blood_red := Color(0.46, 0.04, 0.02, 1.0)
 	var sky_color := void_black.lerp(dead_night, horror_daylight)
 	sky_color = sky_color.lerp(toxic_green, toxic_tint * 0.48)
+	sky_color = sky_color.lerp(arcane_purple, purple_tint * 0.42)
 	sky_color = sky_color.lerp(blood_red, maxf(twilight * 0.72, blood_tint * 0.5))
-	sky_color = sky_color.lerp(Color(0.0, 0.0, 0.0, 1.0), void_depth * 0.58)
-	sky_color = sky_color.lerp(lightning_flash_color, lightning_mix * 0.22)
+	sky_color = sky_color.lerp(Color(0.0, 0.0, 0.0, 1.0), void_depth * 0.48)
+	sky_color = sky_color.lerp(lightning_flash_color, lightning_mix * 0.24)
 
-	var ambient_base := Color(0.03, 0.045, 0.035, 1.0)
+	var ambient_base := Color(0.06, 0.07, 0.075, 1.0)
 	var ambient_toxic := Color(0.08, 0.18, 0.09, 1.0)
+	var ambient_purple := Color(0.16, 0.08, 0.2, 1.0)
 	var ambient_blood := Color(0.16, 0.04, 0.03, 1.0)
 	var ambient_color := ambient_base.lerp(ambient_toxic, toxic_tint * 0.52)
+	ambient_color = ambient_color.lerp(ambient_purple, purple_tint * 0.42)
 	ambient_color = ambient_color.lerp(ambient_blood, blood_tint * 0.35)
-	ambient_color = ambient_color.lerp(sky_color, 0.18)
+	ambient_color = ambient_color.lerp(sky_color, 0.24)
 
 	var sick_moon := Color(0.28, 0.48, 0.3, 1.0)
+	var cursed_purple := Color(0.56, 0.24, 0.68, 1.0)
 	var dirty_day := Color(0.46, 0.54, 0.38, 1.0)
 	var dusk_sun_color := Color(0.82, 0.14, 0.08, 1.0)
 	var sun_color := sick_moon.lerp(dirty_day, horror_daylight)
+	sun_color = sun_color.lerp(cursed_purple, purple_tint * 0.36)
 	sun_color = sun_color.lerp(dusk_sun_color, maxf(twilight * 0.78, blood_tint * 0.22))
 	sun_color = sun_color.lerp(lightning_flash_color, lightning_mix * 0.38)
 
 	environment.background_color = sky_color
 	environment.ambient_light_color = ambient_color
-	environment.ambient_light_energy = lerpf(0.035, 0.18, horror_daylight) * ambient_multiplier
+	environment.ambient_light_energy = lerpf(0.06, 0.22, horror_daylight) * ambient_multiplier
 	environment.fog_enabled = fog_density > 0.001
 	environment.fog_density = fog_density
 	environment.fog_aerial_perspective = lerpf(0.34, 0.62, rain_amount)
 	environment.fog_sky_affect = lerpf(0.62, 0.9, sky_shadow)
-	var fog_color := Color(0.03, 0.05, 0.04, 1.0)
-	fog_color = fog_color.lerp(Color(0.1, 0.24, 0.11, 1.0), toxic_tint * 0.75)
-	fog_color = fog_color.lerp(Color(0.32, 0.05, 0.03, 1.0), blood_tint * 0.45)
-	fog_color = fog_color.lerp(lightning_flash_color, lightning_mix * 0.18)
+	var fog_color := Color(0.16, 0.18, 0.18, 1.0)
+	fog_color = fog_color.lerp(Color(0.22, 0.42, 0.24, 1.0), toxic_tint * 0.82)
+	fog_color = fog_color.lerp(Color(0.34, 0.18, 0.42, 1.0), purple_tint * 0.8)
+	fog_color = fog_color.lerp(Color(0.36, 0.08, 0.06, 1.0), blood_tint * 0.34)
+	fog_color = fog_color.lerp(lightning_flash_color, lightning_mix * 0.2)
 	environment.fog_light_color = fog_color
-	environment.fog_light_energy = lerpf(0.12, 0.34, horror_daylight) + (lightning_mix * 0.12)
+	environment.fog_light_energy = lerpf(0.24, 0.46, horror_daylight) + (purple_tint * 0.08) + (lightning_mix * 0.14)
 
 	sun.light_color = sun_color
 	sun.light_energy = (lerpf(0.015, 0.42, horror_daylight) * light_multiplier) + (lightning_light.light_energy * 0.24)
