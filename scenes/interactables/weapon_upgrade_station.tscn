@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3 uid="uid://weapon_upgrade_station_001"]
+
+[ext_resource type="Script" path="res://scripts/interactables/weapon_upgrade_station.gd" id="1_upgrade_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_upgrade_station"]
+size = Vector3(1.4, 1.8, 1.0)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_upgrade_station"]
+top_radius = 0.48
+bottom_radius = 0.56
+height = 1.35
+
+[sub_resource type="LabelSettings" id="LabelSettings_upgrade_station"]
+font_size = 30
+outline_size = 8
+outline_color = Color(0, 0, 0, 0.88)
+
+[node name="WeaponUpgradeStation" type="StaticBody3D" groups=["interactable"]]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_upgrade_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("BoxShape3D_upgrade_station")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualRoot"]
+mesh = SubResource("CylinderMesh_upgrade_station")
+
+[node name="Label3D" type="Label3D" parent="VisualRoot"]
+transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, 0, 1.22, 0)
+billboard = 1
+text = "UPGRADE"
+font_size = 30
+outline_size = 8
+label_settings = SubResource("LabelSettings_upgrade_station")
+horizontal_alignment = 1

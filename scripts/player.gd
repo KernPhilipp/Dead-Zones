@@ -115,6 +115,9 @@ var gun_kick_offset := Vector3.ZERO
 var current_bloom := 0.0
 var fire_input_active_this_frame := false
 var highlighted_interaction_target: Node = null
+var movement_slow_multiplier := 1.0
+var movement_slow_remaining := 0.0
+var movement_slow_active := false
 
 func _ready() -> void:
 	health = max_health
@@ -140,6 +143,7 @@ func _ready() -> void:
 	_emit_runtime_state()
 
 func _physics_process(delta: float) -> void:
+	_update_movement_slow(delta)
 	fire_input_active_this_frame = _should_fire_this_frame()
 	move_player(delta)
 	rotate_player(delta)
@@ -191,13 +195,14 @@ func rotate_player(delta: float) -> void:
 		$Head.quaternion = Quaternion(Vector3.RIGHT, head_target)
 
 func move_player(delta: float) -> void:
+	var movement_multiplier: float = movement_slow_multiplier
 	if not is_on_floor():
-		speed = IN_AIR_SPEED
+		speed = IN_AIR_SPEED * movement_multiplier
 		accel = IN_AIR_ACCEL
 		is_sprinting = false
 		velocity.y -= gravity * delta
 	else:
-		speed = SPEED
+		speed = SPEED * movement_multiplier
 		accel = ACCEL
 		var input_dir_length := Input.get_vector("move_left", "move_right", "move_forward", "move_back").length()
 		is_sprinting = input_dir_length > 0.0 and Input.is_action_pressed("sprint") and not fire_input_active_this_frame and not is_reloading
@@ -225,28 +230,9 @@ func shoot() -> void:
 	can_shoot = false
 	weapon_loadout.consume_current_shot()
 	_sync_current_weapon_view(false)
-	shots_fired += 1
-	var shot_result := _perform_weapon_shot(was_sprinting)
-	var did_hit: bool = bool(shot_result["hit"])
-	var did_headshot: bool = bool(shot_result["headshot"])
-	var did_kill: bool = bool(shot_result["killed"])
-	if did_hit:
-		shots_hit += 1
-		_add_points(points_per_hit)
-		if did_headshot:
-			headshots += 1
-			combat_text_feedback.emit("HEADSHOT", Color(1.0, 0.42, 0.3, 1.0))
-		if did_kill:
-			kills += 1
-			_add_points(points_per_kill)
-			if did_headshot:
-				_add_points(points_per_headshot_kill)
-			_emit_kill_feedback()
-			kill_feedback.emit()
-			for unlocked_entry in progression.register_kill(did_headshot):
-				_handle_unlock_entry(unlocked_entry)
+	var shot_result: Dictionary = _apply_damage_events(_perform_weapon_shot(was_sprinting), true)
 	_apply_fire_feedback(was_sprinting)
-	shot_feedback.emit(did_hit)
+	shot_feedback.emit(bool(shot_result.get("hit", false)))
 	fire_timer.start(float(current_weapon_data.get("fire_rate", 0.1)))
 
 func reload_weapon() -> void:
@@ -275,6 +261,12 @@ func get_reload_progress() -> float:
 	if not is_reloading or reload_time <= 0.0:
 		return 0.0
 	return clampf((reload_time - reload_timer.time_left) / reload_time, 0.0, 1.0)
+
+func get_current_weapon_id() -> String:
+	return weapon_loadout.get_current_weapon_id()
+
+func get_current_weapon_upgrade_tier() -> int:
+	return weapon_loadout.get_current_upgrade_tier()
 
 func _on_fire_timer_timeout() -> void:
 	can_shoot = not is_reloading
@@ -356,6 +348,59 @@ func take_damage(amount: int, source_position: Vector3 = Vector3.ZERO) -> void:
 		direction = Vector2(local_direction.x, local_direction.z)
 	damage_feedback.emit(incoming_damage, direction)
 
+func apply_movement_slow(strength: float, duration: float) -> void:
+	var clamped_duration: float = maxf(0.0, duration)
+	if clamped_duration <= 0.0:
+		return
+	var clamped_strength: float = clampf(strength, 0.2, 1.0)
+	movement_slow_multiplier = min(movement_slow_multiplier, clamped_strength)
+	movement_slow_remaining = maxf(movement_slow_remaining, clamped_duration)
+	if not movement_slow_active:
+		movement_slow_active = true
+		show_runtime_status("SLOWED", "warning", true)
+
+func register_external_damage_events(damage_events: Array[Dictionary]) -> Dictionary:
+	return _apply_damage_events(damage_events, false)
+
+func upgrade_current_weapon(cost_override: int = -1, display_name: String = "") -> bool:
+	var weapon_id: String = weapon_loadout.get_current_weapon_id()
+	var current_tier: int = weapon_loadout.get_current_upgrade_tier()
+	var next_tier: int = current_tier + 1
+	if next_tier > WeaponDefinitions.get_max_upgrade_tier(weapon_id):
+		reload_feedback.emit("%s MAXED" % WeaponDefinitions.get_display_name(weapon_id, current_tier).to_upper(), WARNING_STATUS_COLOR)
+		return false
+	var price: int = cost_override if cost_override >= 0 else WeaponDefinitions.get_upgrade_cost(weapon_id, next_tier)
+	if price <= 0:
+		reload_feedback.emit("UPGRADE UNAVAILABLE", ERROR_STATUS_COLOR)
+		return false
+	if not _try_spend_points(price):
+		reload_feedback.emit("NOT ENOUGH POINTS", ERROR_STATUS_COLOR)
+		return false
+	if not weapon_loadout.apply_upgrade_to_current():
+		_add_points(price)
+		reload_feedback.emit("UPGRADE FAILED", ERROR_STATUS_COLOR)
+		return false
+	_sync_current_weapon_view(true)
+	var label_name: String = display_name if not display_name.is_empty() else weapon_name
+	reload_feedback.emit("%s UPGRADED" % label_name.to_upper(), POSITIVE_STATUS_COLOR)
+	combat_text_feedback.emit("-%d PTS" % price, WARNING_STATUS_COLOR)
+	combat_text_feedback.emit("%s TIER %d" % [weapon_name.to_upper(), next_tier], POSITIVE_STATUS_COLOR)
+	return true
+
+func reward_points(amount: int, combat_text: String = "") -> void:
+	var resolved_amount: int = maxi(amount, 0)
+	if resolved_amount <= 0:
+		return
+	_add_points(resolved_amount)
+	var resolved_text: String = combat_text if not combat_text.is_empty() else "+%d PTS" % resolved_amount
+	combat_text_feedback.emit(resolved_text, POSITIVE_STATUS_COLOR)
+
+func show_runtime_status(message: String, style: String = "info", show_combat_text: bool = false) -> void:
+	var color: Color = _get_status_color(style)
+	reload_feedback.emit(message, color)
+	if show_combat_text:
+		combat_text_feedback.emit(message, color)
+
 func head_bob_motion(delta: float) -> void:
 	var horizontal_speed := Vector2(velocity.x, velocity.z).length()
 	var bob_ratio := clampf(horizontal_speed / maxf(SPEED, 0.001), 0.0, sprint_speed_multiplier)
@@ -417,7 +462,8 @@ func _collect_ammo_pickup(amount: int, weapon_id: String, display_name: String) 
 	if slot_index == -1:
 		reload_feedback.emit("NO MATCHING WEAPON", ERROR_STATUS_COLOR)
 		return false
-	var resolved_amount := amount if amount > 0 else int(WeaponDefinitions.get_weapon_data(target_weapon_id).get("ammo_pickup_amount", 0))
+	var weapon_data := WeaponDefinitions.get_weapon_data(target_weapon_id, weapon_loadout.get_upgrade_tier(slot_index))
+	var resolved_amount := amount if amount > 0 else int(weapon_data.get("ammo_pickup_amount", 0))
 	var added_amount := weapon_loadout.add_reserve_ammo_for_weapon(target_weapon_id, resolved_amount)
 	_sync_current_weapon_view(false)
 	var pickup_name := display_name if not display_name.is_empty() else "%s Ammo" % WeaponDefinitions.get_display_name(target_weapon_id)
@@ -434,7 +480,8 @@ func _collect_weapon_pickup(weapon_id: String, display_name: String) -> bool:
 		return false
 	var existing_slot := weapon_loadout.get_slot_index_by_weapon_id(weapon_id)
 	if existing_slot != -1:
-		weapon_loadout.add_reserve_ammo_for_weapon(weapon_id, int(WeaponDefinitions.get_weapon_data(weapon_id).get("ammo_pickup_amount", 0)))
+		var owned_weapon_data := WeaponDefinitions.get_weapon_data(weapon_id, weapon_loadout.get_upgrade_tier(existing_slot))
+		weapon_loadout.add_reserve_ammo_for_weapon(weapon_id, int(owned_weapon_data.get("ammo_pickup_amount", 0)))
 		weapon_loadout.set_current_slot(existing_slot)
 		_sync_current_weapon_view(false)
 		reload_feedback.emit("%s RESTOCKED" % WeaponDefinitions.get_display_name(weapon_id).to_upper(), POSITIVE_STATUS_COLOR)
@@ -463,10 +510,11 @@ func _collect_consumable_pickup(item_id: String, amount: int, display_name: Stri
 
 func _purchase_ammo_refill(weapon_id: String, amount: int, cost_override: int, display_name: String) -> bool:
 	var target_weapon_id := weapon_id if not weapon_id.is_empty() else weapon_loadout.get_current_weapon_id()
-	if weapon_loadout.get_slot_index_by_weapon_id(target_weapon_id) == -1:
+	var slot_index: int = weapon_loadout.get_slot_index_by_weapon_id(target_weapon_id)
+	if slot_index == -1:
 		reload_feedback.emit("WEAPON NOT EQUIPPED", ERROR_STATUS_COLOR)
 		return false
-	var weapon_data := WeaponDefinitions.get_weapon_data(target_weapon_id)
+	var weapon_data := WeaponDefinitions.get_weapon_data(target_weapon_id, weapon_loadout.get_upgrade_tier(slot_index))
 	var price := cost_override if cost_override >= 0 else int(weapon_data.get("ammo_refill_cost", 0))
 	if not _try_spend_points(price):
 		reload_feedback.emit("NOT ENOUGH POINTS", ERROR_STATUS_COLOR)
@@ -572,24 +620,92 @@ func _sync_current_weapon_view(reset_feedback: bool) -> void:
 		current_bloom = 0.0
 		weapon_bloom_ratio = 0.0
 
-func _perform_weapon_shot(was_sprinting: bool) -> Dictionary:
+func _perform_weapon_shot(was_sprinting: bool) -> Array[Dictionary]:
 	var ray: RayCast3D = $Head/RayCast3D
 	var original_target_position := ray.target_position
-	var shot_direction := _build_shot_direction(_get_current_shot_spread(was_sprinting))
+	var pellet_count: int = maxi(int(current_weapon_data.get("pellet_count", 1)), 1)
+	var pellet_spread: float = _get_current_shot_spread(was_sprinting) * maxf(float(current_weapon_data.get("pellet_spread_multiplier", 1.0)), 0.05)
+	var base_damage: int = max(1, int(current_weapon_data.get("damage", 1)))
+	var headshot_multiplier: float = maxf(float(current_weapon_data.get("headshot_multiplier", 2.0)), 1.0)
 	var max_distance := maxf(original_target_position.length(), 100.0)
-	var world_target := ray.global_position + shot_direction * max_distance
-	ray.target_position = ray.to_local(world_target)
-	ray.force_raycast_update()
-	var result := {"hit": false, "headshot": false, "killed": false}
-	if ray.is_colliding():
-		var target: Object = ray.get_collider()
-		if target.has_method("take_damage"):
-			result["hit"] = true
-			result["headshot"] = _is_headshot(target, ray.get_collision_point())
-			var base_damage := int(current_weapon_data.get("damage", 1))
-			result["killed"] = bool(target.call("take_damage", base_damage * (2 if bool(result["headshot"]) else 1)))
+	var aggregated_events: Dictionary = {}
+
+	for _pellet_index in range(pellet_count):
+		var shot_direction := _build_shot_direction(pellet_spread)
+		var world_target := ray.global_position + shot_direction * max_distance
+		ray.target_position = ray.to_local(world_target)
+		ray.force_raycast_update()
+		if not ray.is_colliding():
+			continue
+
+		var target_info: Dictionary = _resolve_damage_target(ray.get_collider(), ray.get_collision_point())
+		if not bool(target_info.get("valid", false)):
+			continue
+
+		var body_part: String = String(target_info.get("body_part", ""))
+		var pellet_damage: int = base_damage
+		var did_headshot: bool = body_part == "head"
+		if did_headshot:
+			pellet_damage = max(1, int(round(float(base_damage) * headshot_multiplier)))
+
+		var damage_target: Object = target_info.get("damage_target", null)
+		if damage_target == null:
+			continue
+
+		var killed := false
+		if not body_part.is_empty() and damage_target.has_method("take_part_damage"):
+			killed = bool(damage_target.call("take_part_damage", body_part, pellet_damage))
+		elif damage_target.has_method("take_damage"):
+			killed = bool(damage_target.call("take_damage", pellet_damage))
+
+		var event_key: int = int(target_info.get("event_key", 0))
+		var event_data: Dictionary = aggregated_events.get(event_key, {"hit": true, "headshot": false, "killed": false})
+		event_data["headshot"] = bool(event_data.get("headshot", false)) or did_headshot
+		event_data["killed"] = bool(event_data.get("killed", false)) or killed
+		aggregated_events[event_key] = event_data
+
 	ray.target_position = original_target_position
+
+	var result: Array[Dictionary] = []
+	for event_data in aggregated_events.values():
+		result.append(event_data)
 	return result
+
+func _resolve_damage_target(collider: Object, collision_point: Vector3) -> Dictionary:
+	if collider == null:
+		return {"valid": false}
+
+	if collider.has_method("get_zombie_owner"):
+		var zombie_owner: Object = collider.call("get_zombie_owner")
+		if zombie_owner != null and is_instance_valid(zombie_owner):
+			var body_part: String = ""
+			if collider.has_method("get_body_part"):
+				body_part = String(collider.call("get_body_part"))
+			return {
+				"valid": true,
+				"damage_target": zombie_owner,
+				"event_key": zombie_owner.get_instance_id(),
+				"body_part": body_part,
+			}
+
+	if collider.has_method("take_part_damage"):
+		var resolved_body_part: String = "head" if _is_headshot(collider, collision_point) else "torso"
+		return {
+			"valid": true,
+			"damage_target": collider,
+			"event_key": collider.get_instance_id(),
+			"body_part": resolved_body_part,
+		}
+
+	if collider.has_method("take_damage"):
+		return {
+			"valid": true,
+			"damage_target": collider,
+			"event_key": collider.get_instance_id(),
+			"body_part": "",
+		}
+
+	return {"valid": false}
 
 func _is_headshot(target: Object, collision_point: Vector3) -> bool:
 	if target == null or not target.is_in_group("zombie"):
@@ -660,7 +776,7 @@ func _throw_grenade() -> void:
 	var camera: Camera3D = $Head/Camera3D
 	var throw_direction := (-camera.global_transform.basis.z + Vector3.UP * 0.18).normalized()
 	if grenade.has_method("launch"):
-		grenade.call("launch", camera.global_position + throw_direction * 0.7, throw_direction)
+		grenade.call("launch", camera.global_position + throw_direction * 0.7, throw_direction, self)
 
 func _should_fire_this_frame() -> bool:
 	return Input.is_action_pressed("shoot") if is_weapon_automatic else Input.is_action_just_pressed("shoot")
@@ -704,6 +820,73 @@ func _try_spend_points(amount: int) -> bool:
 
 func _get_weapon_mode_text() -> String:
 	return "%s %s" % [weapon_name.to_upper(), "AUTO" if is_weapon_automatic else "SEMI"]
+
+func _apply_damage_events(damage_events: Array[Dictionary], counts_as_shot: bool) -> Dictionary:
+	var any_hit := false
+	var any_headshot := false
+	var any_kill := false
+	var total_headshots := 0
+	var total_kills := 0
+
+	if counts_as_shot:
+		shots_fired += 1
+
+	for damage_event in damage_events:
+		if not bool(damage_event.get("hit", false)):
+			continue
+
+		any_hit = true
+		_add_points(points_per_hit)
+
+		var did_headshot: bool = bool(damage_event.get("headshot", false))
+		if did_headshot:
+			any_headshot = true
+			total_headshots += 1
+
+		if bool(damage_event.get("killed", false)):
+			any_kill = true
+			total_kills += 1
+			_add_points(points_per_kill)
+			if did_headshot:
+				_add_points(points_per_headshot_kill)
+			_emit_kill_feedback()
+			kill_feedback.emit()
+			for unlocked_entry in progression.register_kill(did_headshot):
+				_handle_unlock_entry(unlocked_entry)
+
+	if counts_as_shot and any_hit:
+		shots_hit += 1
+	if total_headshots > 0:
+		headshots += total_headshots
+		combat_text_feedback.emit("HEADSHOT" if total_headshots == 1 else "%d HEADSHOTS" % total_headshots, Color(1.0, 0.42, 0.3, 1.0))
+	if total_kills > 0:
+		kills += total_kills
+
+	return {"hit": any_hit, "headshot": any_headshot, "killed": any_kill}
+
+func _update_movement_slow(delta: float) -> void:
+	if movement_slow_remaining > 0.0:
+		movement_slow_remaining = maxf(0.0, movement_slow_remaining - delta)
+		if movement_slow_remaining > 0.0:
+			return
+	if movement_slow_multiplier < 1.0:
+		movement_slow_multiplier = 1.0
+		if movement_slow_active:
+			movement_slow_active = false
+			show_runtime_status("MOBILITY RESTORED", "positive")
+
+func _get_status_color(style: String) -> Color:
+	match style:
+		"positive":
+			return POSITIVE_STATUS_COLOR
+		"warning":
+			return WARNING_STATUS_COLOR
+		"error":
+			return ERROR_STATUS_COLOR
+		"prompt":
+			return INTERACTION_PROMPT_COLOR
+		_:
+			return INFO_STATUS_COLOR
 
 func build_game_over_stats(current_wave: int, total_seconds: int) -> Dictionary:
 	return {"wave": current_wave, "kills": kills, "headshots": headshots, "accuracy": get_accuracy(), "time_seconds": total_seconds, "points": points}

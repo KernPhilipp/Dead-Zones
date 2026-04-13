@@ -114,6 +114,7 @@ var base_head_rotation := Vector3.ZERO
 var behavior_triggered: bool = false
 var hidder_ground_mode: bool = false
 var cover_nodes: Array[Node3D] = []
+var current_barricade_target: Node3D = null
 
 var part_health: Dictionary = {}
 var missing_parts: Dictionary = {}
@@ -390,6 +391,7 @@ func die():
 		return
 
 	_broadcast_ally_death_event()
+	current_barricade_target = null
 
 	if resolved_death_behavior == "explode":
 		_die_with_explosion()
@@ -422,6 +424,7 @@ func _die_with_explosion():
 	state = ZombieState.DEAD
 	remove_from_group("zombie")
 	can_attack = false
+	current_barricade_target = null
 	damage_area.monitoring = false
 	damage_area.monitorable = false
 	body_collision.set_deferred("disabled", true)
@@ -511,11 +514,14 @@ func _process_chase(delta: float):
 		velocity.z = move_toward(velocity.z, 0.0, 12.0 * delta)
 
 	move_and_slide()
+	_refresh_barricade_target()
 
 	if hidder_ground_mode:
 		return
 
 	if can_attack and _is_player_in_damage_area():
+		state = ZombieState.ATTACK
+	elif can_attack and _has_attackable_barricade():
 		state = ZombieState.ATTACK
 
 func _process_attack(delta: float):
@@ -526,10 +532,16 @@ func _process_attack(delta: float):
 	_apply_gravity(delta)
 	velocity.x = move_toward(velocity.x, 0.0, 16.0 * delta)
 	velocity.z = move_toward(velocity.z, 0.0, 16.0 * delta)
-	_look_at_player()
+	if _is_player_in_damage_area():
+		_look_at_player()
+	elif _has_attackable_barricade():
+		_look_at_barricade_target()
+	else:
+		current_barricade_target = null
+		_look_at_player()
 	move_and_slide()
 
-	if not _is_player_in_damage_area():
+	if not _is_player_in_damage_area() and not _has_attackable_barricade():
 		if _try_species_ranged_attack():
 			state = ZombieState.CHASE
 			return
@@ -698,6 +710,72 @@ func _look_at_player():
 		return
 	_look_at_point(player.global_position)
 
+func _look_at_barricade_target():
+	if not _has_attackable_barricade():
+		return
+	_look_at_point(current_barricade_target.global_position)
+
+func _refresh_barricade_target():
+	if _has_attackable_barricade():
+		return
+
+	current_barricade_target = null
+	for collision_index in range(get_slide_collision_count()):
+		var collision: KinematicCollision3D = get_slide_collision(collision_index)
+		if collision == null:
+			continue
+		var collider: Object = collision.get_collider()
+		if _is_valid_barricade_target(collider):
+			current_barricade_target = collider as Node3D
+			return
+
+	if not player or not is_instance_valid(player):
+		return
+
+	var player_direction: Vector3 = (player.global_position - global_position)
+	player_direction.y = 0.0
+	if player_direction.length_squared() <= 0.0001:
+		return
+	player_direction = player_direction.normalized()
+
+	var best_distance := INF
+	for barricade in get_tree().get_nodes_in_group("barricade"):
+		if not _is_valid_barricade_target(barricade):
+			continue
+		var barricade_node: Node3D = barricade as Node3D
+		if barricade_node == null:
+			continue
+		var delta_to_barricade: Vector3 = barricade_node.global_position - global_position
+		delta_to_barricade.y = 0.0
+		var distance: float = delta_to_barricade.length()
+		if distance > 1.95 or distance <= 0.001:
+			continue
+		var forward_alignment: float = delta_to_barricade.normalized().dot(player_direction)
+		if forward_alignment < 0.3 or distance >= best_distance:
+			continue
+		best_distance = distance
+		current_barricade_target = barricade_node
+
+func _is_valid_barricade_target(target: Object) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	if not (target is Node):
+		return false
+	var target_node: Node = target as Node
+	if not target_node.is_in_group("barricade"):
+		return false
+	if not target_node.has_method("blocks_zombies"):
+		return false
+	return bool(target_node.call("blocks_zombies"))
+
+func _has_attackable_barricade() -> bool:
+	if not _is_valid_barricade_target(current_barricade_target):
+		current_barricade_target = null
+		return false
+	var barricade_position: Vector3 = current_barricade_target.global_position
+	barricade_position.y = global_position.y
+	return global_position.distance_to(barricade_position) <= 1.95
+
 func _look_at_point(point: Vector3):
 	var look_target: Vector3 = Vector3(point.x, global_position.y, point.z)
 	if global_position.distance_to(look_target) > 0.1:
@@ -736,10 +814,17 @@ func _perform_attack():
 		_start_attack_cooldown()
 		return
 
-	if player and is_instance_valid(player) and player.has_method("take_damage"):
+	if _is_player_in_damage_area() and player and is_instance_valid(player) and player.has_method("take_damage"):
 		player.take_damage(target_damage)
 		_apply_touch_effect_on_player()
 		_apply_on_attack_self_heal()
+		_start_attack_cooldown()
+		return
+
+	if _has_attackable_barricade() and current_barricade_target.has_method("take_zombie_damage"):
+		current_barricade_target.call("take_zombie_damage", target_damage)
+		_start_attack_cooldown(1.05)
+		return
 
 	_start_attack_cooldown()
 

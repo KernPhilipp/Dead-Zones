@@ -9,14 +9,16 @@ extends CharacterBody3D
 var _remaining_lifetime: float = 0.0
 var _exploded: bool = false
 var _gravity: float = 9.8
+var _credit_owner: Node = null
 
 func _ready() -> void:
 	_gravity = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 	_remaining_lifetime = lifetime
 
-func launch(origin: Vector3, direction: Vector3) -> void:
+func launch(origin: Vector3, direction: Vector3, owner_or_credit_ref: Node = null) -> void:
 	global_position = origin
 	velocity = direction.normalized() * throw_speed
+	_credit_owner = owner_or_credit_ref
 
 func _physics_process(delta: float) -> void:
 	if _exploded:
@@ -33,6 +35,7 @@ func _explode() -> void:
 		return
 	_exploded = true
 
+	var damage_events: Array[Dictionary] = []
 	for zombie in get_tree().get_nodes_in_group("zombie"):
 		if not is_instance_valid(zombie) or not (zombie is Node3D):
 			continue
@@ -42,6 +45,10 @@ func _explode() -> void:
 		var falloff: float = 1.0 - (distance / maxf(explosion_radius, 0.001))
 		var applied_damage: int = max(1, int(round(explosion_damage * falloff)))
 		if zombie.has_method("take_damage"):
-			zombie.call("take_damage", applied_damage)
+			var killed: bool = bool(zombie.call("take_damage", applied_damage))
+			damage_events.append({"hit": true, "headshot": false, "killed": killed})
+
+	if _credit_owner != null and is_instance_valid(_credit_owner) and _credit_owner.has_method("register_external_damage_events"):
+		_credit_owner.call("register_external_damage_events", damage_events)
 
 	queue_free()
