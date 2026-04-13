@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const HANDBOOK_SCENE := preload("res://scenes/handbook_book.tscn")
+
 var health_bar: ProgressBar
 var health_damage_bar: ProgressBar
 var health_value_label: Label
@@ -44,6 +46,7 @@ var pause_summary_label: Label
 var pause_controls_label: Label
 var pause_settings_label: Label
 var resume_button: Button
+var handbook_button: Button
 var pause_restart_button: Button
 var game_over_panel: PanelContainer
 var game_over_label: Label
@@ -99,6 +102,8 @@ var recent_threat_time: float = 0.0
 var milestone_kills_announced: int = 0
 var active_weapon_slot_index: int = 0
 var adaptive_threat_level: float = 0.0
+var handbook_book: Control
+var handbook_opened_from_pause: bool = false
 
 func _enter_tree():
 	_ensure_nodes()
@@ -156,8 +161,10 @@ func _ready():
 	_set_crosshair_state("default")
 	update_crosshair(0.0)
 	resume_button.pressed.connect(_on_resume)
+	handbook_button.pressed.connect(_on_handbook_pressed)
 	pause_restart_button.pressed.connect(_on_restart)
 	restart_button.pressed.connect(_on_restart)
+	_setup_handbook_overlay()
 	_show_start_hints()
 
 func _ensure_nodes():
@@ -208,6 +215,7 @@ func _ensure_nodes():
 	pause_controls_label = _find_required_node("PauseControlsLabel") as Label
 	pause_settings_label = _find_required_node("PauseSettingsLabel") as Label
 	resume_button = _find_required_node("ResumeButton") as Button
+	handbook_button = _find_required_node("HandbookButton") as Button
 	pause_restart_button = _find_required_node("PauseRestartButton") as Button
 	game_over_panel = _find_required_node("GameOverPanel") as PanelContainer
 	game_over_label = _find_required_node("GameOverLabel") as Label
@@ -237,6 +245,15 @@ func _process(delta):
 	recent_threat_time = maxf(0.0, recent_threat_time - delta)
 	_update_adaptive_hud(delta)
 	_update_session_milestones()
+
+	if handbook_book != null and handbook_book.visible:
+		if Input.is_action_just_pressed("pause_game"):
+			_close_handbook_overlay()
+		return
+
+	if handbook_opened_from_pause and handbook_book != null and not handbook_book.visible:
+		_restore_pause_menu_after_handbook()
+		handbook_opened_from_pause = false
 
 	if Input.is_action_just_pressed("pause_game") and not game_over_panel.visible:
 		toggle_pause_menu()
@@ -617,6 +634,15 @@ func _hide_legacy_damage_indicators():
 func _on_resume():
 	_set_pause_menu_visible(false)
 
+func _on_handbook_pressed():
+	if handbook_book == null:
+		return
+	handbook_opened_from_pause = true
+	pause_panel.visible = false
+	if handbook_book.has_method("open_book"):
+		handbook_book.call("open_book")
+	call_deferred("_apply_handbook_theme")
+
 func _on_restart():
 	if pause_tween:
 		pause_tween.kill()
@@ -778,6 +804,111 @@ func _show_start_hints():
 	tween.tween_interval(3.4)
 	tween.tween_property(start_hint_label, "modulate:a", 0.0, 0.28)
 	tween.tween_callback(func(): start_hint_label.visible = false)
+
+func _setup_handbook_overlay():
+	if handbook_book != null:
+		return
+	handbook_book = HANDBOOK_SCENE.instantiate() as Control
+	if handbook_book == null:
+		return
+	handbook_book.visible = false
+	handbook_book.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	handbook_book.scale = Vector2(0.82, 0.82)
+	handbook_book.position = Vector2(120.0, 40.0)
+	add_child(handbook_book)
+	_apply_handbook_theme()
+
+func _close_handbook_overlay():
+	if handbook_book != null and handbook_book.has_method("close_book"):
+		handbook_book.call("close_book")
+	_restore_pause_menu_after_handbook()
+	handbook_opened_from_pause = false
+
+func _restore_pause_menu_after_handbook():
+	pause_dimmer.visible = true
+	pause_dimmer.modulate.a = 1.0
+	pause_panel.visible = true
+	pause_panel.modulate.a = 1.0
+	pause_panel.scale = Vector2.ONE
+
+func _apply_handbook_theme():
+	if handbook_book == null:
+		return
+
+	var frame: Control = handbook_book.get_node_or_null("BookFrame") as Control
+	var tabs_bg: Control = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/ChapterTabsBg") as Control
+	var top_bar: Control = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/TopBar") as Control
+	var left_column: Control = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn") as Control
+	var right_column: Control = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn") as Control
+	var title_ribbon: Control = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/TitleRibbon") as Control
+	var body_panel: Control = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/BodyPanel") as Control
+	var portrait_panel: Control = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/PortraitPanel") as Control
+
+	_tint_panel_style(frame, Color(0.015, 0.015, 0.018, 0.99), Color(0.52, 0.08, 0.08, 0.55))
+	_tint_panel_style(tabs_bg, Color(0.03, 0.03, 0.035, 0.975), Color(0.44, 0.08, 0.08, 0.4))
+	_tint_panel_style(top_bar, Color(0.02, 0.02, 0.024, 0.98), Color(0.46, 0.08, 0.08, 0.36))
+	_tint_panel_style(left_column, Color(0.035, 0.035, 0.04, 0.975), Color(0.34, 0.07, 0.07, 0.3))
+	_tint_panel_style(right_column, Color(0.02, 0.02, 0.024, 0.99), Color(0.42, 0.08, 0.08, 0.34))
+	_tint_panel_style(title_ribbon, Color(0.22, 0.03, 0.03, 0.96), Color(0.68, 0.12, 0.12, 0.52))
+	_tint_panel_style(body_panel, Color(0.028, 0.028, 0.032, 0.99), Color(0.34, 0.07, 0.07, 0.26))
+	_tint_panel_style(portrait_panel, Color(0.04, 0.04, 0.045, 0.99), Color(0.34, 0.07, 0.07, 0.24))
+
+	var labels: Array = handbook_book.find_children("*", "Label", true, false)
+	for label_node in labels:
+		var label: Label = label_node as Label
+		if label == null:
+			continue
+		label.modulate = Color(0.92, 0.93, 0.95, 1.0)
+
+	var rich_labels: Array = handbook_book.find_children("*", "RichTextLabel", true, false)
+	for rich_label_node in rich_labels:
+		var rich_label: RichTextLabel = rich_label_node as RichTextLabel
+		if rich_label == null:
+			continue
+		rich_label.modulate = Color(0.88, 0.9, 0.93, 1.0)
+
+	var buttons: Array = handbook_book.find_children("*", "Button", true, false)
+	for button_node in buttons:
+		var button: Button = button_node as Button
+		if button == null:
+			continue
+		button.modulate = Color(0.94, 0.95, 0.97, 1.0)
+
+	var tree: Tree = handbook_book.get_node_or_null("BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn/LeftMargin/LeftVBox/EntryTree") as Tree
+	if tree != null:
+		tree.modulate = Color(0.9, 0.92, 0.95, 1.0)
+		var list_panel := StyleBoxFlat.new()
+		list_panel.bg_color = Color(0.028, 0.028, 0.032, 0.99)
+		list_panel.border_width_left = 1
+		list_panel.border_width_top = 1
+		list_panel.border_width_right = 1
+		list_panel.border_width_bottom = 1
+		list_panel.border_color = Color(0.42, 0.08, 0.08, 0.34)
+		list_panel.corner_radius_top_left = 5
+		list_panel.corner_radius_top_right = 5
+		list_panel.corner_radius_bottom_left = 5
+		list_panel.corner_radius_bottom_right = 5
+		tree.add_theme_stylebox_override("panel", list_panel)
+		tree.add_theme_color_override("font_color", Color(0.9, 0.92, 0.95, 1.0))
+		tree.add_theme_color_override("font_selected_color", Color(1.0, 0.94, 0.94, 1.0))
+		tree.add_theme_color_override("font_hovered_color", Color(0.98, 0.78, 0.78, 1.0))
+		tree.add_theme_color_override("guide_color", Color(0.42, 0.08, 0.08, 0.28))
+		tree.add_theme_color_override("title_button_color", Color(0.88, 0.9, 0.93, 1.0))
+
+func _tint_panel_style(control: Control, bg_color: Color, border_color: Color):
+	if control == null:
+		return
+	var style: StyleBoxFlat = control.get("theme_override_styles/panel") as StyleBoxFlat
+	if style == null:
+		style = control.get_theme_stylebox("panel") as StyleBoxFlat
+	if style == null:
+		return
+	var duplicate_style: StyleBoxFlat = style.duplicate() as StyleBoxFlat
+	if duplicate_style == null:
+		return
+	duplicate_style.bg_color = bg_color
+	duplicate_style.border_color = border_color
+	control.set("theme_override_styles/panel", duplicate_style)
 
 func _start_ammo_warning():
 	if ammo_warning_tween and ammo_warning_tween.is_running():

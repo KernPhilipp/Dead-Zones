@@ -854,6 +854,12 @@ size_flags_horizontal = 4
 custom_minimum_size = Vector2(180, 46)
 text = "Resume"
 
+[node name="HandbookButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(180, 46)
+text = "Handbook"
+
 [node name="PauseRestartButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
