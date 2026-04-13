@@ -1,0 +1,355 @@
+extends Node3D
+
+const WEATHER_CLEAR := 0
+const WEATHER_CLOUDY := 1
+const WEATHER_FOGGY := 2
+const WEATHER_RAIN := 3
+const WEATHER_STORM := 4
+
+const WEATHER_PROFILES := {
+	WEATHER_CLEAR: {
+		"sky_shadow": 0.0,
+		"fog_density": 0.002,
+		"rain_amount": 0.0,
+		"light_multiplier": 1.0,
+		"ambient_multiplier": 1.0,
+		"storminess": 0.0
+	},
+	WEATHER_CLOUDY: {
+		"sky_shadow": 0.18,
+		"fog_density": 0.006,
+		"rain_amount": 0.0,
+		"light_multiplier": 0.85,
+		"ambient_multiplier": 0.92,
+		"storminess": 0.0
+	},
+	WEATHER_FOGGY: {
+		"sky_shadow": 0.12,
+		"fog_density": 0.024,
+		"rain_amount": 0.0,
+		"light_multiplier": 0.72,
+		"ambient_multiplier": 0.86,
+		"storminess": 0.0
+	},
+	WEATHER_RAIN: {
+		"sky_shadow": 0.28,
+		"fog_density": 0.014,
+		"rain_amount": 0.72,
+		"light_multiplier": 0.62,
+		"ambient_multiplier": 0.78,
+		"storminess": 0.15
+	},
+	WEATHER_STORM: {
+		"sky_shadow": 0.45,
+		"fog_density": 0.022,
+		"rain_amount": 1.0,
+		"light_multiplier": 0.46,
+		"ambient_multiplier": 0.7,
+		"storminess": 1.0
+	}
+}
+
+const WEATHER_WEIGHTS := {
+	WEATHER_CLEAR: 0.28,
+	WEATHER_CLOUDY: 0.26,
+	WEATHER_FOGGY: 0.18,
+	WEATHER_RAIN: 0.18,
+	WEATHER_STORM: 0.1
+}
+
+@export var cycle_duration_seconds: float = 240.0
+@export_range(0.0, 1.0, 0.001) var start_time_of_day: float = 0.28
+@export var weather_hold_duration: Vector2 = Vector2(20.0, 38.0)
+@export var weather_transition_duration: float = 7.5
+@export var rain_follow_target_path: NodePath
+@export var rain_follow_height: float = 18.0
+@export var rain_area_size: Vector2 = Vector2(18.0, 18.0)
+
+var sun: DirectionalLight3D
+var world_environment: WorldEnvironment
+var environment: Environment
+var follow_target: Node3D
+var rain_particles: GPUParticles3D
+var rain_material: ParticleProcessMaterial
+var lightning_light: OmniLight3D
+
+var rng := RandomNumberGenerator.new()
+var time_of_day: float = 0.0
+var current_weather: int = WEATHER_CLEAR
+var target_weather: int = WEATHER_CLEAR
+var weather_blend: float = 1.0
+var weather_hold_timer: float = 0.0
+var lightning_timer: float = 0.0
+var lightning_flash_duration: float = 0.0
+var lightning_flash_remaining: float = 0.0
+var lightning_peak_energy: float = 0.0
+
+func _ready():
+	rng.randomize()
+	time_of_day = wrapf(start_time_of_day, 0.0, 1.0)
+	sun = _resolve_sun()
+	world_environment = _resolve_world_environment()
+	environment = world_environment.environment
+	if environment == null:
+		environment = Environment.new()
+		world_environment.environment = environment
+	_configure_environment_defaults()
+	follow_target = get_node_or_null(rain_follow_target_path) as Node3D
+	if follow_target == null:
+		follow_target = get_tree().get_first_node_in_group("player") as Node3D
+	_create_weather_effects()
+	current_weather = WEATHER_CLEAR
+	target_weather = current_weather
+	weather_blend = 1.0
+	_reset_weather_hold_timer()
+	lightning_timer = rng.randf_range(2.0, 5.0)
+	_apply_environment()
+
+func _process(delta: float):
+	if cycle_duration_seconds > 0.0:
+		time_of_day = wrapf(time_of_day + (delta / cycle_duration_seconds), 0.0, 1.0)
+	_update_weather_state(delta)
+	_update_lightning(delta)
+	_update_effect_positions()
+	_apply_environment()
+
+func _resolve_sun() -> DirectionalLight3D:
+	var sibling_sun := get_parent().get_node_or_null("DirectionalLight3D") as DirectionalLight3D
+	if sibling_sun != null:
+		return sibling_sun
+	var fallback_sun := DirectionalLight3D.new()
+	fallback_sun.name = "DirectionalLight3D"
+	get_parent().add_child.call_deferred(fallback_sun)
+	push_warning("EnvironmentController: DirectionalLight3D not found, created fallback light.")
+	return fallback_sun
+
+func _resolve_world_environment() -> WorldEnvironment:
+	var sibling_environment := get_parent().get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if sibling_environment != null:
+		return sibling_environment
+	var fallback_environment := WorldEnvironment.new()
+	fallback_environment.name = "WorldEnvironment"
+	get_parent().add_child.call_deferred(fallback_environment)
+	push_warning("EnvironmentController: WorldEnvironment not found, created fallback environment.")
+	return fallback_environment
+
+func _configure_environment_defaults():
+	environment.background_mode = Environment.BG_COLOR
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	environment.ambient_light_sky_contribution = 0.0
+	environment.ambient_light_energy = 0.55
+	environment.ambient_light_color = Color(0.55, 0.58, 0.63, 1.0)
+	environment.fog_enabled = true
+	environment.fog_density = 0.004
+	environment.fog_aerial_perspective = 0.15
+	environment.fog_sky_affect = 0.35
+	environment.fog_light_color = Color(0.7, 0.76, 0.84, 1.0)
+	environment.fog_light_energy = 0.8
+	sun.shadow_enabled = true
+	sun.light_energy = 1.25
+
+func _create_weather_effects():
+	rain_particles = GPUParticles3D.new()
+	rain_particles.name = "RainParticles"
+	rain_particles.amount = 1800
+	rain_particles.lifetime = 1.35
+	rain_particles.preprocess = 0.5
+	rain_particles.local_coords = true
+	rain_particles.emitting = false
+	rain_particles.draw_pass_1 = _build_rain_mesh()
+	rain_particles.visibility_aabb = AABB(
+		Vector3(-rain_area_size.x, -28.0, -rain_area_size.y),
+		Vector3(rain_area_size.x * 2.0, 56.0, rain_area_size.y * 2.0)
+	)
+	rain_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	rain_material = ParticleProcessMaterial.new()
+	rain_material.direction = Vector3(0.0, -1.0, 0.0)
+	rain_material.spread = 4.0
+	rain_material.gravity = Vector3(0.0, -26.0, 0.0)
+	rain_material.initial_velocity_min = 18.0
+	rain_material.initial_velocity_max = 24.0
+	rain_material.scale_min = 0.75
+	rain_material.scale_max = 1.2
+	rain_material.color = Color(0.8, 0.87, 0.95, 0.55)
+	rain_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	rain_material.emission_box_extents = Vector3(rain_area_size.x, 1.0, rain_area_size.y)
+	rain_particles.process_material = rain_material
+	add_child(rain_particles)
+
+	lightning_light = OmniLight3D.new()
+	lightning_light.name = "LightningLight"
+	lightning_light.light_color = Color(0.9, 0.96, 1.0, 1.0)
+	lightning_light.light_energy = 0.0
+	lightning_light.omni_range = 42.0
+	lightning_light.shadow_enabled = false
+	add_child(lightning_light)
+
+func _build_rain_mesh() -> QuadMesh:
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(0.03, 0.8)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.vertex_color_use_as_albedo = true
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.albedo_color = Color(0.9, 0.96, 1.0, 0.65)
+	mesh.material = material
+	return mesh
+
+func _update_weather_state(delta: float):
+	if current_weather == target_weather:
+		weather_hold_timer -= delta
+		if weather_hold_timer <= 0.0:
+			target_weather = _pick_next_weather()
+			weather_blend = 0.0
+		return
+
+	weather_blend = minf(weather_blend + (delta / maxf(weather_transition_duration, 0.01)), 1.0)
+	if weather_blend >= 1.0:
+		current_weather = target_weather
+		weather_blend = 1.0
+		_reset_weather_hold_timer()
+
+func _update_lightning(delta: float):
+	var storminess := _get_weather_value("storminess")
+	if storminess < 0.2:
+		lightning_flash_remaining = 0.0
+		lightning_flash_duration = 0.0
+		lightning_peak_energy = 0.0
+		lightning_light.light_energy = 0.0
+		lightning_timer = rng.randf_range(2.0, 5.0)
+		return
+
+	lightning_timer -= delta
+	if lightning_flash_remaining <= 0.0 and lightning_timer <= 0.0 and rng.randf() < storminess:
+		_begin_lightning_flash(storminess)
+
+	if lightning_flash_remaining > 0.0:
+		lightning_flash_remaining = maxf(lightning_flash_remaining - delta, 0.0)
+		var progress := 1.0 - (lightning_flash_remaining / maxf(lightning_flash_duration, 0.01))
+		var pulse := sin(progress * PI)
+		lightning_light.light_energy = lightning_peak_energy * pulse
+	else:
+		lightning_light.light_energy = 0.0
+
+func _begin_lightning_flash(storminess: float):
+	lightning_flash_duration = rng.randf_range(0.08, 0.16)
+	lightning_flash_remaining = lightning_flash_duration
+	lightning_peak_energy = rng.randf_range(2.0, 3.2) * lerpf(0.7, 1.15, storminess)
+	lightning_timer = rng.randf_range(1.8, 4.5)
+	if follow_target != null:
+		var offset := Vector3(rng.randf_range(-12.0, 12.0), 14.0, rng.randf_range(-12.0, 12.0))
+		lightning_light.global_position = follow_target.global_position + offset
+
+func _update_effect_positions():
+	if follow_target == null:
+		return
+	var target_position := follow_target.global_position
+	if rain_particles != null:
+		rain_particles.global_position = Vector3(target_position.x, target_position.y + rain_follow_height, target_position.z)
+	if lightning_light != null and lightning_flash_remaining <= 0.0:
+		lightning_light.global_position = Vector3(target_position.x, target_position.y + rain_follow_height + 4.0, target_position.z)
+
+func _apply_environment():
+	var orbit_angle := time_of_day * TAU
+	var sun_height_curve := sin(orbit_angle - (PI * 0.5))
+	var elevation := lerpf(deg_to_rad(-82.0), deg_to_rad(82.0), (sun_height_curve + 1.0) * 0.5)
+	var azimuth := orbit_angle + deg_to_rad(32.0)
+	var sun_position := Vector3(
+		cos(elevation) * cos(azimuth),
+		sin(elevation),
+		cos(elevation) * sin(azimuth)
+	).normalized()
+	var light_direction := -sun_position
+	sun.transform = Transform3D(Basis.looking_at(light_direction, Vector3.UP), sun.transform.origin)
+
+	var daylight := smoothstep(-0.16, 0.1, sun_position.y)
+	var twilight := clampf(1.0 - absf(sun_position.y * 4.0), 0.0, 1.0)
+	var sky_shadow := _get_weather_value("sky_shadow")
+	var fog_density := _get_weather_value("fog_density") + ((1.0 - daylight) * 0.006)
+	var ambient_multiplier := _get_weather_value("ambient_multiplier")
+	var light_multiplier := _get_weather_value("light_multiplier")
+	var rain_amount := _get_weather_value("rain_amount")
+	var lightning_mix := clampf(lightning_light.light_energy / 3.2, 0.0, 1.0)
+
+	var night_sky := Color(0.03, 0.05, 0.1, 1.0)
+	var day_sky := Color(0.48, 0.69, 0.92, 1.0)
+	var dawn_sky := Color(0.98, 0.46, 0.25, 1.0)
+	var storm_sky := Color(0.18, 0.2, 0.25, 1.0)
+	var sky_color := night_sky.lerp(day_sky, daylight)
+	sky_color = sky_color.lerp(dawn_sky, twilight * 0.42)
+	sky_color = sky_color.lerp(storm_sky, sky_shadow)
+	sky_color = sky_color.lerp(Color(0.85, 0.92, 1.0, 1.0), lightning_mix * 0.28)
+
+	var ambient_day := Color(0.64, 0.68, 0.74, 1.0)
+	var ambient_night := Color(0.12, 0.15, 0.22, 1.0)
+	var ambient_color := ambient_night.lerp(ambient_day, daylight)
+	ambient_color = ambient_color.lerp(sky_color, 0.25)
+
+	var day_sun_color := Color(1.0, 0.96, 0.89, 1.0)
+	var dusk_sun_color := Color(1.0, 0.68, 0.42, 1.0)
+	var moon_color := Color(0.42, 0.5, 0.68, 1.0)
+	var sun_color := moon_color.lerp(day_sun_color, daylight)
+	sun_color = sun_color.lerp(dusk_sun_color, twilight * 0.65)
+	sun_color = sun_color.lerp(Color(0.9, 0.96, 1.0, 1.0), lightning_mix * 0.35)
+
+	environment.background_color = sky_color
+	environment.ambient_light_color = ambient_color
+	environment.ambient_light_energy = lerpf(0.24, 1.0, daylight) * ambient_multiplier
+	environment.fog_enabled = fog_density > 0.001
+	environment.fog_density = fog_density
+	environment.fog_aerial_perspective = lerpf(0.15, 0.4, rain_amount)
+	environment.fog_sky_affect = lerpf(0.3, 0.55, sky_shadow)
+	environment.fog_light_color = sky_color.lerp(Color(0.78, 0.84, 0.92, 1.0), 0.25)
+	environment.fog_light_energy = lerpf(0.55, 1.0, daylight)
+
+	sun.light_color = sun_color
+	sun.light_energy = (lerpf(0.06, 1.7, daylight) * light_multiplier) + (lightning_light.light_energy * 0.35)
+
+	_update_rain_effect(rain_amount)
+
+func _update_rain_effect(rain_amount: float):
+	if rain_particles == null or rain_material == null:
+		return
+	if rain_amount <= 0.05:
+		rain_particles.emitting = false
+		return
+
+	rain_particles.emitting = true
+	rain_particles.amount = int(lerpf(900.0, 2200.0, rain_amount))
+	rain_material.initial_velocity_min = lerpf(15.0, 22.0, rain_amount)
+	rain_material.initial_velocity_max = lerpf(19.0, 28.0, rain_amount)
+	rain_material.gravity = Vector3(0.0, lerpf(-22.0, -34.0, rain_amount), 0.0)
+	rain_material.color = Color(0.78, 0.86, 0.96, lerpf(0.35, 0.75, rain_amount))
+
+func _pick_next_weather() -> int:
+	var total_weight := 0.0
+	for weather_type in WEATHER_WEIGHTS.keys():
+		if weather_type == current_weather:
+			continue
+		total_weight += float(WEATHER_WEIGHTS[weather_type])
+
+	var roll := rng.randf() * total_weight
+	for weather_type in WEATHER_WEIGHTS.keys():
+		if weather_type == current_weather:
+			continue
+		roll -= float(WEATHER_WEIGHTS[weather_type])
+		if roll <= 0.0:
+			return int(weather_type)
+	return WEATHER_CLEAR
+
+func _reset_weather_hold_timer():
+	weather_hold_timer = rng.randf_range(weather_hold_duration.x, weather_hold_duration.y)
+
+func _get_weather_value(key: String) -> float:
+	var from_profile: Dictionary = WEATHER_PROFILES.get(current_weather, WEATHER_PROFILES[WEATHER_CLEAR])
+	var to_profile: Dictionary = WEATHER_PROFILES.get(target_weather, from_profile)
+	var blend := 1.0 if current_weather == target_weather else smoothstep(0.0, 1.0, weather_blend)
+	return lerpf(float(from_profile.get(key, 0.0)), float(to_profile.get(key, 0.0)), blend)
+
+func get_time_label() -> String:
+	var total_minutes := int(roundi(time_of_day * 24.0 * 60.0)) % (24 * 60)
+	var hours: int = total_minutes / 60
+	var minutes: int = total_minutes % 60
+	return "%02d:%02d" % [hours, minutes]

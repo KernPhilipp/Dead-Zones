@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://main0001"]
+[gd_scene load_steps=9 format=3 uid="uid://main0001"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="2_hud"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_gm"]
+[ext_resource type="Script" path="res://scripts/environment_controller.gd" id="4_env"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.35, 0.35, 0.3, 1)
@@ -32,6 +33,9 @@ shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_world")
+
+[node name="EnvironmentController" type="Node3D" parent="."]
+script = ExtResource("4_env")
 
 [node name="Map" type="Node3D" parent="."]
 
