@@ -929,11 +929,126 @@ text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.74)
 
-[node name="PauseSettingsLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
+[node name="PauseSettingsButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(180, 40)
+text = "Settings  v"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="PauseSettingsContent" type="VBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+
+[node name="PauseSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 8
+
+[node name="HudOpacityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+text = "HUD OPACITY"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="HudOpacitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.65
+max_value = 1.0
+step = 0.01
+value = 0.92
+
+[node name="HudOpacityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "92%"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="CrosshairSizeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+text = "CROSSHAIR"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="CrosshairSizeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.85
+max_value = 1.25
+step = 0.01
+value = 1.0
+
+[node name="CrosshairSizeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "100%"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="FeedbackIntensityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+text = "FEEDBACK FX"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="FeedbackIntensitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.35
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="FeedbackIntensityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "80%"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="MasterVolumeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+text = "MASTER VOL"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="MasterVolumeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 0.85
+
+[node name="MasterVolumeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "85%"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="PauseSessionLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
 text = "SESSION SNAPSHOT\nHEADSHOTS  0\nACCURACY   0%\nSURVIVAL   00:00"
-label_settings = SubResource("LabelSettings_status")
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.74)
 
 [node name="ResumeButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2

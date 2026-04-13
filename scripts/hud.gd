@@ -3,6 +3,7 @@ extends CanvasLayer
 const HANDBOOK_SCENE := preload("res://scenes/handbook_book.tscn")
 const PISTOL_ICON := preload("res://assets/ui/pistol_icon.svg")
 const RIFLE_ICON := preload("res://assets/ui/rifle_icon.svg")
+const SETTINGS_PATH := "user://hud_settings.cfg"
 
 var health_bar: ProgressBar
 var health_damage_bar: ProgressBar
@@ -44,7 +45,17 @@ var pause_dimmer: ColorRect
 var pause_panel: PanelContainer
 var pause_summary_label: Label
 var pause_controls_label: Label
-var pause_settings_label: Label
+var pause_settings_button: Button
+var pause_settings_content: VBoxContainer
+var pause_session_label: Label
+var hud_opacity_slider: HSlider
+var hud_opacity_value_label: Label
+var crosshair_size_slider: HSlider
+var crosshair_size_value_label: Label
+var feedback_intensity_slider: HSlider
+var feedback_intensity_value_label: Label
+var master_volume_slider: HSlider
+var master_volume_value_label: Label
 var resume_button: Button
 var handbook_button: Button
 var pause_restart_button: Button
@@ -98,6 +109,9 @@ var crosshair_scale_velocity: float = 0.18
 var crosshair_extra_spread: float = 0.0
 var crosshair_base_color: Color = Color(0.95, 0.97, 1.0, 0.92)
 var crosshair_dot_base_color: Color = Color(0.95, 0.97, 1.0, 1.0)
+var crosshair_segment_length: float = 4.0
+var crosshair_segment_thickness: float = 2.0
+var crosshair_dot_size: float = 2.0
 var damage_compass_markers: Array[Control] = []
 var damage_compass_next_index: int = 0
 var combat_message_priorities: Dictionary = {}
@@ -113,6 +127,12 @@ var last_health_value: int = -1
 var last_ammo_value: int = -1
 var last_wave_seen: int = 0
 var last_weapon_seen: String = ""
+var hud_opacity_setting: float = 0.92
+var crosshair_size_setting: float = 1.0
+var feedback_intensity_setting: float = 0.8
+var master_volume_setting: float = 0.85
+var settings_initialized: bool = false
+var settings_dropdown_open: bool = false
 
 func _enter_tree():
 	_ensure_nodes()
@@ -179,6 +199,8 @@ func _ready():
 	handbook_button.pressed.connect(_on_handbook_pressed)
 	pause_restart_button.pressed.connect(_on_restart)
 	restart_button.pressed.connect(_on_restart)
+	_load_pause_settings()
+	_setup_pause_settings()
 	_setup_handbook_overlay()
 	_show_start_hints()
 
@@ -226,7 +248,17 @@ func _ensure_nodes():
 	pause_panel = _find_required_node("PausePanel") as PanelContainer
 	pause_summary_label = _find_required_node("PauseSummaryLabel") as Label
 	pause_controls_label = _find_required_node("PauseControlsLabel") as Label
-	pause_settings_label = _find_required_node("PauseSettingsLabel") as Label
+	pause_settings_button = _find_required_node("PauseSettingsButton") as Button
+	pause_settings_content = _find_required_node("PauseSettingsContent") as VBoxContainer
+	pause_session_label = _find_required_node("PauseSessionLabel") as Label
+	hud_opacity_slider = _find_required_node("HudOpacitySlider") as HSlider
+	hud_opacity_value_label = _find_required_node("HudOpacityValueLabel") as Label
+	crosshair_size_slider = _find_required_node("CrosshairSizeSlider") as HSlider
+	crosshair_size_value_label = _find_required_node("CrosshairSizeValueLabel") as Label
+	feedback_intensity_slider = _find_required_node("FeedbackIntensitySlider") as HSlider
+	feedback_intensity_value_label = _find_required_node("FeedbackIntensityValueLabel") as Label
+	master_volume_slider = _find_required_node("MasterVolumeSlider") as HSlider
+	master_volume_value_label = _find_required_node("MasterVolumeValueLabel") as Label
 	resume_button = _find_required_node("ResumeButton") as Button
 	handbook_button = _find_required_node("HandbookButton") as Button
 	pause_restart_button = _find_required_node("PauseRestartButton") as Button
@@ -241,6 +273,108 @@ func _ensure_nodes():
 	weapon_panel = _find_required_node("WeaponPanel") as PanelContainer
 	damage_compass_markers = [damage_compass_marker, damage_compass_marker_alt_a, damage_compass_marker_alt_b]
 	nodes_initialized = true
+
+func _setup_pause_settings():
+	if settings_initialized:
+		return
+	settings_initialized = true
+	hud_opacity_slider.value = hud_opacity_setting
+	crosshair_size_slider.value = crosshair_size_setting
+	feedback_intensity_slider.value = feedback_intensity_setting
+	master_volume_slider.value = master_volume_setting
+	pause_settings_button.pressed.connect(_on_pause_settings_toggled)
+	hud_opacity_slider.value_changed.connect(_on_hud_opacity_changed)
+	crosshair_size_slider.value_changed.connect(_on_crosshair_size_changed)
+	feedback_intensity_slider.value_changed.connect(_on_feedback_intensity_changed)
+	master_volume_slider.value_changed.connect(_on_master_volume_changed)
+	_refresh_setting_labels()
+	_apply_master_volume()
+	_apply_crosshair_size()
+	_apply_adaptive_hud_presence()
+	_apply_pause_settings_dropdown()
+
+func _on_pause_settings_toggled():
+	settings_dropdown_open = not settings_dropdown_open
+	_apply_pause_settings_dropdown()
+
+func _apply_pause_settings_dropdown():
+	if pause_settings_content == null or pause_settings_button == null:
+		return
+	pause_settings_content.visible = settings_dropdown_open
+	pause_settings_button.text = "Settings  ^" if settings_dropdown_open else "Settings  v"
+
+func _on_hud_opacity_changed(value: float):
+	hud_opacity_setting = value
+	_refresh_setting_labels()
+	_apply_adaptive_hud_presence()
+	_save_pause_settings()
+
+func _on_crosshair_size_changed(value: float):
+	crosshair_size_setting = value
+	_refresh_setting_labels()
+	_apply_crosshair_size()
+	_save_pause_settings()
+
+func _on_feedback_intensity_changed(value: float):
+	feedback_intensity_setting = value
+	_refresh_setting_labels()
+	_save_pause_settings()
+
+func _on_master_volume_changed(value: float):
+	master_volume_setting = value
+	_refresh_setting_labels()
+	_apply_master_volume()
+	_save_pause_settings()
+
+func _refresh_setting_labels():
+	if not settings_initialized:
+		return
+	hud_opacity_value_label.text = "%d%%" % int(round(hud_opacity_setting * 100.0))
+	crosshair_size_value_label.text = "%d%%" % int(round(crosshair_size_setting * 100.0))
+	feedback_intensity_value_label.text = "%d%%" % int(round(feedback_intensity_setting * 100.0))
+	master_volume_value_label.text = "%d%%" % int(round(master_volume_setting * 100.0))
+
+func _save_pause_settings():
+	var config: ConfigFile = ConfigFile.new()
+	config.set_value("hud", "opacity", hud_opacity_setting)
+	config.set_value("hud", "crosshair_size", crosshair_size_setting)
+	config.set_value("hud", "feedback_intensity", feedback_intensity_setting)
+	config.set_value("audio", "master_volume", master_volume_setting)
+	config.save(SETTINGS_PATH)
+
+func _load_pause_settings():
+	var config: ConfigFile = ConfigFile.new()
+	var err: int = config.load(SETTINGS_PATH)
+	if err != OK:
+		return
+	hud_opacity_setting = clampf(float(config.get_value("hud", "opacity", hud_opacity_setting)), 0.65, 1.0)
+	crosshair_size_setting = clampf(float(config.get_value("hud", "crosshair_size", crosshair_size_setting)), 0.85, 1.25)
+	feedback_intensity_setting = clampf(float(config.get_value("hud", "feedback_intensity", feedback_intensity_setting)), 0.35, 1.0)
+	master_volume_setting = clampf(float(config.get_value("audio", "master_volume", master_volume_setting)), 0.0, 1.0)
+
+func _apply_master_volume():
+	var linear_value: float = clampf(master_volume_setting, 0.0, 1.0)
+	var bus_index: int = AudioServer.get_bus_index("Master")
+	if bus_index < 0:
+		bus_index = 0
+	if linear_value <= 0.001:
+		AudioServer.set_bus_volume_db(bus_index, -80.0)
+	else:
+		AudioServer.set_bus_volume_db(bus_index, linear_to_db(linear_value))
+
+func _hud_alpha(alpha: float) -> float:
+	return clampf(alpha * hud_opacity_setting, 0.0, 1.0)
+
+func _feedback_alpha(alpha: float) -> float:
+	return clampf(alpha * feedback_intensity_setting, 0.0, 1.0)
+
+func _apply_crosshair_size():
+	if crosshair_root == null:
+		return
+	crosshair_root.pivot_offset = crosshair_root.size * 0.5
+	crosshair_segment_length = round(lerpf(4.0, 7.0, inverse_lerp(0.85, 1.25, crosshair_size_setting)))
+	crosshair_segment_thickness = round(lerpf(2.0, 3.0, inverse_lerp(0.85, 1.25, crosshair_size_setting)))
+	crosshair_dot_size = round(lerpf(2.0, 3.0, inverse_lerp(0.85, 1.25, crosshair_size_setting)))
 
 func _find_required_node(node_name: String) -> Node:
 	var node := find_child(node_name, true, false)
@@ -278,7 +412,7 @@ func _process(delta):
 		low_health_label.modulate.a = 0.0
 		low_health_label.scale = Vector2.ONE
 		health_panel.scale = health_panel.scale.lerp(Vector2.ONE, clampf(delta * 8.0, 0.0, 1.0))
-		health_panel.modulate.a = 1.0
+		health_panel.modulate.a = _hud_alpha(1.0)
 		return
 
 	var pulse: float = 0.48 + (sin(low_health_time * 5.8) * 0.24)
@@ -289,7 +423,7 @@ func _process(delta):
 	low_health_label.modulate.a = clampf(low_health_strength * hard_pulse, 0.0, 1.0)
 	low_health_label.scale = Vector2.ONE * (1.0 + low_health_strength * 0.16)
 	health_panel.scale = Vector2.ONE * low_health_panel_pulse
-	health_panel.modulate.a = clampf(0.9 + low_health_strength * 0.22, 0.0, 1.0)
+	health_panel.modulate.a = _hud_alpha(clampf(0.9 + low_health_strength * 0.22, 0.0, 1.0))
 
 func update_health(value: int):
 	_ensure_nodes()
@@ -440,11 +574,22 @@ func update_crosshair(movement_ratio: float):
 	var ratio: float = clampf(movement_ratio, 0.0, 1.0)
 	var target_spread: float = lerpf(2.0, 5.0, ratio) + crosshair_extra_spread
 	crosshair_spread = lerpf(crosshair_spread, target_spread, 0.2)
-	var center: float = 16.0
-	crosshair_left.position = Vector2(center - crosshair_spread - 5.0, 15.0)
-	crosshair_right.position = Vector2(center + crosshair_spread, 15.0)
-	crosshair_top.position = Vector2(15.0, center - crosshair_spread - 5.0)
-	crosshair_bottom.position = Vector2(15.0, center + crosshair_spread)
+	var center: float = floor(crosshair_root.size.x * 0.5)
+	var half_thickness: float = floor(crosshair_segment_thickness * 0.5)
+	var left_x: float = center - crosshair_spread - crosshair_segment_length
+	var right_x: float = center + crosshair_spread
+	var top_y: float = center - crosshair_spread - crosshair_segment_length
+	var bottom_y: float = center + crosshair_spread
+	crosshair_left.position = Vector2(left_x, center - half_thickness)
+	crosshair_left.size = Vector2(crosshair_segment_length, crosshair_segment_thickness)
+	crosshair_right.position = Vector2(right_x, center - half_thickness)
+	crosshair_right.size = Vector2(crosshair_segment_length, crosshair_segment_thickness)
+	crosshair_top.position = Vector2(center - half_thickness, top_y)
+	crosshair_top.size = Vector2(crosshair_segment_thickness, crosshair_segment_length)
+	crosshair_bottom.position = Vector2(center - half_thickness, bottom_y)
+	crosshair_bottom.size = Vector2(crosshair_segment_thickness, crosshair_segment_length)
+	crosshair_dot.position = Vector2(center - floor(crosshair_dot_size * 0.5), center - floor(crosshair_dot_size * 0.5))
+	crosshair_dot.size = Vector2(crosshair_dot_size, crosshair_dot_size)
 	crosshair_dot.modulate.a = lerpf(crosshair_dot.modulate.a, lerpf(1.0, 0.68, ratio), 0.22)
 	if ratio > 0.45 and current_ammo_state == "READY":
 		_set_crosshair_state("move")
@@ -535,12 +680,12 @@ func show_damage_feedback(amount: int, direction: Vector2):
 	show_combat_text("INCOMING", Color(1.0, 0.24, 0.22, 1.0))
 	if damage_flash_tween:
 		damage_flash_tween.kill()
-	damage_flash.modulate = Color(1, 0.16, 0.16, 0.46)
+	damage_flash.modulate = Color(1, 0.16, 0.16, _feedback_alpha(0.46))
 	damage_flash_tween = create_tween()
 	damage_flash_tween.tween_property(damage_flash, "modulate:a", 0.0, 0.34)
 	if blood_overlay_tween:
 		blood_overlay_tween.kill()
-	blood_overlay.modulate = Color(0.82, 0.14, 0.14, 0.88)
+	blood_overlay.modulate = Color(0.82, 0.14, 0.14, _feedback_alpha(0.88))
 	blood_overlay_tween = create_tween()
 	blood_overlay_tween.tween_property(blood_overlay, "modulate:a", 0.0, 0.72)
 	_show_damage_indicator(direction)
@@ -616,6 +761,8 @@ func _set_pause_menu_visible(next_visible: bool):
 	pause_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 
 	if next_visible:
+		settings_dropdown_open = false
+		_apply_pause_settings_dropdown()
 		_update_pause_menu_content()
 		pause_dimmer.modulate.a = 0.0
 		pause_blood_overlay.modulate.a = 0.0
@@ -624,7 +771,7 @@ func _set_pause_menu_visible(next_visible: bool):
 		get_tree().paused = true
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		pause_tween.tween_property(pause_dimmer, "modulate:a", 1.0, 0.16)
-		pause_tween.parallel().tween_property(pause_blood_overlay, "modulate:a", 0.34, 0.22)
+		pause_tween.parallel().tween_property(pause_blood_overlay, "modulate:a", _feedback_alpha(0.34), 0.22)
 		pause_tween.parallel().tween_property(pause_panel, "modulate:a", 1.0, 0.14)
 		pause_tween.parallel().tween_property(pause_panel, "scale", Vector2(1.0, 1.0), 0.16)
 	else:
@@ -654,13 +801,13 @@ func _show_damage_indicator(direction: Vector2):
 	marker.rotation = angle
 	marker.visible = true
 	marker.modulate.a = 0.0
-	marker.scale = Vector2(0.68, 1.1)
+	marker.scale = Vector2(0.68, 1.1).lerp(Vector2(1.0, 1.35), clampf(feedback_intensity_setting, 0.0, 1.0))
 	var tween: Tween = create_tween()
-	tween.tween_property(marker, "modulate:a", 1.0, 0.06)
-	tween.parallel().tween_property(marker, "scale", Vector2(1.05, 1.28), 0.08)
+	tween.tween_property(marker, "modulate:a", _feedback_alpha(1.0), 0.06)
+	tween.parallel().tween_property(marker, "scale", Vector2(1.05, 1.28).lerp(Vector2(1.18, 1.52), clampf(feedback_intensity_setting, 0.0, 1.0)), 0.08)
 	tween.tween_interval(0.12)
 	tween.tween_property(marker, "modulate:a", 0.0, 0.32)
-	tween.parallel().tween_property(marker, "scale", Vector2(1.18, 1.42), 0.32)
+	tween.parallel().tween_property(marker, "scale", Vector2(1.18, 1.42).lerp(Vector2(1.32, 1.62), clampf(feedback_intensity_setting, 0.0, 1.0)), 0.32)
 	tween.tween_callback(func(): marker.visible = false)
 
 func _hide_legacy_damage_indicators():
@@ -1096,7 +1243,8 @@ func _update_pause_menu_content():
 
 	pause_summary_label.text = "WAVE %02d PAUSED\n%d HOSTILES ELIMINATED" % [wave, kills]
 	pause_controls_label.text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
-	pause_settings_label.text = "SESSION SNAPSHOT\nHEADSHOTS  %d\nACCURACY   %.0f%%\nSURVIVAL   %02d:%02d" % [headshots, accuracy, minutes, seconds]
+	pause_session_label.text = "SESSION SNAPSHOT\nHEADSHOTS  %d\nACCURACY   %.0f%%\nSURVIVAL   %02d:%02d" % [headshots, accuracy, minutes, seconds]
+	_refresh_setting_labels()
 
 func _update_adaptive_hud(delta: float):
 	var target_threat: float = clampf(maxf(recent_threat_time / 1.5, low_health_strength), 0.0, 1.0)
@@ -1111,12 +1259,12 @@ func _apply_adaptive_hud_presence():
 	var reserve_alpha: float = lerpf(0.4, 0.96, threat_level)
 	var crosshair_alpha: float = lerpf(0.6, 1.0, threat_level)
 
-	wave_panel.modulate.a = wave_alpha
-	weapon_panel.modulate.a = weapon_alpha
+	wave_panel.modulate.a = _hud_alpha(wave_alpha)
+	weapon_panel.modulate.a = _hud_alpha(weapon_alpha)
 	ammo_label.modulate.a = ammo_alpha
 	ammo_state_label.modulate.a = maxf(ammo_state_label.modulate.a, ammo_alpha)
 	reserve_label.modulate.a = reserve_alpha
-	crosshair_root.modulate.a = crosshair_alpha
+	crosshair_root.modulate.a = _hud_alpha(crosshair_alpha)
 	wave_panel.scale = Vector2.ONE * lerpf(0.97, 1.0, threat_level)
 	weapon_panel.scale = Vector2.ONE * lerpf(0.975, 1.0, threat_level)
 
