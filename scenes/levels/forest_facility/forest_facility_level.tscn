@@ -1,2766 +1,703 @@
-[gd_scene format=3 uid="uid://bsmg57yisywmn"]
+[gd_scene format=3]
 
 [ext_resource type="Mesh" path="res://assets/models/trees/trees9.obj" id="1_tree_mesh"]
-[ext_resource type="Texture2D" path="res://assets/models/grass/coast_sand_rocks_02_diff_1k.jpg" id="2_ground_albedo"]
-[ext_resource type="Texture2D" path="res://assets/models/grass/coast_sand_rocks_02_rough_1k.exr" id="3_ground_roughness"]
-[ext_resource type="Texture2D" path="res://assets/models/grass/coast_sand_rocks_02_nor_gl_1k.exr" id="4_ground_normal"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(120, 2, 120)
+size = Vector3(180, 2, 180)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
-size = Vector2(120, 120)
-subdivide_width = 32
-subdivide_depth = 32
+size = Vector2(180, 180)
+subdivide_width = 24
+subdivide_depth = 24
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.42, 0.48, 0.38, 1)
-albedo_texture = ExtResource("2_ground_albedo")
-roughness = 0.95
-roughness_texture = ExtResource("3_ground_roughness")
-normal_enabled = true
-normal_scale = 0.4
-normal_texture = ExtResource("4_ground_normal")
-uv1_scale = Vector3(10, 10, 1)
+[sub_resource type="PlaneMesh" id="PlaneMesh_large_patch"]
+size = Vector2(42, 28)
 
-[sub_resource type="SphereMesh" id="SphereMesh_hill_large"]
-radius = 1.0
-height = 2.0
+[sub_resource type="PlaneMesh" id="PlaneMesh_mid_patch"]
+size = Vector2(18, 12)
 
-[sub_resource type="SphereMesh" id="SphereMesh_hill_medium"]
-radius = 1.0
-height = 2.0
+[sub_resource type="PlaneMesh" id="PlaneMesh_small_patch"]
+size = Vector2(10, 8)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_platform"]
-size = Vector3(16, 1, 12)
+[sub_resource type="BoxMesh" id="BoxMesh_unit"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_platform"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_tank"]
+top_radius = 2.2
+bottom_radius = 2.4
+height = 4.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_platform"]
-albedo_color = Color(0.42, 0.44, 0.46, 1)
-roughness = 0.75
+[sub_resource type="CylinderMesh" id="CylinderMesh_pole"]
+top_radius = 0.16
+bottom_radius = 0.2
+height = 7.5
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_path"]
-size = Vector3(8, 1, 30)
+[sub_resource type="BoxShape3D" id="BoxShape3D_main_block"]
+size = Vector3(18, 7, 12)
 
-[sub_resource type="BoxMesh" id="BoxMesh_path"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_rear_wing"]
+size = Vector3(10, 6, 8)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_path"]
-albedo_color = Color(0.58, 0.56, 0.52, 1)
-roughness = 0.88
+[sub_resource type="BoxShape3D" id="BoxShape3D_front_office"]
+size = Vector3(6, 4.5, 5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_cover_long"]
-size = Vector3(4, 2, 1.5)
+[sub_resource type="BoxShape3D" id="BoxShape3D_gatehouse"]
+size = Vector3(5, 3.2, 4.5)
 
-[sub_resource type="BoxMesh" id="BoxMesh_cover_north"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_warehouse"]
+size = Vector3(9, 5, 7)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cover"]
-albedo_color = Color(0.28, 0.24, 0.2, 1)
-roughness = 0.85
+[sub_resource type="BoxShape3D" id="BoxShape3D_shed_a"]
+size = Vector3(7, 3.8, 5)
 
-[sub_resource type="BoxMesh" id="BoxMesh_cover_south"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_shed_b"]
+size = Vector3(5.5, 3.4, 4.5)
 
-[sub_resource type="BoxMesh" id="BoxMesh_building"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_tower"]
+size = Vector3(3.5, 8, 3.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_building"]
-albedo_color = Color(0.47, 0.48, 0.45, 1)
-roughness = 0.92
+[sub_resource type="BoxShape3D" id="BoxShape3D_barrier_a"]
+size = Vector3(3.8, 1.2, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_medium"]
-size = Vector3(6, 4, 0.6)
+[sub_resource type="BoxShape3D" id="BoxShape3D_barrier_b"]
+size = Vector3(3.2, 1.2, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
-size = Vector3(3.5, 4, 0.6)
+[sub_resource type="BoxShape3D" id="BoxShape3D_barrier_c"]
+size = Vector3(4.2, 1.1, 1.0)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
-size = Vector3(10, 4, 0.6)
+[sub_resource type="BoxShape3D" id="BoxShape3D_container_a"]
+size = Vector3(5.5, 2.6, 2.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side_short"]
-size = Vector3(0.6, 4, 3)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
-size = Vector3(0.6, 4, 8)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_rubble"]
-size = Vector3(2.4, 1.2, 1.6)
-
-[sub_resource type="BoxMesh" id="BoxMesh_rubble"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_container_b"]
+size = Vector3(4.5, 2.2, 2.0)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fence_long"]
-size = Vector3(12, 2.4, 0.35)
+size = Vector3(44, 2.4, 0.24)
 
-[sub_resource type="BoxMesh" id="BoxMesh_fence"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_fence_east_north"]
+size = Vector3(0.24, 2.4, 18)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fence"]
-albedo_color = Color(0.38, 0.4, 0.38, 1)
-metallic = 0.65
-roughness = 0.55
+[sub_resource type="BoxShape3D" id="BoxShape3D_fence_east_south"]
+size = Vector3(0.24, 2.4, 14)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_fence_medium"]
-size = Vector3(8, 2.4, 0.35)
+[sub_resource type="BoxShape3D" id="BoxShape3D_west_fence_north"]
+size = Vector3(0.24, 2.4, 50)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_fence_side"]
-size = Vector3(0.35, 2.4, 10)
+[sub_resource type="BoxShape3D" id="BoxShape3D_west_fence_south"]
+size = Vector3(0.24, 2.4, 20)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_fence_side_short"]
-size = Vector3(0.35, 2.4, 5)
+[sub_resource type="BoxShape3D" id="BoxShape3D_service_annex"]
+size = Vector3(8, 4.6, 6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_tower_leg"]
-size = Vector3(0.45, 14, 0.45)
+[sub_resource type="BoxShape3D" id="BoxShape3D_loading_bay"]
+size = Vector3(10, 3.2, 4.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_landmark_metal"]
-albedo_color = Color(0.5, 0.52, 0.54, 1)
-metallic = 0.7
-roughness = 0.45
+[sub_resource type="BoxShape3D" id="BoxShape3D_barricade_long"]
+size = Vector3(8, 2.2, 1.4)
 
-[sub_resource type="SphereMesh" id="SphereMesh_radio_dish"]
-radius = 1.1
-height = 2.2
+[sub_resource type="BoxShape3D" id="BoxShape3D_barricade_short"]
+size = Vector3(5, 1.8, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_landmark_warning"]
-albedo_color = Color(0.68, 0.42, 0.16, 1)
-metallic = 0.25
-roughness = 0.65
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.115, 0.125, 0.115, 1)
+roughness = 1.0
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_water_tank_leg"]
-size = Vector3(0.5, 6, 0.5)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dirt"]
+albedo_color = Color(0.165, 0.155, 0.125, 1)
+roughness = 1.0
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_water_tank"]
-top_radius = 2.6
-bottom_radius = 2.8
-height = 4.2
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_vehicle_body"]
-size = Vector3(3.4, 1.1, 1.8)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_vehicle_cabin"]
-size = Vector3(1.6, 1, 1.6)
-
-[sub_resource type="QuadMesh" id="QuadMesh_grass_blade"]
-size = Vector2(1.2, 1.6)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grass"]
-albedo_color = Color(0.26, 0.4, 0.19, 1)
-roughness = 0.92
-cull_mode = 2
-billboard_mode = 1
-
-[sub_resource type="SphereMesh" id="SphereMesh_shrub_round"]
-radius = 1.1
-height = 1.7
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shrub"]
-albedo_color = Color(0.18, 0.3, 0.16, 1)
-roughness = 0.98
-
-[sub_resource type="SphereMesh" id="SphereMesh_shrub_low"]
-radius = 0.8
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_tree_trunk"]
-top_radius = 0.22
-bottom_radius = 0.3
-height = 4.5
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tree_trunk"]
-albedo_color = Color(0.28, 0.2, 0.12, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mud"]
+albedo_color = Color(0.11, 0.105, 0.095, 1)
 roughness = 0.96
 
-[sub_resource type="SphereMesh" id="SphereMesh_tree_canopy"]
-radius = 1.8
-height = 3.6
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tree_canopy"]
-albedo_color = Color(0.14, 0.3, 0.12, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_road"]
+albedo_color = Color(0.08, 0.085, 0.09, 1)
 roughness = 0.9
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dead_tree"]
-albedo_color = Color(0.34, 0.31, 0.28, 1)
-roughness = 0.98
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vehicle_rust"]
-albedo_color = Color(0.41, 0.2, 0.12, 1)
-metallic = 0.42
-roughness = 0.93
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vehicle_dark_rust"]
-albedo_color = Color(0.21, 0.17, 0.15, 1)
-metallic = 0.22
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_concrete"]
+albedo_color = Color(0.3, 0.32, 0.31, 1)
 roughness = 0.95
 
-[sub_resource type="SphereMesh" id="SphereMesh_rock_large"]
-radius = 1.0
-height = 1.6
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dark_concrete"]
+albedo_color = Color(0.18, 0.19, 0.2, 1)
+roughness = 0.92
 
-[sub_resource type="SphereMesh" id="SphereMesh_rock_small"]
-radius = 0.6
-height = 0.9
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
+albedo_color = Color(0.21, 0.23, 0.24, 1)
+metallic = 0.75
+roughness = 0.42
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rock"]
-albedo_color = Color(0.24, 0.25, 0.24, 1)
-roughness = 0.98
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rust"]
+albedo_color = Color(0.31, 0.2, 0.13, 1)
+metallic = 0.25
+roughness = 0.8
 
-[sub_resource type="Environment" id="Environment_forest"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_window"]
+albedo_color = Color(0.12, 0.15, 0.18, 1)
+emission_enabled = true
+emission = Color(0.9, 0.78, 0.56, 1)
+emission_energy_multiplier = 0.55
+roughness = 0.08
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fogged_light"]
+albedo_color = Color(0.94, 0.77, 0.56, 1)
+emission_enabled = true
+emission = Color(1, 0.84, 0.64, 1)
+emission_energy_multiplier = 1.7
+roughness = 0.25
+
+[sub_resource type="Environment" id="Environment_spooky"]
 background_mode = 1
-background_color = Color(0.16, 0.18, 0.2, 1)
+background_color = Color(0.4, 0.43, 0.46, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.23, 0.26, 0.25, 1)
-ambient_light_energy = 0.45
+ambient_light_color = Color(0.5, 0.52, 0.5, 1)
+ambient_light_energy = 1.15
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.03
 fog_enabled = true
-fog_light_color = Color(0.22, 0.25, 0.24, 1)
-fog_light_energy = 0.45
-fog_density = 0.035
+fog_light_color = Color(0.76, 0.78, 0.8, 1)
+fog_light_energy = 0.08
+fog_density = 0.005
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_level"]
-vertices = PackedVector3Array(-60, 0, -60, 60, 0, -60, 60, 0, 60, -60, 0, 60, -16, 0.1, -14, 16, 0.1, -14, 16, 0.1, -2, -16, 0.1, -2, -38, 0.1, 5, -30, 0.1, 5, -30, 0.1, 11, -38, 0.1, 11, 27, 0.1, -32, 33, 0.1, -32, 33, 0.1, -28, 27, 0.1, -28, 16.5, 0.1, 33.5, 23.5, 0.1, 33.5, 23.5, 0.1, 38.5, 16.5, 0.1, 38.5)
-polygons = [PackedInt32Array(0, 1, 2, 3), PackedInt32Array(4, 5, 6, 7), PackedInt32Array(8, 9, 10, 11), PackedInt32Array(12, 13, 14, 15), PackedInt32Array(16, 17, 18, 19)]
+vertices = PackedVector3Array(-85, 0, -85, 85, 0, -85, 85, 0, 85, -85, 0, 85)
+polygons = [PackedInt32Array(0, 1, 2, 3)]
 
-[node name="ForestFacilityLevel" type="Node3D" unique_id=1728351408]
+[node name="ForestFacilityLevel" type="Node3D"]
 
-[node name="Geometry" type="Node3D" parent="." unique_id=1960700100]
+[node name="Geometry" type="Node3D" parent="."]
 
-[node name="Ground" type="StaticBody3D" parent="Geometry" unique_id=94760075]
+[node name="Ground" type="StaticBody3D" parent="Geometry"]
 collision_layer = 4
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Ground" unique_id=3301540]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_ground")
 
-[node name="GroundMesh" type="MeshInstance3D" parent="Geometry/Ground" unique_id=1340734967]
+[node name="GroundMesh" type="MeshInstance3D" parent="Geometry/Ground"]
 mesh = SubResource("PlaneMesh_ground")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
-[node name="TerrainUndulation" type="Node3D" parent="Geometry" unique_id=1924239239]
+[node name="GroundPatches" type="Node3D" parent="Geometry"]
 
-[node name="OuterHillNorthWest" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=65217616]
-transform = Transform3D(16, 0, 0, 0, 2.4, 0, 0, 0, 14, -36, 0.32, -30)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="NorthDirt" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 0.03, -24)
+mesh = SubResource("PlaneMesh_large_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_dirt")
 
-[node name="OuterHillNorthCenter" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1067246152]
-transform = Transform3D(12, 0, 0, 0, 2, 0, 0, 0, 20, -2, 0.26, -36)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="EastMud" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(1.3, 0, 0.2, -0.12, 1, 0.04, -0.15, 0, 1.15, 36, 0.025, 18)
+mesh = SubResource("PlaneMesh_large_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_mud")
 
-[node name="OuterHillNorthEast" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=251516605]
-transform = Transform3D(15, 0, 0, 0, 2.3, 0, 0, 0, 12, 34, 0.3, -28)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="SouthMud" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(0.92, 0, -0.18, 0.08, 1, -0.02, 0.22, 0, 1.2, -18, 0.025, 34)
+mesh = SubResource("PlaneMesh_mid_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_mud")
 
-[node name="MidRiseWestApproach" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1625586128]
-transform = Transform3D(10, 0, 0, 0, 1.15, 0, 0, 0, 16, -40, 0.14, 8)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="GateDirt" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(1.1, 0, 0.14, 0, 1, 0, -0.12, 0, 0.95, 48, 0.03, 8)
+mesh = SubResource("PlaneMesh_mid_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_dirt")
 
-[node name="MidRiseEastApproach" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1929340377]
-transform = Transform3D(12, 0, 0, 0, 1.1, 0, 0, 0, 14, 40, 0.14, 8)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="InnerYardDirt" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(1.2, 0, 0.08, 0, 1, 0, -0.06, 0, 1.05, 4, 0.03, 8)
+mesh = SubResource("PlaneMesh_large_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_dirt")
 
-[node name="OuterHillSouthWest" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=676787398]
-transform = Transform3D(15, 0, 0, 0, 2.2, 0, 0, 0, 13, -30, 0.28, 34)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="Roads" type="Node3D" parent="Geometry"]
 
-[node name="OuterHillSouthCenter" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1379337914]
-transform = Transform3D(18, 0, 0, 0, 1.8, 0, 0, 0, 10, 4, 0.22, 40)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="EntryRoad" type="MeshInstance3D" parent="Geometry/Roads"]
+transform = Transform3D(18, 0, 0, 0, 0.05, 0, 0, 0, 76, 0, 0.02, 8)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
 
-[node name="OuterHillSouthEast" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1644572073]
-transform = Transform3D(15, 0, 0, 0, 2.3, 0, 0, 0, 13, 32, 0.3, 34)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="NorthLane" type="MeshInstance3D" parent="Geometry/Roads"]
+transform = Transform3D(36, 0, 0, 0, 0.05, 0, 0, 0, 9, -6, 0.02, -18)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
 
-[node name="MidRiseNorthRoute" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=274241555]
-transform = Transform3D(9, 0, 0, 0, 0.95, 0, 0, 0, 12, 12, 0.12, -18)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="SouthLane" type="MeshInstance3D" parent="Geometry/Roads"]
+transform = Transform3D(34, 0, 0, 0, 0.05, 0, 0, 0, 9, 2, 0.02, 28)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
 
-[node name="MidRiseSouthRoute" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1599200261]
-transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 12, -12, 0.12, 22)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="WestTrack" type="MeshInstance3D" parent="Geometry/Roads"]
+transform = Transform3D(8, 0, 0, 0, 0.05, 0, 0, 0, 24, -34, 0.02, 18)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
 
-[node name="MidRiseWestInner" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=18068573]
-transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 10, -24, 0.1, -2)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="Structures" type="Node3D" parent="Geometry"]
 
-[node name="MidRiseEastInner" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=98651188]
-transform = Transform3D(8, 0, 0, 0, 0.85, 0, 0, 0, 10, 24, 0.1, 2)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="MainHall" type="Node3D" parent="Geometry/Structures"]
 
-[node name="CentralLowerArea" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=832740339]
-transform = Transform3D(24, 0, 0, 0, -0.35, 0, 0, 0, 22, 2, -0.04, 8)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="MainBlock" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(18, 0, 0, 0, 7, 0, 0, 0, 12, 4, 3.5, 4)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
 
-[node name="CentralLowerNorthPocket" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1744505627]
-transform = Transform3D(12, 0, 0, 0, -0.2, 0, 0, 0, 10, 10, -0.03, -10)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="RearWing" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(10, 0, 0, 0, 6, 0, 0, 0, 8, -14, 3, -4)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
-[node name="CentralLowerSouthPocket" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1302789301]
-transform = Transform3D(14, 0, 0, 0, -0.18, 0, 0, 0, 12, -8, -0.03, 18)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="FrontOffice" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(6, 0, 0, 0, 4.5, 0, 0, 0, 5, 18, 2.25, 0)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
-[node name="NorthRidgeWest" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=201003781]
-transform = Transform3D(20, 0, 0, 0, 1.5, 0, 0, 0, 9, -26, 0.18, -48)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="RoofUnitA" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(3.2, 0, 0, 0, 1.1, 0, 0, 0, 2.4, 0, 7.65, -1.6)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 
-[node name="NorthRidgeEast" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=902114638]
-transform = Transform3D(18, 0, 0, 0, 1.7, 0, 0, 0, 11, 26, 0.2, -44)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="RoofUnitB" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(2.2, 0, 0, 0, 0.9, 0, 0, 0, 1.8, 8, 7.55, 3)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 
-[node name="WestTreelineRise" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=2030618001]
-transform = Transform3D(9, 0, 0, 0, 1.3, 0, 0, 0, 18, -48, 0.16, -18)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="WindowStripNorth" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(8, 0, 0, 0, 1.2, 0, 0, 0, 0.15, 4, 3.1, -8.1)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_window")
 
-[node name="EastTreelineRise" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=762269806]
-transform = Transform3D(10, 0, 0, 0, 1.2, 0, 0, 0, 18, 48, 0.14, 20)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="WindowStripSouth" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(7, 0, 0, 0, 1.1, 0, 0, 0, 0.15, 6, 2.9, 16.1)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_window")
 
-[node name="SouthWestMound" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=155492157]
-transform = Transform3D(12, 0, 0, 0, 1.4, 0, 0, 0, 14, -42, 0.18, 46)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="OfficeWindow" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+transform = Transform3D(0.15, 0, 0, 0, 1.1, 0, 0, 0, 2.8, 24.1, 2.4, 0)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_window")
 
-[node name="SouthEastMound" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=2126931053]
-transform = Transform3D(13, 0, 0, 0, 1.25, 0, 0, 0, 15, 36, 0.16, 44)
-mesh = SubResource("SphereMesh_hill_large")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="Gatehouse" type="Node3D" parent="Geometry/Structures"]
 
-[node name="InnerWestDepression" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1200994061]
-transform = Transform3D(11, 0, 0, 0, -0.22, 0, 0, 0, 9, -18, -0.04, 2)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="GatehouseBase" type="MeshInstance3D" parent="Geometry/Structures/Gatehouse"]
+transform = Transform3D(5, 0, 0, 0, 3.2, 0, 0, 0, 4.5, 34, 1.6, 8)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
 
-[node name="InnerEastDepression" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=1944614485]
-transform = Transform3D(10, 0, 0, 0, -0.2, 0, 0, 0, 10, 16, -0.04, 14)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="GatehouseWindow" type="MeshInstance3D" parent="Geometry/Structures/Gatehouse"]
+transform = Transform3D(0.15, 0, 0, 0, 1.1, 0, 0, 0, 1.8, 36.6, 1.7, 8)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_window")
 
-[node name="FacilityNorthShoulder" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=871009783]
-transform = Transform3D(7, 0, 0, 0, 0.55, 0, 0, 0, 9, -18, 0.08, -24)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="Storage" type="Node3D" parent="Geometry/Structures"]
 
-[node name="StorageSouthShoulder" type="MeshInstance3D" parent="Geometry/TerrainUndulation" unique_id=511203849]
-transform = Transform3D(9, 0, 0, 0, 0.6, 0, 0, 0, 8, 28, 0.08, 46)
-mesh = SubResource("SphereMesh_hill_medium")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+[node name="WarehouseA" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+transform = Transform3D(9, 0, 0, 0, 5, 0, 0, 0, 7, -26, 2.5, 24)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
-[node name="ResearchPad" type="StaticBody3D" parent="Geometry" unique_id=362255745]
+[node name="WarehouseDoorA" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+transform = Transform3D(0.16, 0, 0, 0, 2.4, 0, 0, 0, 2.8, -17.1, 1.8, 24)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="ShedA" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+transform = Transform3D(7, 0, 0, 0, 3.8, 0, 0, 0, 5, -28, 1.9, -26)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="ShedB" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+transform = Transform3D(5.5, 0, 0, 0, 3.4, 0, 0, 0, 4.5, 22, 1.7, 28)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="ServiceAnnex" type="Node3D" parent="Geometry/Structures"]
+
+[node name="AnnexBlock" type="MeshInstance3D" parent="Geometry/Structures/ServiceAnnex"]
+transform = Transform3D(8, 0, 0, 0, 4.6, 0, 0, 0, 6, -30, 2.3, -6)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
+
+[node name="AnnexDoor" type="MeshInstance3D" parent="Geometry/Structures/ServiceAnnex"]
+transform = Transform3D(0.16, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -22.1, 1.6, -6)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="LoadingBay" type="Node3D" parent="Geometry/Structures"]
+
+[node name="LoadingBayBlock" type="MeshInstance3D" parent="Geometry/Structures/LoadingBay"]
+transform = Transform3D(10, 0, 0, 0, 3.2, 0, 0, 0, 4.5, 8, 1.6, -30)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="LoadingBayDoor" type="MeshInstance3D" parent="Geometry/Structures/LoadingBay"]
+transform = Transform3D(2.6, 0, 0, 0, 2.2, 0, 0, 0, 0.16, 8, 1.5, -27.7)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="Tower" type="Node3D" parent="Geometry/Structures"]
+
+[node name="TowerBase" type="MeshInstance3D" parent="Geometry/Structures/Tower"]
+transform = Transform3D(3.5, 0, 0, 0, 8, 0, 0, 0, 3.5, 28, 4, -26)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="TowerCabin" type="MeshInstance3D" parent="Geometry/Structures/Tower"]
+transform = Transform3D(4.2, 0, 0, 0, 2.4, 0, 0, 0, 4.2, 28, 9.2, -26)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
+
+[node name="TowerWindow" type="MeshInstance3D" parent="Geometry/Structures/Tower"]
+transform = Transform3D(1.2, 0, 0, 0, 0.8, 0, 0, 0, 0.15, 28, 9.1, -23.8)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_window")
+
+[node name="Fence" type="Node3D" parent="Geometry"]
+
+[node name="NorthFence" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(44, 0, 0, 0, 2.4, 0, 0, 0, 0.24, 0, 1.2, -40)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="SouthFence" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(44, 0, 0, 0, 2.4, 0, 0, 0, 0.24, 0, 1.2, 40)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="WestFenceNorth" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(0.24, 0, 0, 0, 2.4, 0, 0, 0, 50, -44, 1.2, -15)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="WestFenceSouth" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(0.24, 0, 0, 0, 2.4, 0, 0, 0, 20, -44, 1.2, 30)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="EastFenceNorth" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(0.24, 0, 0, 0, 2.4, 0, 0, 0, 18, 44, 1.2, -22)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="EastFenceSouth" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(0.24, 0, 0, 0, 2.4, 0, 0, 0, 14, 44, 1.2, 26)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="GateLeafLeft" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(0.16, 0, -0.06, 0, 2, 0, 0.05, 0, 5, 44, 1, 3)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="GateLeafRight" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(0.16, 0, 0.06, 0, 2, 0, -0.05, 0, 5, 44, 1, 13)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="WestBreachDebrisA" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(2.8, 0, 0.6, 0, 1.1, 0, -0.35, 0, 1.0, -40.8, 0.55, 10.5)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="WestBreachDebrisB" type="MeshInstance3D" parent="Geometry/Fence"]
+transform = Transform3D(2.2, 0, -0.5, 0, 0.9, 0, 0.28, 0, 1.1, -40.9, 0.45, 17.5)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="YardProps" type="Node3D" parent="Geometry"]
+
+[node name="ConcreteBarrierA" type="MeshInstance3D" parent="Geometry/YardProps"]
+transform = Transform3D(3.8, 0, 0, 0, 1.2, 0, 0, 0, 1.1, 18, 0.6, 18)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
+
+[node name="ConcreteBarrierB" type="MeshInstance3D" parent="Geometry/YardProps"]
+transform = Transform3D(3.2, 0, 0.4, 0, 1.2, 0, -0.35, 0, 1.1, 10, 0.6, 22)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
+
+[node name="ConcreteBarrierC" type="MeshInstance3D" parent="Geometry/YardProps"]
+transform = Transform3D(4.2, 0, -0.35, 0, 1.1, 0, 0.28, 0, 1.0, -8, 0.55, -18)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
+
+[node name="ContainerA" type="MeshInstance3D" parent="Geometry/YardProps"]
+transform = Transform3D(5.5, 0, 0, 0, 2.6, 0, 0, 0, 2.5, -12, 1.3, 18)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="ContainerB" type="MeshInstance3D" parent="Geometry/YardProps"]
+transform = Transform3D(4.5, 0, -0.8, 0, 2.2, 0, 0.5, 0, 2.0, -22, 1.1, 8)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="TankStand" type="Node3D" parent="Geometry/YardProps"]
+
+[node name="Tank" type="MeshInstance3D" parent="Geometry/YardProps/TankStand"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 6.6, 30)
+mesh = SubResource("CylinderMesh_tank")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="TankLegA" type="MeshInstance3D" parent="Geometry/YardProps/TankStand"]
+transform = Transform3D(0.22, 0, 0, 0, 5.5, 0, 0, 0, 0.22, -39.6, 2.75, 28.4)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="TankLegB" type="MeshInstance3D" parent="Geometry/YardProps/TankStand"]
+transform = Transform3D(0.22, 0, 0, 0, 5.5, 0, 0, 0, 0.22, -36.4, 2.75, 28.4)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="TankLegC" type="MeshInstance3D" parent="Geometry/YardProps/TankStand"]
+transform = Transform3D(0.22, 0, 0, 0, 5.5, 0, 0, 0, 0.22, -39.6, 2.75, 31.6)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="TankLegD" type="MeshInstance3D" parent="Geometry/YardProps/TankStand"]
+transform = Transform3D(0.22, 0, 0, 0, 5.5, 0, 0, 0, 0.22, -36.4, 2.75, 31.6)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="SpookyBarricades" type="Node3D" parent="Geometry/YardProps"]
+
+[node name="EntryBarricade" type="MeshInstance3D" parent="Geometry/YardProps/SpookyBarricades"]
+transform = Transform3D(8, 0, 0, 0, 2.2, 0, 0, 0, 1.4, 24, 1.1, 12)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
+
+[node name="NorthServiceBarricade" type="MeshInstance3D" parent="Geometry/YardProps/SpookyBarricades"]
+transform = Transform3D(5, 0, -0.5, 0, 1.8, 0, 0.22, 0, 1.15, -8, 0.9, -12)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
+
+[node name="SouthYardBarricade" type="MeshInstance3D" parent="Geometry/YardProps/SpookyBarricades"]
+transform = Transform3D(5, 0, 0.4, 0, 1.8, 0, -0.24, 0, 1.1, 6, 0.9, 24)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_rust")
+
+[node name="Collisions" type="StaticBody3D" parent="Geometry"]
 collision_layer = 4
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/ResearchPad" unique_id=32054940]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -8)
-shape = SubResource("BoxShape3D_platform")
-
-[node name="PadMesh" type="MeshInstance3D" parent="Geometry/ResearchPad" unique_id=1549608693]
-transform = Transform3D(8, 0, 0, 0, 0.5, 0, 0, 0, 6, 0, 0.5, -8)
-mesh = SubResource("BoxMesh_platform")
-surface_material_override/0 = SubResource("StandardMaterial3D_platform")
-
-[node name="FacilityPath" type="StaticBody3D" parent="Geometry" unique_id=247927525]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPath" unique_id=306903028]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1, 0, 0.573576, 0, 0.819152, -8, 0.5, 10)
-shape = SubResource("BoxShape3D_path")
-
-[node name="PathMesh" type="MeshInstance3D" parent="Geometry/FacilityPath" unique_id=845498591]
-transform = Transform3D(3.27661, 0, -17.2073, 0, 0.5, 0, 2.2943, 0, 24.5746, -8, 0.5, 10)
-mesh = SubResource("BoxMesh_path")
-surface_material_override/0 = SubResource("StandardMaterial3D_path")
-
-[node name="Cover" type="Node3D" parent="Geometry" unique_id=1055475592]
-
-[node name="BarrierNorth" type="StaticBody3D" parent="Geometry/Cover" unique_id=907068379]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Cover/BarrierNorth" unique_id=1453854855]
-transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 10, 1, -2)
-shape = SubResource("BoxShape3D_cover_long")
-
-[node name="BarrierMesh" type="MeshInstance3D" parent="Geometry/Cover/BarrierNorth" unique_id=1665140157]
-transform = Transform3D(1.93185, 0, -0.388229, 0, 2, 0, 0.517638, 0, 1.44889, 10, 1, -2)
-mesh = SubResource("BoxMesh_cover_north")
-surface_material_override/0 = SubResource("StandardMaterial3D_cover")
-
-[node name="BarrierSouth" type="StaticBody3D" parent="Geometry/Cover" unique_id=2100003706]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/Cover/BarrierSouth" unique_id=348264379]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -12, 1, 6)
-shape = SubResource("BoxShape3D_cover_long")
-
-[node name="BarrierMesh" type="MeshInstance3D" parent="Geometry/Cover/BarrierSouth" unique_id=1348938427]
-transform = Transform3D(1.81262, 0, 0.633927, 0, 2, 0, -0.845236, 0, 1.35946, -12, 1, 6)
-mesh = SubResource("BoxMesh_cover_south")
-surface_material_override/0 = SubResource("StandardMaterial3D_cover")
-
-[node name="AbandonedResearchBuilding" type="Node3D" parent="Geometry" unique_id=278966181]
-visible = false
-
-[node name="FloorSlab" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding" unique_id=2046632209]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/FloorSlab" unique_id=639568730]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -8)
-shape = SubResource("BoxShape3D_platform")
-
-[node name="FloorMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/FloorSlab" unique_id=701249622]
-transform = Transform3D(8, 0, 0, 0, 0.2, 0, 0, 0, 6, 0, 0.1, -8)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="Walls" type="Node3D" parent="Geometry/AbandonedResearchBuilding" unique_id=982190537]
-
-[node name="NorthWallWest" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=739019613]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/NorthWallWest" unique_id=1719562307]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2, -14)
-shape = SubResource("BoxShape3D_wall_medium")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/NorthWallWest" unique_id=138360694]
-transform = Transform3D(6, 0, 0, 0, 4, 0, 0, 0, 0.6, -8, 2, -14)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="NorthWallEast" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=1336584676]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/NorthWallEast" unique_id=244930271]
-transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 6.5, 2, -13.5)
-shape = SubResource("BoxShape3D_wall_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/NorthWallEast" unique_id=1095010512]
-transform = Transform3D(3.28893, 0, -0.205212, 0, 4, 0, 1.19707, 0, 0.563816, 6.5, 2, -13.5)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="SouthWallWest" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=784226911]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/SouthWallWest" unique_id=183560451]
-transform = Transform3D(0.984808, 0, 0.173648, 0, 1, 0, -0.173648, 0, 0.984808, -9, 2, -2)
-shape = SubResource("BoxShape3D_wall_long")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/SouthWallWest" unique_id=245508601]
-transform = Transform3D(9.84808, 0, 0.104189, 0, 4, 0, -1.73648, 0, 0.590885, -9, 2, -2)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="SouthWallEast" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=617172025]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/SouthWallEast" unique_id=1849409877]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 2, -2)
-shape = SubResource("BoxShape3D_wall_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/SouthWallEast" unique_id=2071916514]
-transform = Transform3D(3.5, 0, 0, 0, 4, 0, 0, 0, 0.6, 9, 2, -2)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="WestWallNorth" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=903549422]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/WestWallNorth" unique_id=707721355]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 2, -11)
-shape = SubResource("BoxShape3D_wall_side_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/WestWallNorth" unique_id=211835874]
-transform = Transform3D(0.6, 0, 0, 0, 4, 0, 0, 0, 3, -15.5, 2, -11)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="WestWallSouth" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=1227042261]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/WestWallSouth" unique_id=1534916349]
-transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -15, 2, -4.5)
-shape = SubResource("BoxShape3D_wall_side")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/WestWallSouth" unique_id=1862401664]
-transform = Transform3D(0.579556, 0, 2.07055, 0, 4, 0, -0.155291, 0, 7.72741, -15, 2, -4.5)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="EastWallNorth" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=564402280]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/EastWallNorth" unique_id=70573295]
-transform = Transform3D(0.996195, 0, -0.0871557, 0, 1, 0, 0.0871557, 0, 0.996195, 15.5, 2, -10)
-shape = SubResource("BoxShape3D_wall_side")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/EastWallNorth" unique_id=1882431144]
-transform = Transform3D(0.597717, 0, -0.697246, 0, 4, 0, 0.0522934, 0, 7.96956, 15.5, 2, -10)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="EastWallSouth" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Walls" unique_id=549826488]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Walls/EastWallSouth" unique_id=1039108976]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.5, 2, -3)
-shape = SubResource("BoxShape3D_wall_side_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Walls/EastWallSouth" unique_id=1705102885]
-transform = Transform3D(0.6, 0, 0, 0, 4, 0, 0, 0, 3, 15.5, 2, -3)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="Rubble" type="Node3D" parent="Geometry/AbandonedResearchBuilding" unique_id=2106423923]
-
-[node name="CollapsedSectionNorth" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Rubble" unique_id=1126619629]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Rubble/CollapsedSectionNorth" unique_id=310263182]
-transform = Transform3D(0.906308, 0, -0.422618, 0, 1, 0, 0.422618, 0, 0.906308, 1.5, 0.6, -12.5)
-shape = SubResource("BoxShape3D_rubble")
-
-[node name="RubbleMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Rubble/CollapsedSectionNorth" unique_id=1131785375]
-transform = Transform3D(2.17514, 0, -0.676189, 0, 1.2, 0, 1.01428, 0, 1.45009, 1.5, 0.6, -12.5)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="CollapsedSectionEast" type="StaticBody3D" parent="Geometry/AbandonedResearchBuilding/Rubble" unique_id=1050216269]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedResearchBuilding/Rubble/CollapsedSectionEast" unique_id=31812750]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, 13.5, 0.6, -7)
-shape = SubResource("BoxShape3D_rubble")
-
-[node name="RubbleMesh" type="MeshInstance3D" parent="Geometry/AbandonedResearchBuilding/Rubble/CollapsedSectionEast" unique_id=1626635617]
-transform = Transform3D(1.96597, 0, 0.917722, 0, 1.2, 0, -1.37658, 0, 1.31064, 13.5, 0.6, -7)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="DamagedOutbuildings" type="Node3D" parent="Geometry" unique_id=1005292982]
-visible = false
-
-[node name="PowerShedWest" type="Node3D" parent="Geometry/DamagedOutbuildings" unique_id=1084050417]
-
-[node name="FloorSlab" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/PowerShedWest" unique_id=1121340199]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/FloorSlab" unique_id=1822756512]
-transform = Transform3D(0.5, 0, 0, 0, 1, 0, 0, 0, 0.5, -34, 0.1, 8)
-shape = SubResource("BoxShape3D_platform")
-
-[node name="FloorMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/FloorSlab" unique_id=149250670]
-transform = Transform3D(4, 0, 0, 0, 0.2, 0, 0, 0, 3, -34, 0.1, 8)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="NorthWall" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/PowerShedWest" unique_id=984335247]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/NorthWall" unique_id=799626630]
-transform = Transform3D(0.5, 0, 0, 0, 0.8, 0, 0, 0, 1, -34, 1.6, 4.8)
-shape = SubResource("BoxShape3D_wall_medium")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/NorthWall" unique_id=1737543514]
-transform = Transform3D(3, 0, 0, 0, 3.2, 0, 0, 0, 0.6, -34, 1.6, 4.8)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="WestWall" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/PowerShedWest" unique_id=1485635642]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/WestWall" unique_id=1923203137]
-transform = Transform3D(1, 0, 0, 0, 0.8, 0, 0, 0, 0.5, -38, 1.6, 8)
-shape = SubResource("BoxShape3D_wall_side_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/WestWall" unique_id=1325483184]
-transform = Transform3D(0.6, 0, 0, 0, 3.2, 0, 0, 0, 1.5, -38, 1.6, 8)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="CollapsedCorner" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/PowerShedWest" unique_id=844049160]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/CollapsedCorner" unique_id=1218297253]
-transform = Transform3D(0.906308, 0, -0.422618, 0, 1, 0, 0.422618, 0, 0.906308, -31.5, 0.6, 10.5)
-shape = SubResource("BoxShape3D_rubble")
-
-[node name="RubbleMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/PowerShedWest/CollapsedCorner" unique_id=141740907]
-transform = Transform3D(2.17514, 0, -0.676189, 0, 1.2, 0, 1.01428, 0, 1.45009, -31.5, 0.6, 10.5)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="WatchPostNorthEast" type="Node3D" parent="Geometry/DamagedOutbuildings" unique_id=625687032]
-
-[node name="FloorSlab" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast" unique_id=1562357111]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/FloorSlab" unique_id=714340582]
-transform = Transform3D(0.375, 0, 0, 0, 1, 0, 0, 0, 0.333333, 30, 0.1, -30)
-shape = SubResource("BoxShape3D_platform")
-
-[node name="FloorMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/FloorSlab" unique_id=1468512968]
-transform = Transform3D(3, 0, 0, 0, 0.2, 0, 0, 0, 2, 30, 0.1, -30)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="SouthWall" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast" unique_id=1233873667]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/SouthWall" unique_id=1790231039]
-transform = Transform3D(0.583333, 0, 0, 0, 0.75, 0, 0, 0, 1, 30, 1.5, -27.6)
-shape = SubResource("BoxShape3D_wall_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/SouthWall" unique_id=1446471816]
-transform = Transform3D(2.04167, 0, 0, 0, 3, 0, 0, 0, 0.6, 30, 1.5, -27.6)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="EastWall" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast" unique_id=188137229]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/EastWall" unique_id=1417386558]
-transform = Transform3D(1, 0, 0, 0, 0.75, 0, 0, 0, 0.375, 32.7, 1.5, -30)
-shape = SubResource("BoxShape3D_wall_side_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/EastWall" unique_id=848452912]
-transform = Transform3D(0.6, 0, 0, 0, 3, 0, 0, 0, 1.125, 32.7, 1.5, -30)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="Debris" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast" unique_id=2051610832]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/Debris" unique_id=224726247]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, 28.2, 0.6, -31.8)
-shape = SubResource("BoxShape3D_rubble")
-
-[node name="RubbleMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/WatchPostNorthEast/Debris" unique_id=1003208402]
-transform = Transform3D(1.96597, 0, 0.917722, 0, 1.2, 0, -1.37658, 0, 1.31064, 28.2, 0.6, -31.8)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="StorageRuinSouth" type="Node3D" parent="Geometry/DamagedOutbuildings" unique_id=137123393]
-
-[node name="FloorSlab" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth" unique_id=982534541]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/FloorSlab" unique_id=1563563817]
-transform = Transform3D(0.4375, 0, 0, 0, 1, 0, 0, 0, 0.416667, 20, 0.1, 36)
-shape = SubResource("BoxShape3D_platform")
-
-[node name="FloorMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/FloorSlab" unique_id=1529056340]
-transform = Transform3D(3.5, 0, 0, 0, 0.2, 0, 0, 0, 2.5, 20, 0.1, 36)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="NorthWall" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth" unique_id=53095806]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/NorthWall" unique_id=1774780849]
-transform = Transform3D(0.5, 0, 0, 0, 0.7, 0, 0, 0, 1, 20, 1.4, 33.4)
-shape = SubResource("BoxShape3D_wall_medium")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/NorthWall" unique_id=1468969602]
-transform = Transform3D(3, 0, 0, 0, 2.8, 0, 0, 0, 0.6, 20, 1.4, 33.4)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="WestWall" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth" unique_id=1703233145]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/WestWall" unique_id=2121564709]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 0.7, 0, -0.34202, 0, 0.939693, 16.8, 1.4, 36)
-shape = SubResource("BoxShape3D_wall_side_short")
-
-[node name="WallMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/WestWall" unique_id=1270140394]
-transform = Transform3D(0.563816, 0, 0.51303, 0, 2.8, 0, -0.205212, 0, 1.40954, 16.8, 1.4, 36)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="RubblePile" type="StaticBody3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth" unique_id=1744287445]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/RubblePile" unique_id=28687852]
-transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 22.4, 0.6, 38.1)
-shape = SubResource("BoxShape3D_rubble")
-
-[node name="RubbleMesh" type="MeshInstance3D" parent="Geometry/DamagedOutbuildings/StorageRuinSouth/RubblePile" unique_id=1710781840]
-transform = Transform3D(2.31822, 0, -0.41411, 0, 1.2, 0, 0.621166, 0, 1.54548, 22.4, 0.6, 38.1)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_building")
-
-[node name="DirtPaths" type="Node3D" parent="Geometry" unique_id=1173931350]
-
-[node name="FacilityToYard" type="StaticBody3D" parent="Geometry/DirtPaths" unique_id=1233075477]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DirtPaths/FacilityToYard" unique_id=1162537853]
-transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -4, 0.08, 8)
-shape = SubResource("BoxShape3D_path")
-
-[node name="PathMesh" type="MeshInstance3D" parent="Geometry/DirtPaths/FacilityToYard" unique_id=1014877602]
-transform = Transform3D(3.8637, 0, -7.76457, 0, 0.16, 0, 1.03528, 0, 28.9778, -4, 0.08, 8)
-mesh = SubResource("BoxMesh_path")
-surface_material_override/0 = SubResource("StandardMaterial3D_path")
-
-[node name="YardToPowerShed" type="StaticBody3D" parent="Geometry/DirtPaths" unique_id=1753916887]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DirtPaths/YardToPowerShed" unique_id=425510622]
-transform = Transform3D(0.838671, 0, 0.544639, 0, 1, 0, -0.544639, 0, 0.838671, -22, 0.08, 16)
-shape = SubResource("BoxShape3D_path")
-
-[node name="PathMesh" type="MeshInstance3D" parent="Geometry/DirtPaths/YardToPowerShed" unique_id=2071656509]
-transform = Transform3D(3.35468, 0, 16.3392, 0, 0.16, 0, -2.17856, 0, 25.1601, -22, 0.08, 16)
-mesh = SubResource("BoxMesh_path")
-surface_material_override/0 = SubResource("StandardMaterial3D_path")
-
-[node name="YardToWatchPost" type="StaticBody3D" parent="Geometry/DirtPaths" unique_id=128800152]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DirtPaths/YardToWatchPost" unique_id=1585414779]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 16, 0.08, -14)
-shape = SubResource("BoxShape3D_path")
-
-[node name="PathMesh" type="MeshInstance3D" parent="Geometry/DirtPaths/YardToWatchPost" unique_id=1484105793]
-transform = Transform3D(2.82843, 0, -21.2132, 0, 0.16, 0, 2.82843, 0, 21.2132, 16, 0.08, -14)
-mesh = SubResource("BoxMesh_path")
-surface_material_override/0 = SubResource("StandardMaterial3D_path")
-
-[node name="FacilityToStorage" type="StaticBody3D" parent="Geometry/DirtPaths" unique_id=877459782]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DirtPaths/FacilityToStorage" unique_id=268610789]
-transform = Transform3D(0.573576, 0, -0.819152, 0, 1, 0, 0.819152, 0, 0.573576, 10, 0.08, 24)
-shape = SubResource("BoxShape3D_path")
-
-[node name="PathMesh" type="MeshInstance3D" parent="Geometry/DirtPaths/FacilityToStorage" unique_id=2119818195]
-transform = Transform3D(2.2943, 0, -24.5746, 0, 0.16, 0, 3.27661, 0, 17.2073, 10, 0.08, 24)
-mesh = SubResource("BoxMesh_path")
-surface_material_override/0 = SubResource("StandardMaterial3D_path")
-
-[node name="StorageToPowerShed" type="StaticBody3D" parent="Geometry/DirtPaths" unique_id=23890090]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DirtPaths/StorageToPowerShed" unique_id=2120978301]
-transform = Transform3D(0.978148, 0, 0.207912, 0, 1, 0, -0.207912, 0, 0.978148, -8, 0.08, 28)
-shape = SubResource("BoxShape3D_path")
-
-[node name="PathMesh" type="MeshInstance3D" parent="Geometry/DirtPaths/StorageToPowerShed" unique_id=347302009]
-transform = Transform3D(3.91259, 0, 6.23737, 0, 0.16, 0, -0.831647, 0, 29.3444, -8, 0.08, 28)
-mesh = SubResource("BoxMesh_path")
-surface_material_override/0 = SubResource("StandardMaterial3D_path")
-
-[node name="WatchPostSpur" type="StaticBody3D" parent="Geometry/DirtPaths" unique_id=184711142]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/DirtPaths/WatchPostSpur" unique_id=514251661]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 26, 0.08, -24)
-shape = SubResource("BoxShape3D_path")
-
-[node name="PathMesh" type="MeshInstance3D" parent="Geometry/DirtPaths/WatchPostSpur" unique_id=1650027262]
-transform = Transform3D(3.75877, 0, 10.2606, 0, 0.16, 0, -1.36808, 0, 28.1908, 26, 0.08, -24)
-mesh = SubResource("BoxMesh_path")
-surface_material_override/0 = SubResource("StandardMaterial3D_path")
-
-[node name="FacilityPerimeterFence" type="Node3D" parent="Geometry" unique_id=1461127450]
-
-[node name="NorthFenceWest" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=77801285]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/NorthFenceWest" unique_id=860895098]
-transform = Transform3D(0.996195, 0, -0.0871557, 0, 1, 0, 0.0871557, 0, 0.996195, -14, 1.2, -20)
+[node name="MainBlockCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 3.5, 4)
+shape = SubResource("BoxShape3D_main_block")
+
+[node name="RearWingCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 3, -4)
+shape = SubResource("BoxShape3D_rear_wing")
+
+[node name="FrontOfficeCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.25, 0)
+shape = SubResource("BoxShape3D_front_office")
+
+[node name="GatehouseCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 1.6, 8)
+shape = SubResource("BoxShape3D_gatehouse")
+
+[node name="WarehouseCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.5, 24)
+shape = SubResource("BoxShape3D_warehouse")
+
+[node name="ShedACollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1.9, -26)
+shape = SubResource("BoxShape3D_shed_a")
+
+[node name="ShedBCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1.7, 28)
+shape = SubResource("BoxShape3D_shed_b")
+
+[node name="ServiceAnnexCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 2.3, -6)
+shape = SubResource("BoxShape3D_service_annex")
+
+[node name="LoadingBayCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.6, -30)
+shape = SubResource("BoxShape3D_loading_bay")
+
+[node name="TowerCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, -26)
+shape = SubResource("BoxShape3D_tower")
+
+[node name="NorthFenceCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -40)
 shape = SubResource("BoxShape3D_fence_long")
 
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/NorthFenceWest" unique_id=1996188719]
-transform = Transform3D(11.9543, 0, -0.0305045, 0, 2.4, 0, 1.04587, 0, 0.348668, -14, 1.2, -20)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="NorthFenceEast" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=475125953]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/NorthFenceEast" unique_id=713672449]
-transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 14, 1.2, -19)
-shape = SubResource("BoxShape3D_fence_medium")
-
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/NorthFenceEast" unique_id=88613102]
-transform = Transform3D(7.72741, 0, 0.0905868, 0, 2.4, 0, -2.07055, 0, 0.338074, 14, 1.2, -19)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="SouthFenceWest" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=1847555073]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/SouthFenceWest" unique_id=1286611948]
-transform = Transform3D(0.978148, 0, 0.207912, 0, 1, 0, -0.207912, 0, 0.978148, -16, 1.2, 18)
+[node name="SouthFenceCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 40)
 shape = SubResource("BoxShape3D_fence_long")
 
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/SouthFenceWest" unique_id=56267439]
-transform = Transform3D(11.7378, 0, 0.0727692, 0, 2.4, 0, -2.49494, 0, 0.342352, -16, 1.2, 18)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="SouthFenceEast" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=1058341336]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/SouthFenceEast" unique_id=275798767]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.2, 18)
-shape = SubResource("BoxShape3D_fence_medium")
-
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/SouthFenceEast" unique_id=630994486]
-transform = Transform3D(8, 0, 0, 0, 2.4, 0, 0, 0, 0.35, 14, 1.2, 18)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="WestFenceNorth" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=201817410]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/WestFenceNorth" unique_id=1382825986]
-transform = Transform3D(0.996195, 0, 0.0871557, 0, 1, 0, -0.0871557, 0, 0.996195, -24, 1.2, -12)
-shape = SubResource("BoxShape3D_fence_side")
-
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/WestFenceNorth" unique_id=1318890633]
-transform = Transform3D(0.348668, 0, 0.0305045, 0, 2.4, 0, -0.871557, 0, 9.96195, -24, 1.2, -12)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="WestFenceSouth" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=643293364]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/WestFenceSouth" unique_id=310558953]
-transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -22, 1.2, 9)
-shape = SubResource("BoxShape3D_fence_side_short")
-
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/WestFenceSouth" unique_id=686992273]
-transform = Transform3D(0.338074, 0, -0.0905868, 0, 2.4, 0, 1.2941, 0, 4.82963, -22, 1.2, 9)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="EastFenceNorth" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=638977392]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/EastFenceNorth" unique_id=1714993049]
-transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 24, 1.2, -13)
-shape = SubResource("BoxShape3D_fence_side")
-
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/EastFenceNorth" unique_id=2117595312]
-transform = Transform3D(0.344683, 0, -0.0607769, 0, 2.4, 0, 1.73648, 0, 9.84808, 24, 1.2, -13)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="EastFenceMid" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=1205514330]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/EastFenceMid" unique_id=2137655186]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.2, 6)
-shape = SubResource("BoxShape3D_fence_side_short")
-
-[node name="FenceMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/EastFenceMid" unique_id=980612361]
-transform = Transform3D(0.35, 0, 0, 0, 2.4, 0, 0, 0, 5, 24, 1.2, 6)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="CollapsedFenceWest" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=2104761149]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/CollapsedFenceWest" unique_id=1288927131]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, -18, 0.5, -18)
-shape = SubResource("BoxShape3D_rubble")
-
-[node name="RubbleMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/CollapsedFenceWest" unique_id=533491231]
-transform = Transform3D(1.96597, 0, 0.917722, 0, 1.1, 0, -1.37658, 0, 1.31064, -18, 0.5, -18)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="CollapsedFenceEast" type="StaticBody3D" parent="Geometry/FacilityPerimeterFence" unique_id=315228840]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/FacilityPerimeterFence/CollapsedFenceEast" unique_id=2075866675]
-transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 20, 0.5, 16)
-shape = SubResource("BoxShape3D_rubble")
-
-[node name="RubbleMesh" type="MeshInstance3D" parent="Geometry/FacilityPerimeterFence/CollapsedFenceEast" unique_id=703825569]
-transform = Transform3D(2.25526, 0, -0.547232, 0, 1.1, 0, 0.820848, 0, 1.50348, 20, 0.5, 16)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_fence")
-
-[node name="NavigationLandmarks" type="Node3D" parent="Geometry" unique_id=385335659]
-
-[node name="RadioTower" type="Node3D" parent="Geometry/NavigationLandmarks" unique_id=329083810]
-
-[node name="LegNorthWest" type="StaticBody3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=1222635027]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/RadioTower/LegNorthWest" unique_id=498623785]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 7, -42)
-shape = SubResource("BoxShape3D_tower_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower/LegNorthWest" unique_id=594113005]
-transform = Transform3D(0.45, 0, 0, 0, 14, 0, 0, 0, 0.45, -10, 7, -42)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="LegNorthEast" type="StaticBody3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=1828674872]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/RadioTower/LegNorthEast" unique_id=1781192667]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 7, -42)
-shape = SubResource("BoxShape3D_tower_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower/LegNorthEast" unique_id=124573031]
-transform = Transform3D(0.45, 0, 0, 0, 14, 0, 0, 0, 0.45, -4, 7, -42)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="LegSouthWest" type="StaticBody3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=234599912]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/RadioTower/LegSouthWest" unique_id=1057370922]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 7, -36)
-shape = SubResource("BoxShape3D_tower_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower/LegSouthWest" unique_id=1838908097]
-transform = Transform3D(0.45, 0, 0, 0, 14, 0, 0, 0, 0.45, -10, 7, -36)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="LegSouthEast" type="StaticBody3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=1459961576]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/RadioTower/LegSouthEast" unique_id=1689180486]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 7, -36)
-shape = SubResource("BoxShape3D_tower_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower/LegSouthEast" unique_id=83942065]
-transform = Transform3D(0.45, 0, 0, 0, 14, 0, 0, 0, 0.45, -4, 7, -36)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="CrossbeamTop" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=343921095]
-transform = Transform3D(7, 0, 0, 0, 0.3, 0, 0, 0, 0.3, -7, 13.2, -39)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="CrossbeamMid" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=1923170126]
-transform = Transform3D(7, 0, 0, 0, 0.3, 0, 0, 0, 0.3, -7, 7.5, -39)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="CrossbeamSide" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=389995069]
-transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 7, -7, 10.3, -39)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="Dish" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/RadioTower" unique_id=257788344]
-transform = Transform3D(1.2, 0, 0, 0, 0.45, -1.1, 0, 1.1, 0.45, -7.5, 14.8, -38.5)
-mesh = SubResource("SphereMesh_radio_dish")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_warning")
-
-[node name="WaterTank" type="Node3D" parent="Geometry/NavigationLandmarks" unique_id=1320303613]
-
-[node name="LegNorthWest" type="StaticBody3D" parent="Geometry/NavigationLandmarks/WaterTank" unique_id=132649554]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/WaterTank/LegNorthWest" unique_id=1678954623]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 3, 30)
-shape = SubResource("BoxShape3D_water_tank_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/WaterTank/LegNorthWest" unique_id=337954829]
-transform = Transform3D(0.5, 0, 0, 0, 6, 0, 0, 0, 0.5, 34, 3, 30)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="LegNorthEast" type="StaticBody3D" parent="Geometry/NavigationLandmarks/WaterTank" unique_id=584745204]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/WaterTank/LegNorthEast" unique_id=737921484]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 3, 30)
-shape = SubResource("BoxShape3D_water_tank_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/WaterTank/LegNorthEast" unique_id=777408497]
-transform = Transform3D(0.5, 0, 0, 0, 6, 0, 0, 0, 0.5, 38, 3, 30)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="LegSouthWest" type="StaticBody3D" parent="Geometry/NavigationLandmarks/WaterTank" unique_id=289179722]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/WaterTank/LegSouthWest" unique_id=1493143700]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 3, 34)
-shape = SubResource("BoxShape3D_water_tank_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/WaterTank/LegSouthWest" unique_id=522910532]
-transform = Transform3D(0.5, 0, 0, 0, 6, 0, 0, 0, 0.5, 34, 3, 34)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="LegSouthEast" type="StaticBody3D" parent="Geometry/NavigationLandmarks/WaterTank" unique_id=1898188573]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/WaterTank/LegSouthEast" unique_id=630322573]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 3, 34)
-shape = SubResource("BoxShape3D_water_tank_leg")
-
-[node name="LegMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/WaterTank/LegSouthEast" unique_id=549628372]
-transform = Transform3D(0.5, 0, 0, 0, 6, 0, 0, 0, 0.5, 38, 3, 34)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="Tank" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/WaterTank" unique_id=1533453801]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 7.4, 32)
-mesh = SubResource("CylinderMesh_water_tank")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="CrashedVehicle" type="Node3D" parent="Geometry/NavigationLandmarks" unique_id=980561856]
-
-[node name="VehicleBody" type="StaticBody3D" parent="Geometry/NavigationLandmarks/CrashedVehicle" unique_id=799377072]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/CrashedVehicle/VehicleBody" unique_id=1125285327]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -40, 0.55, -8)
-shape = SubResource("BoxShape3D_vehicle_body")
-
-[node name="BodyMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/CrashedVehicle/VehicleBody" unique_id=2022117066]
-transform = Transform3D(3.08145, 0, 0.760712, 0, 1.1, 0, -1.4369, 0, 1.63135, -40, 0.55, -8)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_warning")
-
-[node name="VehicleCabin" type="StaticBody3D" parent="Geometry/NavigationLandmarks/CrashedVehicle" unique_id=1291198212]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/NavigationLandmarks/CrashedVehicle/VehicleCabin" unique_id=1491956604]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, -38.5, 1.45, -8.4)
-shape = SubResource("BoxShape3D_vehicle_cabin")
-
-[node name="CabinMesh" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/CrashedVehicle/VehicleCabin" unique_id=106902859]
-transform = Transform3D(1.31064, 0, 0.917722, 0, 1, 0, -0.917722, 0, 1.31064, -38.5, 1.45, -8.4)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="Debris" type="MeshInstance3D" parent="Geometry/NavigationLandmarks/CrashedVehicle" unique_id=349775308]
-transform = Transform3D(2.17514, 0, -0.676189, 0, 0.9, 0, 1.01428, 0, 1.45009, -42.5, 0.35, -6.5)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_warning")
-
-[node name="AbandonedBrokenCars" type="Node3D" parent="Geometry" unique_id=1356217850]
-
-[node name="SedanNearMainBuilding" type="Node3D" parent="Geometry/AbandonedBrokenCars" unique_id=1598273221]
-
-[node name="VehicleBody" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/SedanNearMainBuilding" unique_id=8556263]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/SedanNearMainBuilding/VehicleBody" unique_id=1081966960]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1, 0, 0.573576, 0, 0.819152, 20, 0.5, -6)
-shape = SubResource("BoxShape3D_vehicle_body")
-
-[node name="BodyMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/SedanNearMainBuilding/VehicleBody" unique_id=1781084973]
-transform = Transform3D(2.78512, 0, -1.03244, 0, 1, 0, 1.95198, 0, 1.47447, 20, 0.38, -6)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_rust")
-
-[node name="VehicleCabin" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/SedanNearMainBuilding" unique_id=246407772]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/SedanNearMainBuilding/VehicleCabin" unique_id=1915970070]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 21.2, 1.22, -6.3)
-shape = SubResource("BoxShape3D_vehicle_cabin")
-
-[node name="CabinMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/SedanNearMainBuilding/VehicleCabin" unique_id=1988242611]
-transform = Transform3D(1.13137, 0, -1.13137, 0, 0.92, 0, 1.13137, 0, 1.13137, 21.2, 1.08, -6.3)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_dark_rust")
-
-[node name="Debris" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/SedanNearMainBuilding" unique_id=737826478]
-transform = Transform3D(1.6383, 0, 1.14715, 0, 0.7, 0, -0.860364, 0, 1.22873, 18.1, 0.28, -4.7)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="UtilityCarNearWatchPost" type="Node3D" parent="Geometry/AbandonedBrokenCars" unique_id=1309102557]
-
-[node name="VehicleBody" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/UtilityCarNearWatchPost" unique_id=1224192189]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/UtilityCarNearWatchPost/VehicleBody" unique_id=245538174]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 24.5, 0.45, -25.5)
-shape = SubResource("BoxShape3D_vehicle_body")
-
-[node name="BodyMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/UtilityCarNearWatchPost/VehicleBody" unique_id=621521194]
-transform = Transform3D(3.19496, 0, 0.615636, 0, 0.95, 0, -1.16287, 0, 1.69145, 24.5, 0.34, -25.5)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_rust")
-
-[node name="VehicleCabin" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/UtilityCarNearWatchPost" unique_id=2091321366]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/UtilityCarNearWatchPost/VehicleCabin" unique_id=684979067]
-transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 25.9, 1.18, -25.1)
-shape = SubResource("BoxShape3D_vehicle_cabin")
-
-[node name="CabinMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/UtilityCarNearWatchPost/VehicleCabin" unique_id=1331787500]
-transform = Transform3D(1.38564, 0, 0.8, 0, 0.88, 0, -0.8, 0, 1.38564, 25.9, 1.02, -25.1)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_dark_rust")
-
-[node name="Debris" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/UtilityCarNearWatchPost" unique_id=1873303813]
-transform = Transform3D(1.72073, 0, -0.625738, 0, 0.68, 0, 0.45581, 0, 1.25217, 22.7, 0.24, -23.7)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_warning")
-
-[node name="PickupNearStorageRuin" type="Node3D" parent="Geometry/AbandonedBrokenCars" unique_id=1471877101]
-
-[node name="VehicleBody" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/PickupNearStorageRuin" unique_id=1162613892]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/PickupNearStorageRuin/VehicleBody" unique_id=2141634580]
-transform = Transform3D(0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, 0.766044, 26, 0.48, 31)
-shape = SubResource("BoxShape3D_vehicle_body")
-
-[node name="BodyMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/PickupNearStorageRuin/VehicleBody" unique_id=724324505]
-transform = Transform3D(2.60455, 0, 1.15702, 0, 1.02, 0, -2.18548, 0, 1.37888, 26, 0.34, 31)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_rust")
-
-[node name="VehicleCabin" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/PickupNearStorageRuin" unique_id=1685502867]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/PickupNearStorageRuin/VehicleCabin" unique_id=1075633840]
-transform = Transform3D(0.642788, 0, 0.766044, 0, 1, 0, -0.766044, 0, 0.642788, 27.3, 1.2, 31.2)
-shape = SubResource("BoxShape3D_vehicle_cabin")
-
-[node name="CabinMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/PickupNearStorageRuin/VehicleCabin" unique_id=871884262]
-transform = Transform3D(1.02846, 0, 1.22567, 0, 0.9, 0, -1.22567, 0, 1.02846, 27.3, 1.05, 31.2)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_dark_rust")
-
-[node name="Debris" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/PickupNearStorageRuin" unique_id=1615923375]
-transform = Transform3D(1.87939, 0, 0.68404, 0, 0.72, 0, -0.51303, 0, 1.40954, 24.2, 0.26, 32.8)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_landmark_metal")
-
-[node name="VanWestTreeline" type="Node3D" parent="Geometry/AbandonedBrokenCars" unique_id=2065128858]
-
-[node name="VehicleBody" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/VanWestTreeline" unique_id=1221780031]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/VanWestTreeline/VehicleBody" unique_id=2135036754]
-transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -47, 0.42, -22)
-shape = SubResource("BoxShape3D_vehicle_body")
-
-[node name="BodyMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/VanWestTreeline/VehicleBody" unique_id=1535916686]
-transform = Transform3D(3.28415, 0, 0.465874, 0, 0.92, 0, -0.880004, 0, 1.73867, -47, 0.28, -22)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_rust")
-
-[node name="VehicleCabin" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/VanWestTreeline" unique_id=1435364962]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/VanWestTreeline/VehicleCabin" unique_id=164966681]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -45.5, 1.02, -21.7)
-shape = SubResource("BoxShape3D_vehicle_cabin")
-
-[node name="CabinMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/VanWestTreeline/VehicleCabin" unique_id=1761114987]
-transform = Transform3D(1.45009, 0, 0.676189, 0, 0.86, 0, -0.676189, 0, 1.45009, -45.5, 0.92, -21.7)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_dark_rust")
-
-[node name="Debris" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/VanWestTreeline" unique_id=1862820054]
-transform = Transform3D(1.26785, 0, -0.739528, 0, 0.62, 0, 0.547233, 0, 0.939693, -49.6, 0.22, -20.4)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_dark_rust")
-
-[node name="HatchbackFarSouth" type="Node3D" parent="Geometry/AbandonedBrokenCars" unique_id=658741836]
-
-[node name="VehicleBody" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/HatchbackFarSouth" unique_id=751516566]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/HatchbackFarSouth/VehicleBody" unique_id=938717321]
-transform = Transform3D(0.996195, 0, -0.0871557, 0, 1, 0, 0.0871557, 0, 0.996195, -6, 0.4, 49)
-shape = SubResource("BoxShape3D_vehicle_body")
-
-[node name="BodyMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/HatchbackFarSouth/VehicleBody" unique_id=1525680341]
-transform = Transform3D(3.38706, 0, -0.15688, 0, 0.88, 0, 0.296329, 0, 1.79315, -6, 0.26, 49)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_rust")
-
-[node name="VehicleCabin" type="StaticBody3D" parent="Geometry/AbandonedBrokenCars/HatchbackFarSouth" unique_id=1327819028]
-collision_layer = 4
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Geometry/AbandonedBrokenCars/HatchbackFarSouth/VehicleCabin" unique_id=2048811731]
-transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -4.5, 0.98, 48.6)
-shape = SubResource("BoxShape3D_vehicle_cabin")
-
-[node name="CabinMesh" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/HatchbackFarSouth/VehicleCabin" unique_id=1764933684]
-transform = Transform3D(1.54548, 0, -0.41411, 0, 0.82, 0, 0.41411, 0, 1.54548, -4.5, 0.88, 48.6)
-mesh = SubResource("BoxMesh_building")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_dark_rust")
-
-[node name="Debris" type="MeshInstance3D" parent="Geometry/AbandonedBrokenCars/HatchbackFarSouth" unique_id=1833364860]
-transform = Transform3D(1.28758, 0, 0.469846, 0, 0.56, 0, -0.34202, 0, 0.939693, -8.8, 0.18, 50.1)
-mesh = SubResource("BoxMesh_rubble")
-surface_material_override/0 = SubResource("StandardMaterial3D_vehicle_dark_rust")
-
-[node name="GrassClusters" type="Node3D" parent="Geometry" unique_id=1159632648]
-
-[node name="EdgeNorthWest01" type="Node3D" parent="Geometry/GrassClusters" unique_id=585424815]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -48, 0, -42)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthWest01" unique_id=1618693748]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthWest01" unique_id=2056490805]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.2, 0.8, -0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeNorthWest02" type="Node3D" parent="Geometry/GrassClusters" unique_id=1180175778]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -44)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthWest02" unique_id=105981718]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthWest02" unique_id=1136435920]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1, 0, 0.573576, 0, 0.819152, -0.15, 0.8, 0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeNorthCenter" type="Node3D" parent="Geometry/GrassClusters" unique_id=1887722515]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 6, 0, -46)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthCenter" unique_id=825528499]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthCenter" unique_id=566206179]
-transform = Transform3D(0.642788, 0, -0.766044, 0, 1, 0, 0.766044, 0, 0.642788, 0.1, 0.8, 0.15)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeNorthEast01" type="Node3D" parent="Geometry/GrassClusters" unique_id=63403710]
-transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 40, 0, -42)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthEast01" unique_id=523991575]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthEast01" unique_id=407567094]
-transform = Transform3D(0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, 0.766044, -0.1, 0.8, 0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeNorthEast02" type="Node3D" parent="Geometry/GrassClusters" unique_id=763438398]
-transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, 52, 0, -30)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthEast02" unique_id=413020285]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeNorthEast02" unique_id=558926016]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.15, 0.8, -0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeWest01" type="Node3D" parent="Geometry/GrassClusters" unique_id=174403619]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, -50, 0, -10)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeWest01" unique_id=1362001219]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeWest01" unique_id=1919234925]
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -0.12, 0.8, 0.08)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeWest02" type="Node3D" parent="Geometry/GrassClusters" unique_id=583070856]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 0, 28)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeWest02" unique_id=1301076218]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeWest02" unique_id=267529112]
-transform = Transform3D(0.642788, 0, -0.766044, 0, 1, 0, 0.766044, 0, 0.642788, 0.1, 0.8, 0.14)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeSouthWest" type="Node3D" parent="Geometry/GrassClusters" unique_id=583801829]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -30, 0, 46)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeSouthWest" unique_id=717992100]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeSouthWest" unique_id=532492989]
-transform = Transform3D(0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, 0.766044, -0.1, 0.8, -0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeSouthCenter" type="Node3D" parent="Geometry/GrassClusters" unique_id=1443259096]
-transform = Transform3D(1.05, 0, 0, 0, 1.05, 0, 0, 0, 1.05, 4, 0, 48)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeSouthCenter" unique_id=1504213505]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeSouthCenter" unique_id=213171535]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.15, 0.8, 0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeSouthEast" type="Node3D" parent="Geometry/GrassClusters" unique_id=1040914562]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 34, 0, 44)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeSouthEast" unique_id=36392869]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeSouthEast" unique_id=56534009]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1, 0, 0.573576, 0, 0.819152, -0.1, 0.8, 0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeEast01" type="Node3D" parent="Geometry/GrassClusters" unique_id=110994901]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0, 12)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeEast01" unique_id=531606634]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeEast01" unique_id=39362015]
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 0.1, 0.8, -0.08)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EdgeEast02" type="Node3D" parent="Geometry/GrassClusters" unique_id=1023862471]
-transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, 46, 0, -8)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeEast02" unique_id=1433719898]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/EdgeEast02" unique_id=1695970590]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -0.12, 0.8, 0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="InnerSparseWest" type="Node3D" parent="Geometry/GrassClusters" unique_id=72506723]
-transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, -18, 0, 12)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/InnerSparseWest" unique_id=2034004689]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/InnerSparseWest" unique_id=1123459792]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1, 0, 0.573576, 0, 0.819152, 0.08, 0.8, -0.06)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="InnerSparseEast" type="Node3D" parent="Geometry/GrassClusters" unique_id=382464671]
-transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 18, 0, -6)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/GrassClusters/InnerSparseEast" unique_id=640600874]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/GrassClusters/InnerSparseEast" unique_id=1990893688]
-transform = Transform3D(0.642788, 0, -0.766044, 0, 1, 0, 0.766044, 0, 0.642788, -0.08, 0.8, 0.05)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BushShrubs" type="Node3D" parent="Geometry" unique_id=302330843]
-
-[node name="MainBuildingNorthRubble" type="Node3D" parent="Geometry/BushShrubs" unique_id=396019067]
-transform = Transform3D(1.1, 0, 0, 0, 0.9, 0, 0, 0, 1.1, 3.5, 0, -15.8)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/MainBuildingNorthRubble" unique_id=1166662191]
-transform = Transform3D(1, 0, 0, 0, 0.85, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/MainBuildingNorthRubble" unique_id=2006700740]
-transform = Transform3D(0.75, 0, -0.433013, 0, 0.7, 0, 0.433013, 0, 0.75, 1.2, 0.6, 0.4)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="MainBuildingWestEdge" type="Node3D" parent="Geometry/BushShrubs" unique_id=1954732623]
-transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, -19, 0, -5)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/MainBuildingWestEdge" unique_id=5634870]
-transform = Transform3D(0.95, 0, 0, 0, 0.82, 0, 0, 0, 0.95, 0, 0.95, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/MainBuildingWestEdge" unique_id=1778904662]
-transform = Transform3D(0.6, 0, 0.34641, 0, 0.62, 0, -0.34641, 0, 0.6, -1.1, 0.55, 0.7)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="PowerShedCollapsedCorner" type="Node3D" parent="Geometry/BushShrubs" unique_id=96930662]
-transform = Transform3D(0.866025, 0, 0.5, 0, 1.05, 0, -0.5, 0, 0.866025, -30.5, 0, 11.5)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/PowerShedCollapsedCorner" unique_id=1657736387]
-transform = Transform3D(1.05, 0, 0, 0, 0.88, 0, 0, 0, 1.05, 0, 1.05, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/PowerShedCollapsedCorner" unique_id=1272389485]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 0.7, 0, 0.707107, 0, 0.707107, 1.1, 0.58, -0.3)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="WatchPostDebrisPatch" type="Node3D" parent="Geometry/BushShrubs" unique_id=1767883291]
-transform = Transform3D(0.965926, 0, 0.258819, 0, 0.95, 0, -0.258819, 0, 0.965926, 26.2, 0, -33)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/WatchPostDebrisPatch" unique_id=522513503]
-transform = Transform3D(0.9, 0, 0, 0, 0.78, 0, 0, 0, 0.9, 0, 0.92, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/WatchPostDebrisPatch" unique_id=1255500638]
-transform = Transform3D(0.573576, 0, -0.819152, 0, 0.66, 0, 0.819152, 0, 0.573576, -0.9, 0.52, 0.8)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="StorageRuinRubblePatch" type="Node3D" parent="Geometry/BushShrubs" unique_id=1379695282]
-transform = Transform3D(1.05, 0, 0, 0, 0.92, 0, 0, 0, 1.05, 24.5, 0, 39.8)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/StorageRuinRubblePatch" unique_id=1584864261]
-transform = Transform3D(1, 0, 0, 0, 0.84, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/StorageRuinRubblePatch" unique_id=1752589177]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 0.68, 0, -0.573576, 0, 0.819152, -1.2, 0.55, 0.4)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="NorthWestEdgeCluster" type="Node3D" parent="Geometry/BushShrubs" unique_id=679687494]
-transform = Transform3D(1.2, 0, 0, 0, 1.05, 0, 0, 0, 1.2, -44, 0, -36)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/NorthWestEdgeCluster" unique_id=812122995]
-transform = Transform3D(1, 0, 0, 0, 0.82, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/NorthWestEdgeCluster" unique_id=1642284322]
-transform = Transform3D(0.642788, 0, -0.766044, 0, 0.7, 0, 0.766044, 0, 0.642788, 1.4, 0.55, -0.2)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="EastSlopeCluster" type="Node3D" parent="Geometry/BushShrubs" unique_id=1156981540]
-transform = Transform3D(0.95, 0, 0, 0, 0.88, 0, 0, 0, 0.95, 44, 0, 14)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/EastSlopeCluster" unique_id=1119308360]
-transform = Transform3D(0.92, 0, 0, 0, 0.76, 0, 0, 0, 0.92, 0, 0.9, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/EastSlopeCluster" unique_id=963992598]
-transform = Transform3D(0.766044, 0, 0.642788, 0, 0.64, 0, -0.642788, 0, 0.766044, -1.1, 0.5, 0.5)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="SouthWestEdgeCluster" type="Node3D" parent="Geometry/BushShrubs" unique_id=1275767777]
-transform = Transform3D(1.1, 0, 0, 0, 0.96, 0, 0, 0, 1.1, -36, 0, 40)
-
-[node name="BushA" type="MeshInstance3D" parent="Geometry/BushShrubs/SouthWestEdgeCluster" unique_id=252376811]
-transform = Transform3D(0.96, 0, 0, 0, 0.8, 0, 0, 0, 0.96, 0, 0.95, 0)
-mesh = SubResource("SphereMesh_shrub_round")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="BushB" type="MeshInstance3D" parent="Geometry/BushShrubs/SouthWestEdgeCluster" unique_id=874046757]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 0.66, 0, 0.707107, 0, 0.707107, 1, 0.54, -0.4)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="VehicleOvergrowth" type="Node3D" parent="Geometry" unique_id=1665583911]
-
-[node name="SedanDecayPatch" type="Node3D" parent="Geometry/VehicleOvergrowth" unique_id=358292118]
-transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 20.2, 0, -5.9)
-
-[node name="GrassA" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/SedanDecayPatch" unique_id=1153138743]
-transform = Transform3D(0.9, 0, 0, 0, 0.95, 0, 0, 0, 0.9, -1.3, 0.75, 0.4)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassB" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/SedanDecayPatch" unique_id=931447871]
-transform = Transform3D(0.537401, 0, -0.68944, 0, 1.05, 0, 0.68944, 0, 0.537401, 1.1, 0.82, -0.6)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassC" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/SedanDecayPatch" unique_id=330642218]
-transform = Transform3D(0.68944, 0, 0.578509, 0, 0.88, 0, -0.578509, 0, 0.68944, 0.4, 0.7, 1.2)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="Shrub" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/SedanDecayPatch" unique_id=1569794806]
-transform = Transform3D(0.72, 0, 0, 0, 0.62, 0, 0, 0, 0.72, -0.9, 0.55, 1.1)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="WatchPostDecayPatch" type="Node3D" parent="Geometry/VehicleOvergrowth" unique_id=1161055631]
-transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 24.8, 0, -25.2)
-
-[node name="GrassA" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/WatchPostDecayPatch" unique_id=1353192818]
-transform = Transform3D(0.82, 0, 0, 0, 0.92, 0, 0, 0, 0.82, -1.1, 0.74, 0.6)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassB" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/WatchPostDecayPatch" unique_id=1094584296]
-transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, 1.2, 0.8, 0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassC" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/WatchPostDecayPatch" unique_id=721422881]
-transform = Transform3D(0.728115, 0, 0.529007, 0, 0.86, 0, -0.529007, 0, 0.728115, 0.1, 0.68, -1.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="Shrub" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/WatchPostDecayPatch" unique_id=1870471113]
-transform = Transform3D(0.68, 0, 0, 0, 0.58, 0, 0, 0, 0.68, -0.8, 0.52, -0.9)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="StorageDecayPatch" type="Node3D" parent="Geometry/VehicleOvergrowth" unique_id=1451588550]
-transform = Transform3D(0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, 0.766044, 26.1, 0, 31.3)
-
-[node name="GrassA" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/StorageDecayPatch" unique_id=1575048887]
-transform = Transform3D(0.86, 0, 0, 0, 0.96, 0, 0, 0, 0.86, -1.2, 0.76, 0.2)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassB" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/StorageDecayPatch" unique_id=67758078]
-transform = Transform3D(0.642788, 0, -0.766044, 0, 1.08, 0, 0.766044, 0, 0.642788, 0.9, 0.84, -0.5)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassC" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/StorageDecayPatch" unique_id=234357651]
-transform = Transform3D(0.573576, 0, 0.819152, 0, 0.9, 0, -0.819152, 0, 0.573576, 0.3, 0.72, 1.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="Shrub" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/StorageDecayPatch" unique_id=1053681260]
-transform = Transform3D(0.74, 0, 0, 0, 0.6, 0, 0, 0, 0.74, 1.1, 0.54, 0.9)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="VanDecayPatch" type="Node3D" parent="Geometry/VehicleOvergrowth" unique_id=1325485835]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -46.7, 0, -21.4)
-
-[node name="GrassA" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/VanDecayPatch" unique_id=50048884]
-transform = Transform3D(0.88, 0, 0, 0, 0.98, 0, 0, 0, 0.88, -1.4, 0.78, 0.5)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassB" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/VanDecayPatch" unique_id=1611498867]
-transform = Transform3D(0.422618, 0, -0.906308, 0, 1.12, 0, 0.906308, 0, 0.422618, 1.2, 0.86, -0.3)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassC" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/VanDecayPatch" unique_id=274078863]
-transform = Transform3D(0.694658, 0, 0.438371, 0, 0.82, 0, -0.438371, 0, 0.694658, 0.3, 0.7, 1.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="Shrub" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/VanDecayPatch" unique_id=572209639]
-transform = Transform3D(0.8, 0, 0, 0, 0.66, 0, 0, 0, 0.8, -0.7, 0.58, 1.2)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="HatchbackDecayPatch" type="Node3D" parent="Geometry/VehicleOvergrowth" unique_id=1655382293]
-transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, -6.4, 0, 49.4)
-
-[node name="GrassA" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/HatchbackDecayPatch" unique_id=1083606793]
-transform = Transform3D(0.9, 0, 0, 0, 1.04, 0, 0, 0, 0.9, -1.1, 0.8, 0.2)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassB" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/HatchbackDecayPatch" unique_id=997696032]
-transform = Transform3D(0.573576, 0, -0.819152, 0, 1.08, 0, 0.819152, 0, 0.573576, 1.4, 0.86, -0.2)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="GrassC" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/HatchbackDecayPatch" unique_id=1659912553]
-transform = Transform3D(0.766044, 0, 0.642788, 0, 0.84, 0, -0.642788, 0, 0.766044, 0.2, 0.68, 1.3)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="Shrub" type="MeshInstance3D" parent="Geometry/VehicleOvergrowth/HatchbackDecayPatch" unique_id=1476437028]
-transform = Transform3D(0.78, 0, 0, 0, 0.64, 0, 0, 0, 0.78, 0.9, 0.56, 1)
-mesh = SubResource("SphereMesh_shrub_low")
-surface_material_override/0 = SubResource("StandardMaterial3D_shrub")
-
-[node name="TreeGroups" type="Node3D" parent="Geometry" unique_id=376367147]
-
-[node name="NorthWestGroveA" type="Node3D" parent="Geometry/TreeGroups" unique_id=936002345]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -56, 0, -48)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthWestGroveA" unique_id=2129777981]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthWestGroveA" unique_id=960441015]
-transform = Transform3D(1.1, 0, 0, 0, 1.2, 0, 0, 0, 1.1, 0, 5.2, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="NorthWestGroveB" type="Node3D" parent="Geometry/TreeGroups" unique_id=909204853]
-transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, -50, 0, -38)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthWestGroveB" unique_id=1895800379]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthWestGroveB" unique_id=538128254]
-transform = Transform3D(1, 0, 0, 0, 1.05, 0, 0, 0, 1, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="NorthEastGroveA" type="Node3D" parent="Geometry/TreeGroups" unique_id=1781926562]
-transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 54, 0, -46)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthEastGroveA" unique_id=2136006411]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthEastGroveA" unique_id=487225871]
-transform = Transform3D(1.1, 0, 0, 0, 1.15, 0, 0, 0, 1.1, 0, 5.15, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="NorthEastGroveB" type="Node3D" parent="Geometry/TreeGroups" unique_id=186784687]
-transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 46, 0, -36)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthEastGroveB" unique_id=1079993088]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/NorthEastGroveB" unique_id=1344506483]
-transform = Transform3D(0.95, 0, 0, 0, 1, 0, 0, 0, 0.95, 0, 4.8, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="SouthWestGroveA" type="Node3D" parent="Geometry/TreeGroups" unique_id=814025390]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, -44, 0, 50)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/SouthWestGroveA" unique_id=212224059]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/SouthWestGroveA" unique_id=858541025]
-transform = Transform3D(1.05, 0, 0, 0, 1.1, 0, 0, 0, 1.05, 0, 5.05, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="SouthEastGroveA" type="Node3D" parent="Geometry/TreeGroups" unique_id=1761633747]
-transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 48, 0, 46)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/SouthEastGroveA" unique_id=1336420453]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/SouthEastGroveA" unique_id=1027661937]
-transform = Transform3D(1.1, 0, 0, 0, 1.15, 0, 0, 0, 1.1, 0, 5.1, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="InteriorScatteredNorth" type="Node3D" parent="Geometry/TreeGroups" unique_id=268785097]
-transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, -22, 0, -26)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/InteriorScatteredNorth" unique_id=1897741169]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/InteriorScatteredNorth" unique_id=420188671]
-transform = Transform3D(0.95, 0, 0, 0, 1, 0, 0, 0, 0.95, 0, 4.85, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="InteriorScatteredSouth" type="Node3D" parent="Geometry/TreeGroups" unique_id=1615213399]
-transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 26, 0, 24)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/InteriorScatteredSouth" unique_id=1573717831]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/InteriorScatteredSouth" unique_id=1869519509]
-transform = Transform3D(0.9, 0, 0, 0, 0.95, 0, 0, 0, 0.9, 0, 4.75, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="InteriorScatteredWest" type="Node3D" parent="Geometry/TreeGroups" unique_id=965493750]
-transform = Transform3D(0.75, 0, 0, 0, 0.75, 0, 0, 0, 0.75, -30, 0, 18)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/TreeGroups/InteriorScatteredWest" unique_id=53127735]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/TreeGroups/InteriorScatteredWest" unique_id=1941731668]
-transform = Transform3D(0.88, 0, 0, 0, 0.92, 0, 0, 0, 0.88, 0, 4.7, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="DeadTrees" type="Node3D" parent="Geometry" unique_id=1887869660]
-
-[node name="DeadTreeNorth" type="Node3D" parent="Geometry/DeadTrees" unique_id=818651589]
-transform = Transform3D(0.906308, 0, -0.422618, 0, 1.05, 0, 0.422618, 0, 0.906308, 18, 0, -24)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeNorth" unique_id=327365407]
-transform = Transform3D(1, 0, 0, 0, 1.1, 0, 0, 0, 1, 0, 2.5, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="BranchA" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeNorth" unique_id=740436389]
-transform = Transform3D(1.8, 0.15, 0, -0.2, 0.12, -0.4, 0, 0.25, 0.12, 0.4, 3.8, 0)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="BranchB" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeNorth" unique_id=256498785]
-transform = Transform3D(1.4, -0.1, 0.25, 0.15, 0.12, 0.35, 0.2, -0.18, 0.12, -0.2, 4.5, 0.1)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="DeadTreeWest" type="Node3D" parent="Geometry/DeadTrees" unique_id=80462558]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 0.9, 0, -0.573576, 0, 0.819152, -34, 0, -4)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeWest" unique_id=1220890027]
-transform = Transform3D(1, 0, 0, 0, 0.95, 0, 0, 0, 1, 0, 2.3, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="BranchA" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeWest" unique_id=133665359]
-transform = Transform3D(1.5, 0.12, -0.15, -0.15, 0.11, -0.3, 0.1, 0.22, 0.11, 0.3, 3.3, 0)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="BranchB" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeWest" unique_id=1087862697]
-transform = Transform3D(1.2, -0.08, 0.22, 0.12, 0.11, 0.28, 0.18, -0.14, 0.11, -0.25, 4, 0.05)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="DeadTreeSouth" type="Node3D" parent="Geometry/DeadTrees" unique_id=1612373985]
-transform = Transform3D(0.965926, 0, 0.258819, 0, 1.15, 0, -0.258819, 0, 0.965926, 10, 0, 34)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeSouth" unique_id=809920765]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 1, 0, 2.6, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="BranchA" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeSouth" unique_id=135991662]
-transform = Transform3D(1.9, 0.18, -0.1, -0.18, 0.12, -0.36, 0.08, 0.24, 0.12, 0.35, 3.9, 0)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="BranchB" type="MeshInstance3D" parent="Geometry/DeadTrees/DeadTreeSouth" unique_id=937467625]
-transform = Transform3D(1.3, -0.06, 0.28, 0.14, 0.12, 0.32, 0.16, -0.16, 0.12, -0.18, 4.7, -0.05)
-mesh = SubResource("BoxMesh_fence")
-surface_material_override/0 = SubResource("StandardMaterial3D_dead_tree")
-
-[node name="ForestEdgeTrees" type="Node3D" parent="Geometry" unique_id=1212500610]
-visible = false
-
-[node name="TreeNorthWest01" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1295457361]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, -52, 0, -54)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthWest01" unique_id=1532345190]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthWest01" unique_id=170866329]
-transform = Transform3D(1.1, 0, 0, 0, 1.15, 0, 0, 0, 1.1, 0, 5.1, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthWest02" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=2012766585]
-transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, -40, 0, -50)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthWest02" unique_id=814669716]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthWest02" unique_id=956256282]
-transform = Transform3D(1, 0, 0, 0, 1.05, 0, 0, 0, 1, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthCenter" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=345930332]
-transform = Transform3D(1.05, 0, 0, 0, 1.05, 0, 0, 0, 1.05, -8, 0, -56)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthCenter" unique_id=254341474]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthCenter" unique_id=1266192894]
-transform = Transform3D(1.05, 0, 0, 0, 1.1, 0, 0, 0, 1.05, 0, 5, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthEast01" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1584352132]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 0, -52)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthEast01" unique_id=1512867993]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthEast01" unique_id=1460703401]
-transform = Transform3D(1.05, 0, 0, 0, 1.1, 0, 0, 0, 1.05, 0, 5.05, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthEast02" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1038584308]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 54, 0, -40)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthEast02" unique_id=1885436237]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeNorthEast02" unique_id=1629389309]
-transform = Transform3D(1.15, 0, 0, 0, 1.2, 0, 0, 0, 1.15, 0, 5.2, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeWestMid" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1995170929]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, -56, 0, -12)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeWestMid" unique_id=1507165449]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeWestMid" unique_id=771397704]
-transform = Transform3D(1.1, 0, 0, 0, 1.15, 0, 0, 0, 1.1, 0, 5.1, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeWestSouth" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1487249451]
-transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, -50, 0, 38)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeWestSouth" unique_id=1038183599]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeWestSouth" unique_id=2063558790]
-transform = Transform3D(0.95, 0, 0, 0, 1, 0, 0, 0, 0.95, 0, 4.85, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeSouthWest" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=699840870]
-transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, -26, 0, 54)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeSouthWest" unique_id=2077160561]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeSouthWest" unique_id=1736145967]
-transform = Transform3D(1.1, 0, 0, 0, 1.15, 0, 0, 0, 1.1, 0, 5.15, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeSouthCenter" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=619366883]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 56)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeSouthCenter" unique_id=217341962]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeSouthCenter" unique_id=1219050940]
-transform = Transform3D(1.05, 0, 0, 0, 1.1, 0, 0, 0, 1.05, 0, 4.95, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeSouthEast" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1658789953]
-transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, 34, 0, 50)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeSouthEast" unique_id=1993273211]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeSouthEast" unique_id=2066936638]
-transform = Transform3D(1, 0, 0, 0, 1.05, 0, 0, 0, 1, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeEastMid" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1937606220]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 56, 0, 10)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeEastMid" unique_id=1152130034]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeEastMid" unique_id=2044873349]
-transform = Transform3D(1.1, 0, 0, 0, 1.15, 0, 0, 0, 1.1, 0, 5.1, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeEastNorth" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=1626025579]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0, -6)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeEastNorth" unique_id=181827968]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeEastNorth" unique_id=583459466]
-transform = Transform3D(1.05, 0, 0, 0, 1.1, 0, 0, 0, 1.05, 0, 5, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeFarNorth01" type="Node3D" parent="Geometry/ForestEdgeTrees" unique_id=653908695]
-transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 20, 0, -58)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeFarNorth01" unique_id=999167]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/ForestEdgeTrees/TreeFarNorth01" unique_id=2036094279]
-transform = Transform3D(0.95, 0, 0, 0, 1, 0, 0, 0, 0.95, 0, 4.85, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="BoundaryTreeLine" type="Node3D" parent="Geometry" unique_id=1612207408]
-visible = false
-
-[node name="TreeNorthWestA" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=1663191023]
-transform = Transform3D(1.22, 0, 0, 0, 1.22, 0, 0, 0, 1.22, -54, 0, -52)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthWestA" unique_id=111600001]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthWestA" unique_id=111600002]
-transform = Transform3D(1.08, 0, 0, 0, 1.14, 0, 0, 0, 1.08, 0, 5.05, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthWestB" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=1099705981]
-transform = Transform3D(0.953457, 0, -0.444753, 0, 1.05, 0, 0.444753, 0, 0.953457, -44, 0, -56)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthWestB" unique_id=111600003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthWestB" unique_id=111600004]
-transform = Transform3D(1, 0, 0, 0, 1.08, 0, 0, 0, 1, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthCenterA" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=336165739]
-transform = Transform3D(1.05, 0, 0, 0, 1.05, 0, 0, 0, 1.05, -12, 0, -58)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthCenterA" unique_id=111600005]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthCenterA" unique_id=111600006]
-transform = Transform3D(1.03, 0, 0, 0, 1.1, 0, 0, 0, 1.03, 0, 4.95, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthCenterB" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=713418906]
-transform = Transform3D(0.838976, 0, -0.704133, 0, 1.1, 0, 0.704133, 0, 0.838976, 10, 0, -56)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthCenterB" unique_id=111600007]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthCenterB" unique_id=111600008]
-transform = Transform3D(1.08, 0, 0, 0, 1.14, 0, 0, 0, 1.08, 0, 5.05, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthEastA" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=989630378]
-transform = Transform3D(1.18, 0, 0, 0, 1.18, 0, 0, 0, 1.18, 38, 0, -54)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthEastA" unique_id=111600009]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthEastA" unique_id=111600010]
-transform = Transform3D(1.08, 0, 0, 0, 1.13, 0, 0, 0, 1.08, 0, 5.05, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeNorthEastB" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=2107546379]
-transform = Transform3D(1.01884, 0, 0.272669, 0, 1.05, 0, -0.272669, 0, 1.01884, 52, 0, -46)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthEastB" unique_id=111600011]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeNorthEastB" unique_id=111600012]
-transform = Transform3D(1.02, 0, 0, 0, 1.08, 0, 0, 0, 1.02, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeWestNorth" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=1914880490]
-transform = Transform3D(0.96, 0, 0, 0, 0.96, 0, 0, 0, 0.96, -58, 0, -18)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeWestNorth" unique_id=111600013]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeWestNorth" unique_id=111600014]
-transform = Transform3D(1.02, 0, 0, 0, 1.08, 0, 0, 0, 1.02, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeWestMid" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=731195197]
-transform = Transform3D(1.0509, 0, -0.382141, 0, 1.14, 0, 0.382141, 0, 1.0509, -56, 0, 12)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeWestMid" unique_id=111600015]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeWestMid" unique_id=111600016]
-transform = Transform3D(1.1, 0, 0, 0, 1.16, 0, 0, 0, 1.1, 0, 5.08, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeWestSouth" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=1927055543]
-transform = Transform3D(1.01884, 0, 0.272669, 0, 1.05, 0, -0.272669, 0, 1.01884, -52, 0, 42)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeWestSouth" unique_id=111600017]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeWestSouth" unique_id=111600018]
-transform = Transform3D(1.02, 0, 0, 0, 1.08, 0, 0, 0, 1.02, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeSouthWestA" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=274820814]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, -30, 0, 56)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthWestA" unique_id=111600019]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthWestA" unique_id=111600020]
-transform = Transform3D(1.06, 0, 0, 0, 1.12, 0, 0, 0, 1.06, 0, 5, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeSouthCenter" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=2084729148]
-transform = Transform3D(0.946741, 0, -0.253643, 0, 0.98, 0, 0.253643, 0, 0.946741, 4, 0, 58)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthCenter" unique_id=111600021]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthCenter" unique_id=111600022]
-transform = Transform3D(1.02, 0, 0, 0, 1.08, 0, 0, 0, 1.02, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeSouthEastA" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=457598944]
-transform = Transform3D(1.10525, 0, -0.296056, 0, 1.14, 0, 0.296056, 0, 1.10525, 28, 0, 54)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthEastA" unique_id=111600023]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthEastA" unique_id=111600024]
-transform = Transform3D(1.08, 0, 0, 0, 1.14, 0, 0, 0, 1.08, 0, 5.02, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeSouthEastB" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=2111745612]
-transform = Transform3D(0.964112, 0, -0.169075, 0, 0.98, 0, 0.169075, 0, 0.964112, 50, 0, 46)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthEastB" unique_id=111600025]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeSouthEastB" unique_id=111600026]
-transform = Transform3D(1, 0, 0, 0, 1.06, 0, 0, 0, 1, 0, 4.88, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeEastNorth" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=178513757]
-transform = Transform3D(0.902105, 0, -0.328339, 0, 0.96, 0, 0.328339, 0, 0.902105, 56, 0, -8)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeEastNorth" unique_id=111600027]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeEastNorth" unique_id=111600028]
-transform = Transform3D(1.02, 0, 0, 0, 1.08, 0, 0, 0, 1.02, 0, 4.9, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeEastMid" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=1714572135]
-transform = Transform3D(1.14, 0, 0, 0, 1.14, 0, 0, 0, 1.14, 58, 0, 16)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeEastMid" unique_id=111600029]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeEastMid" unique_id=111600030]
-transform = Transform3D(1.08, 0, 0, 0, 1.14, 0, 0, 0, 1.08, 0, 5.02, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="TreeEastSouth" type="Node3D" parent="Geometry/BoundaryTreeLine" unique_id=369421117]
-transform = Transform3D(1.04205, 0, 0.379642, 0, 1.16, 0, -0.379642, 0, 1.04205, 54, 0, 38)
-
-[node name="Trunk" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeEastSouth" unique_id=111600031]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-mesh = SubResource("CylinderMesh_tree_trunk")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_trunk")
-
-[node name="Canopy" type="MeshInstance3D" parent="Geometry/BoundaryTreeLine/TreeEastSouth" unique_id=111600032]
-transform = Transform3D(1.06, 0, 0, 0, 1.14, 0, 0, 0, 1.06, 0, 5.03, 0)
-mesh = SubResource("SphereMesh_tree_canopy")
-surface_material_override/0 = SubResource("StandardMaterial3D_tree_canopy")
-
-[node name="BoundaryForest" type="Node3D" parent="Geometry"]
-
-[node name="NorthWestClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.051160, 0, -0.009310, 0, 0.052, 0, 0.009310, 0, 0.051160, -57, 0, -55)
+[node name="WestFenceNorthCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 1.2, -15)
+shape = SubResource("BoxShape3D_west_fence_north")
+
+[node name="WestFenceSouthCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 1.2, 30)
+shape = SubResource("BoxShape3D_west_fence_south")
+
+[node name="EastFenceNorthCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 1.2, -22)
+shape = SubResource("BoxShape3D_fence_east_north")
+
+[node name="EastFenceSouthCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 1.2, 26)
+shape = SubResource("BoxShape3D_fence_east_south")
+
+[node name="BarrierACollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.6, 18)
+shape = SubResource("BoxShape3D_barrier_a")
+
+[node name="BarrierBCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(0.992278, 0, 0.124035, 0, 1, 0, -0.124035, 0, 0.992278, 10, 0.6, 22)
+shape = SubResource("BoxShape3D_barrier_b")
+
+[node name="BarrierCCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(0.996546, 0, -0.0830455, 0, 1, 0, 0.0830455, 0, 0.996546, -8, 0.55, -18)
+shape = SubResource("BoxShape3D_barrier_c")
+
+[node name="ContainerACollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.3, 18)
+shape = SubResource("BoxShape3D_container_a")
+
+[node name="ContainerBCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, -22, 1.1, 8)
+shape = SubResource("BoxShape3D_container_b")
+
+[node name="EntryBarricadeCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.1, 12)
+shape = SubResource("BoxShape3D_barricade_long")
+
+[node name="NorthServiceBarricadeCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(0.995004, 0, -0.0998334, 0, 1, 0, 0.0998334, 0, 0.995004, -8, 0.9, -12)
+shape = SubResource("BoxShape3D_barricade_short")
+
+[node name="SouthYardBarricadeCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+transform = Transform3D(0.996802, 0, 0.0799147, 0, 1, 0, -0.0799147, 0, 0.996802, 6, 0.9, 24)
+shape = SubResource("BoxShape3D_barricade_short")
+
+[node name="Lights" type="Node3D" parent="Geometry"]
+
+[node name="GatePoleLeftMesh" type="MeshInstance3D" parent="Geometry/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 3.75, 0)
+mesh = SubResource("CylinderMesh_pole")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="GatePoleLeftLamp" type="MeshInstance3D" parent="Geometry/Lights"]
+transform = Transform3D(0.45, 0, 0, 0, 0.28, 0, 0, 0, 0.45, 40, 7.9, 0)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_fogged_light")
+
+[node name="GatePoleLeft" type="OmniLight3D" parent="Geometry/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 7.8, 0)
+light_color = Color(1, 0.82, 0.65, 1)
+light_energy = 1.8
+omni_range = 18.0
+
+[node name="GatePoleRightMesh" type="MeshInstance3D" parent="Geometry/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 3.75, 16)
+mesh = SubResource("CylinderMesh_pole")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="GatePoleRightLamp" type="MeshInstance3D" parent="Geometry/Lights"]
+transform = Transform3D(0.45, 0, 0, 0, 0.28, 0, 0, 0, 0.45, 40, 7.9, 16)
+mesh = SubResource("BoxMesh_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_fogged_light")
+
+[node name="GatePoleRight" type="OmniLight3D" parent="Geometry/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 7.8, 16)
+light_color = Color(1, 0.82, 0.65, 1)
+light_energy = 1.8
+omni_range = 18.0
+
+[node name="TowerLamp" type="SpotLight3D" parent="Geometry/Lights"]
+transform = Transform3D(0.965926, -0.258819, 0, 0, 0, 1, -0.258819, -0.965926, 0, 28, 11, -26)
+light_color = Color(0.82, 0.88, 1, 1)
+light_energy = 2.0
+spot_range = 28.0
+spot_angle = 36.0
+
+[node name="ServiceLight" type="OmniLight3D" parent="Geometry/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 4.5, 24)
+light_color = Color(0.95, 0.76, 0.58, 1)
+light_energy = 1.2
+omni_range = 15.0
+
+[node name="Forest" type="Node3D" parent="Geometry"]
+
+[node name="NorthForest" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.12, 0, 0, 0, 0.16, 0, 0, 0, 0.055, 0, 0, -82)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthWestClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.043828, 0, 0.019573, 0, 0.048, 0, -0.019573, 0, 0.043828, -51, 0, -58)
+[node name="SouthForest" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.12, 0, 0, 0, 0.16, 0, 0, 0, 0.055, 0, 0, 82)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthWestClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.043110, 0, -0.034154, 0, 0.055, 0, 0.034154, 0, 0.043110, -46, 0, -53)
+[node name="WestForest" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.055, 0, 0, 0, 0.16, 0, 0, 0, 0.12, -82, 0, 0)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthWestClusterD" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.044989, 0, 0.009589, 0, 0.046, 0, -0.009589, 0, 0.044989, -55, 0, -47)
+[node name="EastForest" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.055, 0, 0, 0, 0.16, 0, 0, 0, 0.12, 82, 0, 0)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthCenterClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.049698, 0, -0.005489, 0, 0.050, 0, 0.005489, 0, 0.049698, -14, 0, -58)
+[node name="NorthWestMass" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.09, 0, -0.018, 0, 0.13, 0, 0.018, 0, 0.085, -58, 0, -60)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthCenterClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.043987, 0, 0.016557, 0, 0.047, 0, -0.016557, 0, 0.043987, -6, 0, -55)
+[node name="NorthEastMass" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.09, 0, 0.018, 0, 0.13, 0, -0.018, 0, 0.085, 58, 0, -58)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthCenterClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.045994, 0, -0.026335, 0, 0.053, 0, 0.026335, 0, 0.045994, 4, 0, -57)
+[node name="SouthWestMass" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.09, 0, 0.018, 0, 0.13, 0, -0.018, 0, 0.085, -60, 0, 58)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthEastClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.048521, 0, 0.006838, 0, 0.049, 0, -0.006838, 0, 0.048521, 34, 0, -58)
+[node name="SouthEastMass" type="MeshInstance3D" parent="Geometry/Forest"]
+transform = Transform3D(0.09, 0, -0.018, 0, 0.13, 0, 0.018, 0, 0.085, 60, 0, 60)
 mesh = ExtResource("1_tree_mesh")
 
-[node name="NorthEastClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.051086, 0, -0.017498, 0, 0.054, 0, 0.017498, 0, 0.051086, 42, 0, -56)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="NorthEastClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.040146, 0, 0.022456, 0, 0.046, 0, -0.022456, 0, 0.040146, 49, 0, -52)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="NorthEastClusterD" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.038342, 0, -0.033629, 0, 0.051, 0, 0.033629, 0, 0.038342, 56, 0, -46)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="WestNorthClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.048189, 0, -0.013337, 0, 0.050, 0, 0.013337, 0, 0.048189, -58, 0, -22)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="WestNorthClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.044760, 0, 0.014338, 0, 0.047, 0, -0.014338, 0, 0.044760, -54, 0, -14)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="WestNorthClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.044333, 0, -0.029045, 0, 0.053, 0, 0.029045, 0, 0.044333, -57, 0, -5)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="WestSouthClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.047596, 0, 0.011647, 0, 0.049, 0, -0.011647, 0, 0.047596, -56, 0, 18)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="WestSouthClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.049525, 0, -0.021525, 0, 0.054, 0, 0.021525, 0, 0.049525, -52, 0, 28)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="WestSouthClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.037169, 0, 0.027101, 0, 0.046, 0, -0.027101, 0, 0.037169, -55, 0, 40)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthWestClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.050427, 0, -0.007621, 0, 0.051, 0, 0.007621, 0, 0.050427, -34, 0, 56)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthWestClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.043819, 0, 0.016996, 0, 0.047, 0, -0.016996, 0, 0.043819, -24, 0, 58)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthWestClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.048528, 0, -0.025884, 0, 0.055, 0, 0.025884, 0, 0.048528, -14, 0, 54)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthCenterClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.047136, 0, 0.009065, 0, 0.048, 0, -0.009065, 0, 0.047136, 6, 0, 58)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthCenterClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.048667, 0, -0.018318, 0, 0.052, 0, 0.018318, 0, 0.048667, 18, 0, 55)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthEastClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.047912, 0, 0.014298, 0, 0.050, 0, -0.014298, 0, 0.047912, 30, 0, 56)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthEastClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.048145, 0, -0.024456, 0, 0.054, 0, 0.024456, 0, 0.048145, 42, 0, 54)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="SouthEastClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.039216, 0, 0.024044, 0, 0.046, 0, -0.024044, 0, 0.039216, 54, 0, 48)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="EastNorthClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.047819, 0, -0.010693, 0, 0.049, 0, 0.010693, 0, 0.047819, 58, 0, -18)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="EastNorthClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.049966, 0, 0.017675, 0, 0.053, 0, -0.017675, 0, 0.049966, 55, 0, -6)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="EastNorthClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.038523, 0, -0.026925, 0, 0.047, 0, 0.026925, 0, 0.038523, 57, 0, 8)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="EastSouthClusterA" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.050176, 0, 0.009131, 0, 0.051, 0, -0.009131, 0, 0.050176, 58, 0, 20)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="EastSouthClusterB" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.050870, 0, -0.020910, 0, 0.055, 0, 0.020910, 0, 0.050870, 56, 0, 32)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="EastSouthClusterC" type="MeshInstance3D" parent="Geometry/BoundaryForest"]
-transform = Transform3D(0.039066, 0, 0.027890, 0, 0.048, 0, -0.027890, 0, 0.039066, 54, 0, 42)
-mesh = ExtResource("1_tree_mesh")
-
-[node name="OpenTerrainGrass" type="Node3D" parent="Geometry" unique_id=974535966]
-
-[node name="WestNorthPatch" type="Node3D" parent="Geometry/OpenTerrainGrass" unique_id=1380769688]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -42, 0, -26)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestNorthPatch" unique_id=1949092744]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestNorthPatch" unique_id=339299040]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1, 0, 0.573576, 0, 0.819152, -0.24, 0.8, 0.16)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestNorthPatch" unique_id=1773977796]
-transform = Transform3D(0.573576, 0, -0.819152, 0, 1, 0, 0.819152, 0, 0.573576, 0.22, 0.8, -0.08)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="WestSouthPatch" type="Node3D" parent="Geometry/OpenTerrainGrass" unique_id=1420769203]
-transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -36, 0, 32)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestSouthPatch" unique_id=1836734152]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestSouthPatch" unique_id=1482817395]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -0.18, 0.8, 0.22)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestSouthPatch" unique_id=917862142]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, 0.2, 0.8, -0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="CenterNorthPatch" type="Node3D" parent="Geometry/OpenTerrainGrass" unique_id=205148750]
-transform = Transform3D(1.05, 0, 0, 0, 1.05, 0, 0, 0, 1.05, -10, 0, -32)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/CenterNorthPatch" unique_id=1969273984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/CenterNorthPatch" unique_id=287185349]
-transform = Transform3D(0.642788, 0, -0.766044, 0, 1, 0, 0.766044, 0, 0.642788, 0.18, 0.8, 0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/CenterNorthPatch" unique_id=290798431]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, -0.16, 0.8, -0.16)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="CenterSouthPatch" type="Node3D" parent="Geometry/OpenTerrainGrass" unique_id=761947404]
-transform = Transform3D(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0, -2, 0, 32)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/CenterSouthPatch" unique_id=2010849509]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/CenterSouthPatch" unique_id=690176627]
-transform = Transform3D(0.573576, 0, -0.819152, 0, 1, 0, 0.819152, 0, 0.573576, 0.2, 0.8, -0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/CenterSouthPatch" unique_id=233010379]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -0.18, 0.8, 0.14)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EastCenterPatch" type="Node3D" parent="Geometry/OpenTerrainGrass" unique_id=1855617480]
-transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 42, 0, 12)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastCenterPatch" unique_id=381446911]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastCenterPatch" unique_id=154428945]
-transform = Transform3D(0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, 0.766044, 0.24, 0.8, -0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastCenterPatch" unique_id=896209056]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, -0.2, 0.8, 0.16)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EastNorthPatch" type="Node3D" parent="Geometry/OpenTerrainGrass" unique_id=160327187]
-transform = Transform3D(1.35, 0, 0, 0, 1.35, 0, 0, 0, 1.35, 28, 0, -36)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastNorthPatch" unique_id=1564853977]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastNorthPatch" unique_id=122935150]
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -0.18, 0.8, 0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastNorthPatch" unique_id=1375626155]
-transform = Transform3D(0.642788, 0, 0.766044, 0, 1, 0, -0.766044, 0, 0.642788, 0.16, 0.8, -0.18)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="NorthWestEdgePatch" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -46, 0, -42)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthWestEdgePatch"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthWestEdgePatch"]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1.1, 0, 0.573576, 0, 0.819152, -0.42, 0.84, 0.18)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthWestEdgePatch"]
-transform = Transform3D(0.573576, 0, -0.819152, 0, 0.95, 0, 0.819152, 0, 0.573576, 0.35, 0.78, -0.22)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeD" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthWestEdgePatch"]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1.05, 0, -0.422618, 0, 0.906308, 0.18, 0.82, 0.31)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="NorthCenterEdgePatch" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(1.85, 0, 0, 0, 1.85, 0, 0, 0, 1.85, 2, 0, -46)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthCenterEdgePatch"]
-transform = Transform3D(1, 0, 0, 0, 0.95, 0, 0, 0, 1, 0, 0.78, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthCenterEdgePatch"]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1.05, 0, 0.707107, 0, 0.707107, -0.22, 0.8, 0.2)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthCenterEdgePatch"]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 0.9, 0, -0.34202, 0, 0.939693, 0.26, 0.76, -0.18)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeD" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthCenterEdgePatch"]
-transform = Transform3D(0.573576, 0, 0.819152, 0, 1, 0, -0.819152, 0, 0.573576, 0.46, 0.82, 0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="NorthEastEdgePatch" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, 44, 0, -44)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthEastEdgePatch"]
-transform = Transform3D(1, 0, 0, 0, 1.05, 0, 0, 0, 1, 0, 0.84, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthEastEdgePatch"]
-transform = Transform3D(0.766044, 0, -0.642788, 0, 0.9, 0, 0.642788, 0, 0.766044, -0.3, 0.72, 0.16)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthEastEdgePatch"]
-transform = Transform3D(0.642788, 0, 0.766044, 0, 1.1, 0, -0.766044, 0, 0.642788, 0.24, 0.88, -0.24)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeD" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/NorthEastEdgePatch"]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 0.95, 0, -0.422618, 0, 0.906308, 0.42, 0.78, 0.28)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="WestEdgePatchA" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(1.95, 0, 0, 0, 1.95, 0, 0, 0, 1.95, -46, 0, 6)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestEdgePatchA"]
-transform = Transform3D(1, 0, 0, 0, 0.9, 0, 0, 0, 1, 0, 0.76, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestEdgePatchA"]
-transform = Transform3D(0.866025, 0, -0.5, 0, 1.05, 0, 0.5, 0, 0.866025, -0.26, 0.82, 0.12)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestEdgePatchA"]
-transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 0.22, 0.8, -0.2)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeD" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/WestEdgePatchA"]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 0.92, 0, -0.34202, 0, 0.939693, 0.38, 0.74, 0.24)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="SouthWestEdgePatch" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(2.1, 0, 0, 0, 2.1, 0, 0, 0, 2.1, -30, 0, 46)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthWestEdgePatch"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthWestEdgePatch"]
-transform = Transform3D(0.766044, 0, -0.642788, 0, 1.1, 0, 0.642788, 0, 0.766044, -0.36, 0.86, 0.18)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthWestEdgePatch"]
-transform = Transform3D(0.573576, 0, 0.819152, 0, 0.95, 0, -0.819152, 0, 0.573576, 0.26, 0.76, -0.24)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeD" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthWestEdgePatch"]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 1.02, 0, -0.34202, 0, 0.939693, 0.44, 0.82, 0.26)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="SouthCenterEdgePatch" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(1.7, 0, 0, 0, 1.7, 0, 0, 0, 1.7, 12, 0, 44)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthCenterEdgePatch"]
-transform = Transform3D(1, 0, 0, 0, 0.92, 0, 0, 0, 1, 0, 0.74, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthCenterEdgePatch"]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1.02, 0, 0.707107, 0, 0.707107, -0.24, 0.8, 0.16)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthCenterEdgePatch"]
-transform = Transform3D(0.866025, 0, 0.5, 0, 0.88, 0, -0.5, 0, 0.866025, 0.22, 0.72, -0.18)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="SouthEastEdgePatch" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(2.05, 0, 0, 0, 2.05, 0, 0, 0, 2.05, 42, 0, 42)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthEastEdgePatch"]
-transform = Transform3D(1, 0, 0, 0, 0.96, 0, 0, 0, 1, 0, 0.78, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthEastEdgePatch"]
-transform = Transform3D(0.819152, 0, -0.573576, 0, 1.08, 0, 0.573576, 0, 0.819152, -0.32, 0.84, 0.14)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthEastEdgePatch"]
-transform = Transform3D(0.642788, 0, 0.766044, 0, 0.94, 0, -0.766044, 0, 0.642788, 0.26, 0.76, -0.2)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeD" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/SouthEastEdgePatch"]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 1.02, 0, -0.34202, 0, 0.939693, 0.4, 0.8, 0.24)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="EastEdgePatchA" type="Node3D" parent="Geometry/OpenTerrainGrass"]
-transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 48, 0, 24)
-
-[node name="BladeA" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastEdgePatchA"]
-transform = Transform3D(1, 0, 0, 0, 0.94, 0, 0, 0, 1, 0, 0.76, 0)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeB" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastEdgePatchA"]
-transform = Transform3D(0.766044, 0, -0.642788, 0, 1.06, 0, 0.642788, 0, 0.766044, -0.28, 0.82, 0.1)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="BladeC" type="MeshInstance3D" parent="Geometry/OpenTerrainGrass/EastEdgePatchA"]
-transform = Transform3D(0.573576, 0, 0.819152, 0, 1.0, 0, -0.819152, 0, 0.573576, 0.24, 0.78, -0.22)
-mesh = SubResource("QuadMesh_grass_blade")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
-
-[node name="Gameplay" type="Node3D" parent="." unique_id=2077094175]
-
-[node name="PlayerStart" type="Marker3D" parent="Gameplay" unique_id=1000153334]
-transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 6, 1, 3)
-
-[node name="ZombieSpawns" type="Node3D" parent="Gameplay" unique_id=2105790590]
-
-[node name="ForestNorthWest" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=1000371160]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 1, -48)
-
-[node name="ForestNorthEast" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=1879918589]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 1, -46)
-
-[node name="ForestSouthWest" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=295405655]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 1, 44)
-
-[node name="ForestSouthEast" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=1211593531]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 1, 42)
-
-[node name="BehindMainBuildingNorth" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=530086567]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, -23)
-
-[node name="BehindPowerShedWest" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=992037906]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 1, 12)
-
-[node name="BehindWatchPostNorthEast" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=1594733718]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 1, -34)
-
-[node name="BehindStorageRuinSouth" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=380619123]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1, 41)
-
-[node name="BrokenFenceNorthGap" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=997773358]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, -20)
-
-[node name="BrokenFenceWestGap" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=1058480338]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 1, -1)
-
-[node name="BrokenFenceEastGap" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=51428014]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1, 12)
-
-[node name="BrokenFenceSouthGap" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=379031416]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 18)
-
-[node name="LootSpawns" type="Node3D" parent="Gameplay" unique_id=1002969823]
-
-[node name="MainBuildingInteriorWest" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=439586226]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0.5, -9)
-
-[node name="MainBuildingInteriorEast" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=1532076278]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.5, -7)
-
-[node name="PowerShedInterior" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=1607922362]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0.5, 8)
-
-[node name="WatchPostInterior" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=951287484]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0.5, -30)
-
-[node name="StorageRuinInterior" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=1901712382]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.5, 36)
-
-[node name="CrashedVehicleCabin" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=523501008]
-transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, -38.5, 1, -8.4)
-
-[node name="CrashedVehicleDebris" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=1289613020]
-transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -42.5, 0.6, -6.5)
-
-[node name="BrokenFenceNorthCache" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=1590751847]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.5, -18)
-
-[node name="RadioTowerBaseRisk" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=541509390]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.5, -39)
-
-[node name="WaterTankUnderstructure" type="Marker3D" parent="Gameplay/LootSpawns" unique_id=453099431]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0.5, 32)
-
-[node name="DefensivePositions" type="Node3D" parent="Gameplay" unique_id=1093889561]
-
-[node name="MainEntranceChokepoint" type="Marker3D" parent="Gameplay/DefensivePositions" unique_id=1806267511]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.5, -1)
-
-[node name="NorthBuildingPassage" type="Marker3D" parent="Gameplay/DefensivePositions" unique_id=1382210880]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, -17)
-
-[node name="WestFenceApproach" type="Marker3D" parent="Gameplay/DefensivePositions" unique_id=297176643]
-transform = Transform3D(0.996195, 0, 0.0871557, 0, 1, 0, -0.0871557, 0, 0.996195, -19, 0.5, -2)
-
-[node name="EastFenceApproach" type="Marker3D" parent="Gameplay/DefensivePositions" unique_id=1988726844]
-transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 20, 0.5, 9)
-
-[node name="PowerShedLane" type="Marker3D" parent="Gameplay/DefensivePositions" unique_id=67500083]
-transform = Transform3D(0.838671, 0, 0.544639, 0, 1, 0, -0.544639, 0, 0.838671, -26, 0.5, 14)
-
-[node name="StorageSouthLane" type="Marker3D" parent="Gameplay/DefensivePositions" unique_id=298222689]
-transform = Transform3D(0.573576, 0, -0.819152, 0, 1, 0, 0.819152, 0, 0.573576, 14, 0.5, 27)
-
-[node name="EncounterZones" type="Node3D" parent="Gameplay" unique_id=1672512254]
-
-[node name="FacilityYardCenter" type="Marker3D" parent="Gameplay/EncounterZones" unique_id=838091812]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 4)
-
-[node name="Lighting" type="Node3D" parent="." unique_id=1353773644]
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lighting" unique_id=1884826329]
-transform = Transform3D(0.939693, -0.219846, 0.262003, 0, 0.766044, 0.642788, -0.34202, -0.604023, 0.719846, 0, 18, 0)
-light_color = Color(0.78, 0.8, 0.82, 1)
-light_energy = 0.7
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(0.951057, -0.258819, 0.167731, 0, 0.543174, 0.83962, -0.309017, -0.798636, 0.516708, 0, 20, 0)
+light_color = Color(0.92, 0.94, 0.9, 1)
+light_energy = 1.55
 shadow_enabled = true
-shadow_blur = 2.5
+shadow_blur = 0.8
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Lighting" unique_id=538983656]
-environment = SubResource("Environment_forest")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Lighting"]
+environment = SubResource("Environment_spooky")
 
-[node name="Navigation" type="Node3D" parent="." unique_id=292360595]
+[node name="Gameplay" type="Node3D" parent="."]
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="Navigation" unique_id=890551429]
+[node name="PlayerStart" type="Marker3D" parent="Gameplay"]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 28, 1, 12)
+
+[node name="ZombieSpawns" type="Node3D" parent="Gameplay"]
+
+[node name="NorthGateSpawn" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 1, 8)
+
+[node name="NorthTreeLine" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, -64)
+
+[node name="SouthTreeLine" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 62)
+
+[node name="WestWarehouse" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 1, 24)
+
+[node name="SouthYard" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 1, 28)
+
+[node name="TowerBase" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 1, -26)
+
+[node name="WestBreach" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42, 1, 14)
+
+[node name="NorthAnnex" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1, -10)
+
+[node name="LoadingBay" type="Marker3D" parent="Gameplay/ZombieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1, -30)
+
+[node name="Navigation" type="Node3D" parent="."]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="Navigation"]
 navigation_mesh = SubResource("NavigationMesh_level")
