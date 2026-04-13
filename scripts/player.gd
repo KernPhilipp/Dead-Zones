@@ -272,8 +272,11 @@ func take_damage(amount: int, source_position: Vector3 = Vector3.ZERO):
 	damage_shake_timer = damage_shake_duration
 	damage_shake_amount = damage_shake_strength
 	var direction: Vector2 = Vector2.ZERO
-	if source_position != Vector3.ZERO:
-		var source_direction: Vector3 = (source_position - global_position).normalized()
+	var resolved_source_position: Vector3 = source_position
+	if resolved_source_position == Vector3.ZERO:
+		resolved_source_position = _get_nearest_zombie_position()
+	if resolved_source_position != Vector3.ZERO:
+		var source_direction: Vector3 = (resolved_source_position - global_position).normalized()
 		var local_direction: Vector3 = global_transform.basis.inverse() * source_direction
 		direction = Vector2(local_direction.x, local_direction.z)
 	damage_feedback.emit(amount, direction)
@@ -358,3 +361,16 @@ func _emit_kill_feedback():
 	elif kill_streak_count >= 4:
 		combat_text_feedback.emit("MULTI KILL", Color(1.0, 0.28, 0.18, 1.0))
 	last_kill_time_ms = now_ms
+
+func _get_nearest_zombie_position() -> Vector3:
+	var nearest_position: Vector3 = Vector3.ZERO
+	var nearest_distance_sq: float = INF
+	for zombie_node in get_tree().get_nodes_in_group("zombie"):
+		var zombie: Node3D = zombie_node as Node3D
+		if zombie == null or not is_instance_valid(zombie):
+			continue
+		var distance_sq: float = global_position.distance_squared_to(zombie.global_position)
+		if distance_sq < nearest_distance_sq:
+			nearest_distance_sq = distance_sq
+			nearest_position = zombie.global_position
+	return nearest_position

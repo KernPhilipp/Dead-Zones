@@ -3,8 +3,10 @@ extends CanvasLayer
 var health_bar: ProgressBar
 var health_damage_bar: ProgressBar
 var health_value_label: Label
+var low_health_label: Label
 var weapon_label: Label
 var ammo_label: Label
+var ammo_state_label: Label
 var reserve_label: Label
 var weapon_grip: ColorRect
 var weapon_body: ColorRect
@@ -39,8 +41,13 @@ var resume_button: Button
 var pause_restart_button: Button
 var game_over_panel: PanelContainer
 var game_over_label: Label
+var game_over_summary_label: Label
 var game_over_stats_label: Label
+var game_over_hint_label: Label
 var restart_button: Button
+var health_panel: PanelContainer
+var wave_panel: PanelContainer
+var weapon_panel: PanelContainer
 
 var status_timer: SceneTreeTimer
 var damage_flash_tween: Tween
@@ -60,12 +67,18 @@ var displayed_health: float = 100.0
 var target_health: float = 100.0
 var nodes_initialized: bool = false
 var crosshair_spread: float = 4.0
+var current_ammo_state: String = "READY"
+var session_start_msec: int = 0
+var low_health_panel_pulse: float = 0.0
+var last_wave_number: int = 0
+var wave_clear_announced: bool = false
 
 func _enter_tree():
 	_ensure_nodes()
 
 func _ready():
 	_ensure_nodes()
+	session_start_msec = Time.get_ticks_msec()
 	game_over_panel.visible = false
 	hit_marker.visible = false
 	kill_confirm_label.visible = false
@@ -84,6 +97,8 @@ func _ready():
 	combat_text_secondary.modulate.a = 0.0
 	health_bar.value = 100.0
 	health_damage_bar.value = 100.0
+	low_health_label.visible = false
+	low_health_label.modulate.a = 0.0
 	pause_dimmer.visible = false
 	pause_dimmer.modulate.a = 0.0
 	pause_panel.visible = false
@@ -92,9 +107,14 @@ func _ready():
 	reload_panel.visible = false
 	reload_bar.value = 0.0
 	status_label.text = "READY"
+	ammo_state_label.text = "READY"
+	ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
+	ammo_label.text = "030 | 120"
 	game_over_panel.modulate.a = 0.0
 	game_over_label.scale = Vector2(0.75, 0.75)
+	game_over_summary_label.modulate.a = 0.0
 	game_over_stats_label.modulate.a = 0.0
+	game_over_hint_label.modulate.a = 0.0
 	restart_button.modulate.a = 0.0
 	damage_compass_marker.visible = false
 	damage_compass_marker.modulate.a = 0.0
@@ -112,8 +132,10 @@ func _ensure_nodes():
 	health_bar = _find_required_node("HealthBar") as ProgressBar
 	health_damage_bar = _find_required_node("HealthDamageBar") as ProgressBar
 	health_value_label = _find_required_node("HealthValueLabel") as Label
+	low_health_label = _find_required_node("LowHealthLabel") as Label
 	weapon_label = _find_required_node("WeaponLabel") as Label
 	ammo_label = _find_required_node("AmmoLabel") as Label
+	ammo_state_label = _find_required_node("AmmoStateLabel") as Label
 	reserve_label = _find_required_node("ReserveLabel") as Label
 	weapon_grip = _find_required_node("Grip") as ColorRect
 	weapon_body = _find_required_node("Body") as ColorRect
@@ -148,8 +170,13 @@ func _ensure_nodes():
 	pause_restart_button = _find_required_node("PauseRestartButton") as Button
 	game_over_panel = _find_required_node("GameOverPanel") as PanelContainer
 	game_over_label = _find_required_node("GameOverLabel") as Label
+	game_over_summary_label = _find_required_node("GameOverSummaryLabel") as Label
 	game_over_stats_label = _find_required_node("GameOverStatsLabel") as Label
+	game_over_hint_label = _find_required_node("GameOverHintLabel") as Label
 	restart_button = _find_required_node("RestartButton") as Button
+	health_panel = _find_required_node("HealthPanel") as PanelContainer
+	wave_panel = _find_required_node("WavePanel") as PanelContainer
+	weapon_panel = _find_required_node("WeaponPanel") as PanelContainer
 	nodes_initialized = true
 
 func _find_required_node(node_name: String) -> Node:
@@ -169,10 +196,22 @@ func _process(delta):
 	low_health_time += delta
 	if low_health_strength <= 0.0:
 		low_health_overlay.modulate.a = 0.0
+		low_health_label.visible = false
+		low_health_label.modulate.a = 0.0
+		low_health_label.scale = Vector2.ONE
+		health_panel.scale = health_panel.scale.lerp(Vector2.ONE, clampf(delta * 8.0, 0.0, 1.0))
+		health_panel.modulate.a = 1.0
 		return
 
-	var pulse: float = 0.45 + (sin(low_health_time * 5.5) * 0.25)
-	low_health_overlay.modulate.a = low_health_strength * pulse
+	var pulse: float = 0.48 + (sin(low_health_time * 5.8) * 0.24)
+	var hard_pulse: float = 0.7 + (sin(low_health_time * 8.2) * 0.18)
+	low_health_panel_pulse = 1.0 + (sin(low_health_time * 7.2) * 0.025 * low_health_strength)
+	low_health_overlay.modulate.a = low_health_strength * (pulse + 0.18)
+	low_health_label.visible = true
+	low_health_label.modulate.a = clampf(low_health_strength * hard_pulse, 0.0, 1.0)
+	low_health_label.scale = Vector2.ONE * (1.0 + low_health_strength * 0.12)
+	health_panel.scale = Vector2.ONE * low_health_panel_pulse
+	health_panel.modulate.a = clampf(0.9 + low_health_strength * 0.22, 0.0, 1.0)
 
 func update_health(value: int):
 	_ensure_nodes()
@@ -187,7 +226,17 @@ func update_health(value: int):
 	)
 	health_value_label.text = "HP %03d" % value
 	var health_ratio: float = float(value) / 100.0
-	low_health_strength = clampf((0.35 - health_ratio) / 0.35, 0.0, 0.65)
+	low_health_strength = clampf((0.4 - health_ratio) / 0.4, 0.0, 0.78)
+	if low_health_strength > 0.0:
+		low_health_label.text = "CRITICAL" if value > 15 else "BLEEDING OUT"
+	else:
+		low_health_label.text = ""
+	health_panel.modulate = Color(
+		1.0,
+		lerpf(0.45, 1.0, health_ratio),
+		lerpf(0.45, 1.0, health_ratio),
+		1.0
+	)
 
 func update_weapon(weapon_name: String):
 	_ensure_nodes()
@@ -208,25 +257,56 @@ func update_ammo(current: int, max_val: int, reserve: int):
 	ammo_label.text = "%03d | %03d" % [current, reserve]
 	reserve_label.text = "CAP %02d" % max_val
 	var ammo_ratio: float = float(current) / maxf(float(max_val), 1.0)
-	if ammo_ratio <= 0.2:
+	if current <= 0:
+		current_ammo_state = "EMPTY"
+		ammo_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
+		reserve_label.modulate = Color(0.98, 0.52, 0.42, 0.96)
+		ammo_state_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
+		_start_ammo_warning()
+	elif ammo_ratio <= 0.2:
+		current_ammo_state = "EMPTY" if current <= 0 else "LOW AMMO"
 		ammo_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
+		reserve_label.modulate = Color(1.0, 0.54, 0.46, 0.96)
+		ammo_state_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
 		_start_ammo_warning()
 	elif ammo_ratio <= 0.4:
+		current_ammo_state = "CHECK MAG"
 		ammo_label.modulate = Color(1.0, 0.82, 0.35, 1.0)
+		reserve_label.modulate = Color(0.98, 0.82, 0.38, 0.96)
+		ammo_state_label.modulate = Color(1.0, 0.82, 0.35, 0.96)
 		_stop_ammo_warning()
 	else:
+		current_ammo_state = "READY"
 		ammo_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		reserve_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
+		ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
 		_stop_ammo_warning()
+	ammo_state_label.text = current_ammo_state
 
 func update_reload(active: bool, progress: float):
 	_ensure_nodes()
 	reload_panel.visible = active
 	reload_bar.value = progress * 100.0
+	if active:
+		ammo_state_label.text = "RELOADING %02d%%" % int(round(progress * 100.0))
+		ammo_state_label.modulate = Color(1.0, 0.8, 0.35, 1.0)
+		ammo_label.modulate = Color(1.0, 0.92, 0.66, 1.0)
+		reserve_label.modulate = Color(1.0, 0.82, 0.42, 0.96)
+		_stop_ammo_warning()
+	else:
+		ammo_state_label.text = current_ammo_state
 
 func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 	_ensure_nodes()
 	wave_label.text = "WAVE %02d" % wave
 	zombie_label.text = "Zombies: %d  Incoming: %d" % [living_zombies, remaining_to_spawn]
+	if wave != last_wave_number:
+		last_wave_number = wave
+		wave_clear_announced = false
+	if wave > 0 and living_zombies <= 0 and remaining_to_spawn <= 0 and not wave_clear_announced:
+		wave_clear_announced = true
+		show_combat_text("WAVE CLEAR", Color(1.0, 0.28, 0.24, 1.0))
+		show_status("AREA SECURE", Color(1.0, 0.28, 0.24, 1.0), 0.55)
 
 func update_crosshair(movement_ratio: float):
 	_ensure_nodes()
@@ -244,17 +324,24 @@ func show_wave_announcement(wave: int):
 	_ensure_nodes()
 	if wave_announce_tween:
 		wave_announce_tween.kill()
-	wave_announce_label.text = "WAVE %d" % wave
+	wave_announce_label.text = "WAVE %02d\nINCOMING" % wave
 	wave_announce_label.visible = true
-	wave_announce_label.scale = Vector2(1.28, 1.28)
+	wave_announce_label.scale = Vector2(1.38, 1.38)
 	wave_announce_label.modulate = Color(0.95, 0.98, 1.0, 0.0)
 	wave_announce_tween = create_tween()
-	wave_announce_tween.tween_property(wave_announce_label, "modulate:a", 1.0, 0.12)
-	wave_announce_tween.parallel().tween_property(wave_announce_label, "scale", Vector2(1.0, 1.0), 0.16)
-	wave_announce_tween.tween_interval(0.5)
-	wave_announce_tween.tween_property(wave_announce_label, "modulate:a", 0.0, 0.22)
+	wave_announce_tween.tween_property(wave_announce_label, "modulate:a", 1.0, 0.1)
+	wave_announce_tween.parallel().tween_property(wave_announce_label, "scale", Vector2(1.02, 1.02), 0.18)
+	wave_announce_tween.tween_interval(0.65)
+	wave_announce_tween.tween_property(wave_announce_label, "modulate:a", 0.0, 0.24)
 	wave_announce_tween.tween_callback(func(): wave_announce_label.visible = false)
-	show_combat_text("WAVE %d" % wave, Color(0.95, 0.98, 1.0, 1.0))
+	if combat_text_primary.text == "WAVE CLEAR":
+		combat_text_primary.text = ""
+		combat_text_primary.modulate.a = 0.0
+		combat_text_primary.position = Vector2.ZERO
+	if combat_text_secondary.text == "WAVE CLEAR":
+		combat_text_secondary.text = ""
+		combat_text_secondary.modulate.a = 0.0
+		combat_text_secondary.position = Vector2.ZERO
 
 func show_combat_text(message: String, color: Color):
 	_ensure_nodes()
@@ -334,6 +421,7 @@ func show_status(message: String, color: Color, duration: float = 0.45):
 
 func show_game_over(stats: Dictionary = {}):
 	_ensure_nodes()
+	var resolved_stats: Dictionary = _resolve_game_over_stats(stats)
 	if pause_tween:
 		pause_tween.kill()
 	pause_dimmer.visible = false
@@ -345,18 +433,24 @@ func show_game_over(stats: Dictionary = {}):
 	game_over_panel.modulate.a = 0.0
 	game_over_label.scale = Vector2(0.56, 0.56)
 	game_over_label.modulate = Color(0.95, 0.08, 0.08, 0.0)
-	game_over_stats_label.text = _format_game_over_stats(stats)
+	game_over_summary_label.text = _format_game_over_summary(resolved_stats)
+	game_over_summary_label.modulate.a = 0.0
+	game_over_stats_label.text = _format_game_over_stats(resolved_stats)
 	game_over_stats_label.modulate.a = 0.0
+	game_over_hint_label.text = "Press Restart to redeploy."
+	game_over_hint_label.modulate.a = 0.0
 	restart_button.modulate.a = 0.0
 	if game_over_tween:
 		game_over_tween.kill()
 	game_over_tween = create_tween()
-	game_over_tween.tween_property(game_over_panel, "modulate:a", 1.0, 0.18)
+	game_over_tween.tween_property(game_over_panel, "modulate:a", 1.0, 0.2)
 	game_over_tween.parallel().tween_property(game_over_label, "modulate:a", 1.0, 0.16)
 	game_over_tween.parallel().tween_property(game_over_label, "scale", Vector2(1.08, 1.08), 0.16)
 	game_over_tween.tween_property(game_over_label, "scale", Vector2(1.0, 1.0), 0.1)
-	game_over_tween.tween_property(game_over_stats_label, "modulate:a", 1.0, 0.14)
-	game_over_tween.tween_property(restart_button, "modulate:a", 1.0, 0.18)
+	game_over_tween.tween_property(game_over_summary_label, "modulate:a", 1.0, 0.14)
+	game_over_tween.parallel().tween_property(game_over_stats_label, "modulate:a", 1.0, 0.18)
+	game_over_tween.tween_property(game_over_hint_label, "modulate:a", 1.0, 0.14)
+	game_over_tween.parallel().tween_property(restart_button, "modulate:a", 1.0, 0.18)
 
 func toggle_pause_menu():
 	_ensure_nodes()
@@ -401,21 +495,21 @@ func _show_damage_indicator(direction: Vector2):
 		normalized_direction = Vector2(0.0, -1.0)
 
 	var angle: float = atan2(normalized_direction.x, -normalized_direction.y)
-	var radius: float = 130.0
+	var radius: float = 136.0
 	var center: Vector2 = damage_compass.size * 0.5
 	damage_compass_marker.position = center + (Vector2(sin(angle), -cos(angle)) * radius) - (damage_compass_marker.size * 0.5)
 	damage_compass_marker.rotation = angle
 	damage_compass_marker.visible = true
 	damage_compass_marker.modulate.a = 0.0
-	damage_compass_marker.scale = Vector2(0.8, 0.8)
+	damage_compass_marker.scale = Vector2(0.68, 1.1)
 	if damage_compass_tween:
 		damage_compass_tween.kill()
 	damage_compass_tween = create_tween()
-	damage_compass_tween.tween_property(damage_compass_marker, "modulate:a", 0.9, 0.08)
-	damage_compass_tween.parallel().tween_property(damage_compass_marker, "scale", Vector2(1.1, 1.1), 0.08)
-	damage_compass_tween.tween_interval(0.08)
-	damage_compass_tween.tween_property(damage_compass_marker, "modulate:a", 0.0, 0.28)
-	damage_compass_tween.parallel().tween_property(damage_compass_marker, "scale", Vector2(1.22, 1.22), 0.28)
+	damage_compass_tween.tween_property(damage_compass_marker, "modulate:a", 1.0, 0.06)
+	damage_compass_tween.parallel().tween_property(damage_compass_marker, "scale", Vector2(1.05, 1.28), 0.08)
+	damage_compass_tween.tween_interval(0.1)
+	damage_compass_tween.tween_property(damage_compass_marker, "modulate:a", 0.0, 0.34)
+	damage_compass_tween.parallel().tween_property(damage_compass_marker, "scale", Vector2(1.22, 1.5), 0.34)
 	damage_compass_tween.tween_callback(func(): damage_compass_marker.visible = false)
 
 func _hide_legacy_damage_indicators():
@@ -521,13 +615,74 @@ func _start_ammo_warning():
 		return
 	ammo_warning_tween = create_tween()
 	ammo_warning_tween.set_loops()
-	ammo_warning_tween.tween_property(ammo_label, "scale", Vector2(1.06, 1.06), 0.18)
-	ammo_warning_tween.tween_property(ammo_label, "scale", Vector2(1.0, 1.0), 0.18)
+	ammo_warning_tween.tween_property(ammo_label, "scale", Vector2(1.08, 1.08), 0.16)
+	ammo_warning_tween.parallel().tween_property(ammo_state_label, "modulate:a", 0.55, 0.16)
+	ammo_warning_tween.tween_property(ammo_label, "scale", Vector2(1.0, 1.0), 0.16)
+	ammo_warning_tween.parallel().tween_property(ammo_state_label, "modulate:a", 1.0, 0.16)
 
 func _stop_ammo_warning():
 	if ammo_warning_tween:
 		ammo_warning_tween.kill()
 	ammo_label.scale = Vector2(1.0, 1.0)
+	ammo_state_label.modulate.a = 1.0
+
+func _resolve_game_over_stats(stats: Dictionary) -> Dictionary:
+	var resolved: Dictionary = stats.duplicate(true)
+	var player: Node = get_tree().get_first_node_in_group("player")
+
+	if not resolved.has("wave") or int(resolved.get("wave", 0)) <= 0:
+		resolved["wave"] = _get_current_wave_number()
+	if not resolved.has("kills"):
+		resolved["kills"] = _get_node_int(player, "kills")
+	if not resolved.has("headshots"):
+		resolved["headshots"] = _get_node_int(player, "headshots")
+	if not resolved.has("accuracy"):
+		resolved["accuracy"] = _get_player_accuracy(player)
+	if not resolved.has("time_seconds") or int(resolved.get("time_seconds", 0)) <= 0:
+		resolved["time_seconds"] = _get_session_time_seconds()
+
+	return resolved
+
+func _get_current_wave_number() -> int:
+	if wave_label == null:
+		return 0
+	var digits: String = ""
+	for character in wave_label.text:
+		if character >= "0" and character <= "9":
+			digits += character
+	if digits.is_empty():
+		return 0
+	return int(digits)
+
+func _get_node_int(node: Node, property_name: String) -> int:
+	if node == null or not is_instance_valid(node):
+		return 0
+	var value: Variant = node.get(property_name)
+	if value == null:
+		return 0
+	return int(value)
+
+func _get_player_accuracy(player: Node) -> float:
+	if player == null or not is_instance_valid(player):
+		return 0.0
+	if player.has_method("get_accuracy"):
+		return float(player.call("get_accuracy"))
+
+	var shots_fired: int = _get_node_int(player, "shots_fired")
+	if shots_fired <= 0:
+		return 0.0
+	var shots_hit: int = _get_node_int(player, "shots_hit")
+	return float(shots_hit) / float(shots_fired)
+
+func _get_session_time_seconds() -> int:
+	if session_start_msec <= 0:
+		return 0
+	return maxi(0, int((Time.get_ticks_msec() - session_start_msec) / 1000))
+
+func _format_game_over_summary(stats: Dictionary) -> String:
+	var wave: int = int(stats.get("wave", 0))
+	var kills: int = int(stats.get("kills", 0))
+	return "You held the line until Wave %d and dropped %d hostiles." % [wave, kills]
 
 func _format_game_over_stats(stats: Dictionary) -> String:
 	var wave: int = int(stats.get("wave", 0))
@@ -537,4 +692,4 @@ func _format_game_over_stats(stats: Dictionary) -> String:
 	var total_seconds: int = int(stats.get("time_seconds", 0))
 	var minutes: int = total_seconds / 60
 	var seconds: int = total_seconds % 60
-	return "Wave %d  Kills %d  Headshots %d  Accuracy %.0f%%  Time %02d:%02d" % [wave, kills, headshots, accuracy, minutes, seconds]
+	return "SESSION REPORT\nWAVE REACHED  %02d\nKILLS         %d\nHEADSHOTS     %d\nACCURACY      %.0f%%\nSURVIVAL      %02d:%02d" % [wave, kills, headshots, accuracy, minutes, seconds]
