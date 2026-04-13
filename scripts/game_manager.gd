@@ -77,13 +77,20 @@ func _on_spawn_timer_timeout():
 	if current_zombies >= max_zombies or spawned_in_wave >= zombies_to_spawn_in_wave:
 		return
 
+	spawn_points = spawn_points.filter(func(point: Marker3D) -> bool:
+		return is_instance_valid(point) and point.is_inside_tree()
+	)
+
 	if spawn_points.is_empty():
 		return
 
-	var spawn_point = spawn_points.pick_random()
-	var zombie = zombie_scene.instantiate()
-	zombie.global_position = spawn_point.global_position
+	var spawn_point: Marker3D = spawn_points.pick_random()
+	if spawn_point == null or not is_instance_valid(spawn_point) or not spawn_point.is_inside_tree():
+		return
+
+	var zombie: Node3D = zombie_scene.instantiate()
 	get_tree().current_scene.add_child(zombie)
+	zombie.global_transform = spawn_point.global_transform
 	spawned_in_wave += 1
 	if spawned_in_wave < zombies_to_spawn_in_wave:
 		spawn_timer.start(spawn_interval)

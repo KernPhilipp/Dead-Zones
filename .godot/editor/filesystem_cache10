@@ -1,5 +1,5 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1776060909
+::res://::1776064350
 export_presets.cfg::TextFile::-1::1774606345::0::1::::<><><>0<>0<><>::
 README.md::TextFile::-1::1776059230::0::1::::<><><>0<>0<><>::
 ::res://assets/::1774606345
@@ -67,13 +67,14 @@ zombie_handbook.md::TextFile::-1::1774606345::0::1::::<><><>0<>0<><>::
 ::res://scenes/::1776060029
 handbook_book.tscn::PackedScene::741986523234278784::1774606345::0::1::::<><><>0<>0<><>::res://scripts/handbook_book.gd
 hud.tscn::PackedScene::398730266376::1776059124::0::1::::<><><>0<>0<><>::res://scripts/hud.gd<>res://assets/ui/blood_overlay.svg
-main.tscn::PackedScene::630662069864::1776060029::0::1::::<><><>0<>0<><>::res://scenes/player.tscn<>res://scenes/hud.tscn<>res://scripts/game_manager.gd<>res://scenes/props/broken_fences.tscn
+main.tscn::PackedScene::630662069864::1776061668::0::1::::<><><>0<>0<><>::res://scenes/player.tscn<>res://scenes/hud.tscn<>res://scripts/game_manager.gd<>res://scenes/props/broken_fences.tscn<>res://scenes/props/fences_clean.tscn
 player.tscn::PackedScene::27365761918488::1774250249::0::1::::<><><>0<>0<><>::res://scripts/player.gd
 zombie.tscn::PackedScene::45398768490512::1774606345::0::1::::<><><>0<>0<><>::res://scripts/zombie.gd<>res://scripts/zombie_hitbox.gd
-::res://scenes/props/::1776060029
-broken_fences.tscn::PackedScene::-1::1776060029::0::1::::<><><>0<>0<><>::
+::res://scenes/props/::1776064304
+broken_fences.tscn::PackedScene::-1::1776064304::0::1::::<><><>0<>0<><>::
+fences_clean.tscn::PackedScene::-1::1776064304::0::1::::<><><>0<>0<><>::
 ::res://scripts/::1776059124
-game_manager.gd::GDScript::1107880702585157809::1776059124::0::1::::<>Node<><>0<>0<><>::
+game_manager.gd::GDScript::1107880702585157809::1776063245::0::1::::<>Node<><>0<>0<><>::
 handbook_book.gd::GDScript::3982513685297990710::1774606345::0::1::::<>Control<><>0<>0<><>::
 hud.gd::GDScript::3632510194491325148::1776059124::0::1::::<>CanvasLayer<><>0<>0<><>::
 player.gd::GDScript::6052148405131812736::1776060658::0::1::::<>CharacterBody3D<><>0<>0<><>::

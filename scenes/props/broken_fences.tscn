@@ -1,17 +1,17 @@
 [gd_scene load_steps=4 format=3]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
-albedo_color = Color(0.32, 0.34, 0.31, 1)
-metallic = 0.65
-roughness = 0.82
+[sub_resource type="StandardMaterial3D" id="mat_metal"]
+albedo_color = Color(0.28, 0.29, 0.28, 1)
+metallic = 0.72
+roughness = 0.88
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rust"]
-albedo_color = Color(0.47, 0.24, 0.12, 1)
-metallic = 0.2
-roughness = 0.95
+[sub_resource type="StandardMaterial3D" id="mat_rust"]
+albedo_color = Color(0.52, 0.22, 0.09, 1)
+metallic = 0.18
+roughness = 0.97
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_concrete"]
-albedo_color = Color(0.38, 0.38, 0.36, 1)
+[sub_resource type="StandardMaterial3D" id="mat_concrete"]
+albedo_color = Color(0.41, 0.4, 0.38, 1)
 roughness = 1.0
 
 [node name="BrokenFences" type="Node3D"]
@@ -19,159 +19,153 @@ roughness = 1.0
 [node name="FenceStraightBroken" type="Node3D" parent="."]
 
 [node name="PostLeft" type="CSGBox3D" parent="FenceStraightBroken"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45, 1.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 1.18, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.18, 2.2, 0.18)
-material = SubResource("StandardMaterial3D_metal")
+size = Vector3(0.12, 2.36, 0.12)
+material = SubResource("mat_metal")
 
-[node name="PostRight" type="CSGBox3D" parent="FenceStraightBroken"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.45, 1.1, 0)
+[node name="PostRightCollapsed" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.8192, 0.5736, 0, -0.5736, 0.8192, 0, 0, 0, 1, 1.35, 0.95, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.18, 2.2, 0.18)
-material = SubResource("StandardMaterial3D_metal")
+size = Vector3(0.12, 1.95, 0.12)
+material = SubResource("mat_metal")
 
-[node name="RailTopLeft" type="CSGBox3D" parent="FenceStraightBroken"]
-transform = Transform3D(0.99, -0.12, 0, 0.12, 0.99, 0, 0, 0, 1, -0.7, 1.7, 0)
+[node name="TwistedRailA" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.9781, -0.2079, 0, 0.2079, 0.9781, 0, 0, 0, 1, -0.85, 1.82, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(1.35, 0.1, 0.08)
-material = SubResource("StandardMaterial3D_rust")
+size = Vector3(1.55, 0.05, 0.05)
+material = SubResource("mat_rust")
 
-[node name="RailMidRight" type="CSGBox3D" parent="FenceStraightBroken"]
-transform = Transform3D(0.98, 0.18, 0, -0.18, 0.98, 0, 0, 0, 1, 0.72, 1.15, 0)
+[node name="TwistedRailB" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.9063, 0.4226, 0, -0.4226, 0.9063, 0, 0, 0, 1, 0.7, 1.12, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(1.3, 0.1, 0.08)
-material = SubResource("StandardMaterial3D_rust")
+size = Vector3(1.2, 0.05, 0.05)
+material = SubResource("mat_rust")
 
-[node name="JaggedPiece" type="CSGBox3D" parent="FenceStraightBroken"]
-transform = Transform3D(0.82, -0.57, 0, 0.57, 0.82, 0, 0, 0, 1, 0.18, 1.48, 0)
+[node name="TornMeshA" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.866, -0.5, 0, 0.5, 0.866, 0, 0, 0, 1, -0.8, 1.42, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.9, 0.08, 0.07)
-material = SubResource("StandardMaterial3D_metal")
+size = Vector3(1.1, 0.02, 0.02)
+material = SubResource("mat_metal")
+
+[node name="TornMeshB" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.9063, 0.4226, 0, -0.4226, 0.9063, 0, 0, 0, 1, 0.18, 1.04, 0)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(0.96, 0.02, 0.02)
+material = SubResource("mat_rust")
+
+[node name="HangingBar" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.4226, -0.9063, 0, 0.9063, 0.4226, 0, 0, 0, 1, 0.35, 0.78, 0)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(0.8, 0.03, 0.03)
+material = SubResource("mat_metal")
+
+[node name="DebrisOnGround" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.6293, -0.7771, 0, 0.7771, 0.6293, 0, 0, 0, 1, 0.82, 0.18, 0.05)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1.05, 0.05, 0.05)
+material = SubResource("mat_rust")
 
 [node name="ConcreteBaseLeft" type="CSGBox3D" parent="FenceStraightBroken"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45, 0.15, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0.11, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.36, 0.3, 0.36)
-material = SubResource("StandardMaterial3D_concrete")
+size = Vector3(0.24, 0.22, 0.24)
+material = SubResource("mat_concrete")
 
-[node name="ConcreteBaseRight" type="CSGBox3D" parent="FenceStraightBroken"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.45, 0.15, 0)
+[node name="ConcreteBaseRightBroken" type="CSGBox3D" parent="FenceStraightBroken"]
+transform = Transform3D(0.9659, 0, 0.2588, 0, 1, 0, -0.2588, 0, 0.9659, 1.42, 0.12, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.36, 0.3, 0.36)
-material = SubResource("StandardMaterial3D_concrete")
+size = Vector3(0.32, 0.18, 0.24)
+material = SubResource("mat_concrete")
 
 [node name="FenceGapCollapsed" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.4)
 
-[node name="PostLeft" type="CSGBox3D" parent="FenceGapCollapsed"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.05, 0)
+[node name="LeaningPostLeft" type="CSGBox3D" parent="FenceGapCollapsed"]
+transform = Transform3D(0.9659, -0.2588, 0, 0.2588, 0.9659, 0, 0, 0, 1, -1.45, 1.04, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.18, 2.1, 0.18)
-material = SubResource("StandardMaterial3D_metal")
+size = Vector3(0.12, 2.05, 0.12)
+material = SubResource("mat_metal")
 
-[node name="PostRightBent" type="CSGBox3D" parent="FenceGapCollapsed"]
-transform = Transform3D(0.94, 0.34, 0, -0.34, 0.94, 0, 0, 0, 1, 1.42, 1.0, 0)
+[node name="LeaningPostRight" type="CSGBox3D" parent="FenceGapCollapsed"]
+transform = Transform3D(0.7071, 0.7071, 0, -0.7071, 0.7071, 0, 0, 0, 1, 1.3, 0.72, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.18, 2.0, 0.18)
-material = SubResource("StandardMaterial3D_metal")
+size = Vector3(0.12, 1.65, 0.12)
+material = SubResource("mat_metal")
 
-[node name="BrokenRailLeft" type="CSGBox3D" parent="FenceGapCollapsed"]
-transform = Transform3D(1, 0.03, 0, -0.03, 1, 0, 0, 0, 1, -0.92, 1.36, 0)
+[node name="CollapsedPanelA" type="CSGBox3D" parent="FenceGapCollapsed"]
+transform = Transform3D(0.5736, -0.8192, 0, 0.8192, 0.5736, 0, 0, 0, 1, -0.35, 0.36, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.95, 0.08, 0.08)
-material = SubResource("StandardMaterial3D_rust")
+size = Vector3(1.55, 0.06, 0.05)
+material = SubResource("mat_rust")
 
-[node name="BrokenRailGround" type="CSGBox3D" parent="FenceGapCollapsed"]
-transform = Transform3D(0.71, -0.71, 0, 0.71, 0.71, 0, 0, 0, 1, 0.3, 0.26, 0.18)
+[node name="CollapsedPanelB" type="CSGBox3D" parent="FenceGapCollapsed"]
+transform = Transform3D(0.8192, -0.5736, 0, 0.5736, 0.8192, 0, 0, 0, 1, 0.56, 0.22, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(1.5, 0.08, 0.08)
-material = SubResource("StandardMaterial3D_rust")
-
-[node name="ConcretePile" type="CSGBox3D" parent="FenceGapCollapsed"]
-transform = Transform3D(0.98, 0, 0.18, 0, 1, 0, -0.18, 0, 0.98, 0.78, 0.14, -0.1)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(0.52, 0.28, 0.44)
-material = SubResource("StandardMaterial3D_concrete")
+size = Vector3(1.0, 0.05, 0.05)
+material = SubResource("mat_metal")
 
 [node name="FenceCornerDamaged" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.8)
 
-[node name="CornerPost" type="CSGBox3D" parent="FenceCornerDamaged"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
+[node name="CornerCore" type="CSGCylinder3D" parent="FenceCornerDamaged"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.2, 2.3, 0.2)
-material = SubResource("StandardMaterial3D_metal")
+radius = 0.08
+height = 2.3
+sides = 12
+material = SubResource("mat_metal")
 
-[node name="SidePostX" type="CSGBox3D" parent="FenceCornerDamaged"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.55, 1.1, 0)
+[node name="BrokenWingX" type="CSGBox3D" parent="FenceCornerDamaged"]
+transform = Transform3D(0.9903, -0.1392, 0, 0.1392, 0.9903, 0, 0, 0, 1, 0.7, 1.68, 0)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.18, 2.2, 0.18)
-material = SubResource("StandardMaterial3D_metal")
+size = Vector3(1.4, 0.05, 0.05)
+material = SubResource("mat_rust")
 
-[node name="SidePostZ" type="CSGBox3D" parent="FenceCornerDamaged"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 1.55)
+[node name="BrokenWingZ" type="CSGBox3D" parent="FenceCornerDamaged"]
+transform = Transform3D(0, 0, -1, -0.4226, 0.9063, 0, 0.9063, 0.4226, 0, 0, 1.04, 0.6)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(0.18, 2.2, 0.18)
-material = SubResource("StandardMaterial3D_metal")
+size = Vector3(1.0, 0.05, 0.05)
+material = SubResource("mat_metal")
 
-[node name="RailX" type="CSGBox3D" parent="FenceCornerDamaged"]
-transform = Transform3D(0.99, -0.1, 0, 0.1, 0.99, 0, 0, 0, 1, 0.78, 1.58, 0)
+[node name="RippedMeshCorner" type="CSGBox3D" parent="FenceCornerDamaged"]
+transform = Transform3D(0.766, -0.6428, 0, 0.6428, 0.766, 0, 0, 0, 1, 0.55, 0.68, 0.04)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(1.48, 0.08, 0.08)
-material = SubResource("StandardMaterial3D_rust")
-
-[node name="RailZ" type="CSGBox3D" parent="FenceCornerDamaged"]
-transform = Transform3D(0, 0, -1, -0.26, 0.96, 0, 0.96, 0.26, 0, 0, 1.06, 0.76)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(1.25, 0.08, 0.08)
-material = SubResource("StandardMaterial3D_metal")
-
-[node name="FallenFragment" type="CSGBox3D" parent="FenceCornerDamaged"]
-transform = Transform3D(0.91, 0, 0.42, 0.08, 0.98, -0.18, -0.41, 0.2, 0.89, 0.74, 0.24, 0.82)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(0.9, 0.08, 0.08)
-material = SubResource("StandardMaterial3D_rust")
-
-[node name="CornerBase" type="CSGBox3D" parent="FenceCornerDamaged"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 0)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(0.42, 0.32, 0.42)
-material = SubResource("StandardMaterial3D_concrete")
+size = Vector3(1.25, 0.02, 0.02)
+material = SubResource("mat_rust")

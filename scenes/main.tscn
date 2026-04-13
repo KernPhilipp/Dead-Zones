@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="2_hud"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_gm"]
 [ext_resource type="PackedScene" path="res://scenes/props/broken_fences.tscn" id="4_broken_fences"]
+[ext_resource type="PackedScene" path="res://scenes/props/fences_clean.tscn" id="5_clean_fences"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.35, 0.35, 0.3, 1)
@@ -108,6 +109,12 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0, -6)
 
 [node name="BrokenFenceClusterC" parent="Map" instance=ExtResource("4_broken_fences")]
 transform = Transform3D(-0.87, 0, -0.5, 0, 1, 0, 0.5, 0, -0.87, 4, 0, 13)
+
+[node name="CleanFenceClusterA" parent="Map" instance=ExtResource("5_clean_fences")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -14)
+
+[node name="CleanFenceClusterB" parent="Map" instance=ExtResource("5_clean_fences")]
+transform = Transform3D(0.71, 0, -0.71, 0, 1, 0, 0.71, 0, 0.71, 14, 0, 4)
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
