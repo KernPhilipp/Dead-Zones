@@ -4,6 +4,7 @@ var health_bar: ProgressBar
 var health_damage_bar: ProgressBar
 var health_value_label: Label
 var low_health_label: Label
+var start_hint_label: Label
 var weapon_label: Label
 var ammo_label: Label
 var ammo_state_label: Label
@@ -32,6 +33,8 @@ var crosshair_bottom: ColorRect
 var crosshair_dot: ColorRect
 var damage_compass: Control
 var damage_compass_marker: Control
+var damage_compass_marker_alt_a: Control
+var damage_compass_marker_alt_b: Control
 var damage_flash: ColorRect
 var low_health_overlay: ColorRect
 var blood_overlay: TextureRect
@@ -87,6 +90,11 @@ var crosshair_scale_velocity: float = 0.18
 var crosshair_extra_spread: float = 0.0
 var crosshair_base_color: Color = Color(0.95, 0.97, 1.0, 0.92)
 var crosshair_dot_base_color: Color = Color(0.95, 0.97, 1.0, 1.0)
+var damage_compass_markers: Array[Control] = []
+var damage_compass_next_index: int = 0
+var combat_message_priorities: Dictionary = {}
+var combat_primary_priority: int = -1
+var combat_secondary_priority: int = -1
 
 func _enter_tree():
 	_ensure_nodes()
@@ -114,6 +122,8 @@ func _ready():
 	health_damage_bar.value = 100.0
 	low_health_label.visible = false
 	low_health_label.modulate.a = 0.0
+	start_hint_label.visible = false
+	start_hint_label.modulate.a = 0.0
 	pause_dimmer.visible = false
 	pause_dimmer.modulate.a = 0.0
 	pause_panel.visible = false
@@ -133,6 +143,10 @@ func _ready():
 	restart_button.modulate.a = 0.0
 	damage_compass_marker.visible = false
 	damage_compass_marker.modulate.a = 0.0
+	damage_compass_marker_alt_a.visible = false
+	damage_compass_marker_alt_a.modulate.a = 0.0
+	damage_compass_marker_alt_b.visible = false
+	damage_compass_marker_alt_b.modulate.a = 0.0
 	_hide_legacy_damage_indicators()
 	update_weapon_slots(0)
 	_set_crosshair_state("default")
@@ -140,6 +154,7 @@ func _ready():
 	resume_button.pressed.connect(_on_resume)
 	pause_restart_button.pressed.connect(_on_restart)
 	restart_button.pressed.connect(_on_restart)
+	_show_start_hints()
 
 func _ensure_nodes():
 	if nodes_initialized:
@@ -149,6 +164,7 @@ func _ensure_nodes():
 	health_damage_bar = _find_required_node("HealthDamageBar") as ProgressBar
 	health_value_label = _find_required_node("HealthValueLabel") as Label
 	low_health_label = _find_required_node("LowHealthLabel") as Label
+	start_hint_label = _find_required_node("StartHintLabel") as Label
 	weapon_label = _find_required_node("WeaponLabel") as Label
 	ammo_label = _find_required_node("AmmoLabel") as Label
 	ammo_state_label = _find_required_node("AmmoStateLabel") as Label
@@ -177,6 +193,8 @@ func _ensure_nodes():
 	crosshair_dot = _find_required_node("Dot") as ColorRect
 	damage_compass = _find_required_node("DamageCompass") as Control
 	damage_compass_marker = _find_required_node("DamageCompassMarker") as Control
+	damage_compass_marker_alt_a = _find_required_node("DamageCompassMarkerAltA") as Control
+	damage_compass_marker_alt_b = _find_required_node("DamageCompassMarkerAltB") as Control
 	damage_flash = _find_required_node("DamageFlash") as ColorRect
 	low_health_overlay = _find_required_node("LowHealthOverlay") as ColorRect
 	blood_overlay = _find_required_node("BloodOverlay") as TextureRect
@@ -196,6 +214,7 @@ func _ensure_nodes():
 	health_panel = _find_required_node("HealthPanel") as PanelContainer
 	wave_panel = _find_required_node("WavePanel") as PanelContainer
 	weapon_panel = _find_required_node("WeaponPanel") as PanelContainer
+	damage_compass_markers = [damage_compass_marker, damage_compass_marker_alt_a, damage_compass_marker_alt_b]
 	nodes_initialized = true
 
 func _find_required_node(node_name: String) -> Node:
@@ -392,10 +411,18 @@ func show_wave_announcement(wave: int):
 
 func show_combat_text(message: String, color: Color):
 	_ensure_nodes()
-	if combat_text_primary.text == "" or combat_text_primary.modulate.a <= 0.05:
-		_show_combat_label(combat_text_primary, message, color, true)
-	else:
-		_show_combat_label(combat_text_secondary, message, color, false)
+	var priority: int = _get_combat_text_priority(message)
+	if (combat_text_primary.text == "" or combat_text_primary.modulate.a <= 0.05):
+		_show_combat_label(combat_text_primary, message, color, true, priority)
+		return
+	if priority > combat_primary_priority:
+		_show_combat_label(combat_text_primary, message, color, true, priority)
+		return
+	if combat_text_secondary.text == "" or combat_text_secondary.modulate.a <= 0.05:
+		_show_combat_label(combat_text_secondary, message, color, false, priority)
+		return
+	if priority >= combat_secondary_priority:
+		_show_combat_label(combat_text_secondary, message, color, false, priority)
 
 func show_kill_feedback():
 	_ensure_nodes()
@@ -453,12 +480,17 @@ func show_damage_feedback(amount: int, direction: Vector2):
 func show_status(message: String, color: Color, duration: float = 0.45):
 	_ensure_nodes()
 	status_label.text = message
-	status_label.modulate = color
+	status_label.modulate = Color(color.r, color.g, color.b, 0.0)
+	var tween: Tween = create_tween()
+	tween.tween_property(status_label, "modulate:a", 1.0, 0.08)
 	if status_timer:
 		status_timer = null
 	status_timer = get_tree().create_timer(duration)
 	await status_timer.timeout
 	if status_label.text == message:
+		var fade_out: Tween = create_tween()
+		fade_out.tween_property(status_label, "modulate:a", 0.0, 0.12)
+		await fade_out.finished
 		status_label.text = "READY"
 		status_label.modulate = Color(0.82, 0.14, 0.12, 1)
 
@@ -539,22 +571,22 @@ func _show_damage_indicator(direction: Vector2):
 		normalized_direction = Vector2(0.0, -1.0)
 
 	var angle: float = atan2(normalized_direction.x, -normalized_direction.y)
-	var radius: float = 136.0
+	var marker: Control = damage_compass_markers[damage_compass_next_index % damage_compass_markers.size()]
+	damage_compass_next_index += 1
+	var radius: float = 136.0 + float((damage_compass_next_index % 3) * 12)
 	var center: Vector2 = damage_compass.size * 0.5
-	damage_compass_marker.position = center + (Vector2(sin(angle), -cos(angle)) * radius) - (damage_compass_marker.size * 0.5)
-	damage_compass_marker.rotation = angle
-	damage_compass_marker.visible = true
-	damage_compass_marker.modulate.a = 0.0
-	damage_compass_marker.scale = Vector2(0.68, 1.1)
-	if damage_compass_tween:
-		damage_compass_tween.kill()
-	damage_compass_tween = create_tween()
-	damage_compass_tween.tween_property(damage_compass_marker, "modulate:a", 1.0, 0.06)
-	damage_compass_tween.parallel().tween_property(damage_compass_marker, "scale", Vector2(1.05, 1.28), 0.08)
-	damage_compass_tween.tween_interval(0.1)
-	damage_compass_tween.tween_property(damage_compass_marker, "modulate:a", 0.0, 0.34)
-	damage_compass_tween.parallel().tween_property(damage_compass_marker, "scale", Vector2(1.22, 1.5), 0.34)
-	damage_compass_tween.tween_callback(func(): damage_compass_marker.visible = false)
+	marker.position = center + (Vector2(sin(angle), -cos(angle)) * radius) - (marker.size * 0.5)
+	marker.rotation = angle
+	marker.visible = true
+	marker.modulate.a = 0.0
+	marker.scale = Vector2(0.68, 1.1)
+	var tween: Tween = create_tween()
+	tween.tween_property(marker, "modulate:a", 1.0, 0.06)
+	tween.parallel().tween_property(marker, "scale", Vector2(1.05, 1.28), 0.08)
+	tween.tween_interval(0.12)
+	tween.tween_property(marker, "modulate:a", 0.0, 0.32)
+	tween.parallel().tween_property(marker, "scale", Vector2(1.18, 1.42), 0.32)
+	tween.tween_callback(func(): marker.visible = false)
 
 func _hide_legacy_damage_indicators():
 	for indicator_name in ["DamageIndicatorTop", "DamageIndicatorBottom", "DamageIndicatorLeft", "DamageIndicatorRight"]:
@@ -608,7 +640,7 @@ func _update_weapon_icon(weapon_name: String):
 		weapon_grip.color = Color(0.14, 0.14, 0.15, 1.0)
 		weapon_muzzle.color = Color(0.92, 0.12, 0.08, 1.0)
 
-func _show_combat_label(label: Label, message: String, color: Color, primary: bool):
+func _show_combat_label(label: Label, message: String, color: Color, primary: bool, priority: int):
 	var style: Dictionary = _get_combat_text_style(message, color)
 	label.position = Vector2.ZERO
 	label.text = message
@@ -627,11 +659,17 @@ func _show_combat_label(label: Label, message: String, color: Color, primary: bo
 	tween.tween_callback(func():
 		label.text = ""
 		label.position = Vector2.ZERO
+		if primary:
+			combat_primary_priority = -1
+		else:
+			combat_secondary_priority = -1
 	)
 	if primary:
 		combat_primary_tween = tween
+		combat_primary_priority = priority
 	else:
 		combat_secondary_tween = tween
+		combat_secondary_priority = priority
 
 func _show_kill_confirm():
 	kill_confirm_label.visible = true
@@ -693,6 +731,33 @@ func _get_combat_text_style(message: String, base_color: Color) -> Dictionary:
 		style["fade_out"] = 0.18
 
 	return style
+
+func _get_combat_text_priority(message: String) -> int:
+	var upper_message: String = message.to_upper()
+	if upper_message.contains("TRIPLE KILL") or upper_message.contains("MULTI KILL"):
+		return 100
+	if upper_message.contains("DOUBLE KILL") or upper_message.contains("ELIMINATION"):
+		return 90
+	if upper_message.contains("HEADSHOT"):
+		return 85
+	if upper_message.contains("WAVE CLEAR"):
+		return 80
+	if upper_message.contains("INCOMING"):
+		return 75
+	if upper_message.contains("RELOADED"):
+		return 45
+	return 20
+
+func _show_start_hints():
+	start_hint_label.visible = true
+	start_hint_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	start_hint_label.scale = Vector2(0.96, 0.96)
+	var tween: Tween = create_tween()
+	tween.tween_property(start_hint_label, "modulate:a", 1.0, 0.22)
+	tween.parallel().tween_property(start_hint_label, "scale", Vector2(1.0, 1.0), 0.22)
+	tween.tween_interval(3.4)
+	tween.tween_property(start_hint_label, "modulate:a", 0.0, 0.28)
+	tween.tween_callback(func(): start_hint_label.visible = false)
 
 func _start_ammo_warning():
 	if ammo_warning_tween and ammo_warning_tween.is_running():
