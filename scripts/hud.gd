@@ -95,6 +95,10 @@ var damage_compass_next_index: int = 0
 var combat_message_priorities: Dictionary = {}
 var combat_primary_priority: int = -1
 var combat_secondary_priority: int = -1
+var recent_threat_time: float = 0.0
+var milestone_kills_announced: int = 0
+var active_weapon_slot_index: int = 0
+var adaptive_threat_level: float = 0.0
 
 func _enter_tree():
 	_ensure_nodes()
@@ -230,6 +234,9 @@ func _process(delta):
 	crosshair_root.scale = crosshair_root.scale.lerp(crosshair_scale_target, clampf(delta / maxf(crosshair_scale_velocity, 0.001), 0.0, 1.0))
 	crosshair_extra_spread = lerpf(crosshair_extra_spread, 0.0, clampf(delta * 9.0, 0.0, 1.0))
 	_update_crosshair_colors(delta)
+	recent_threat_time = maxf(0.0, recent_threat_time - delta)
+	_update_adaptive_hud(delta)
+	_update_session_milestones()
 
 	if Input.is_action_just_pressed("pause_game") and not game_over_panel.visible:
 		toggle_pause_menu()
@@ -247,10 +254,10 @@ func _process(delta):
 	var pulse: float = 0.48 + (sin(low_health_time * 5.8) * 0.24)
 	var hard_pulse: float = 0.7 + (sin(low_health_time * 8.2) * 0.18)
 	low_health_panel_pulse = 1.0 + (sin(low_health_time * 7.2) * 0.025 * low_health_strength)
-	low_health_overlay.modulate.a = low_health_strength * (pulse + 0.18)
+	low_health_overlay.modulate.a = low_health_strength * (pulse + 0.28)
 	low_health_label.visible = true
 	low_health_label.modulate.a = clampf(low_health_strength * hard_pulse, 0.0, 1.0)
-	low_health_label.scale = Vector2.ONE * (1.0 + low_health_strength * 0.12)
+	low_health_label.scale = Vector2.ONE * (1.0 + low_health_strength * 0.16)
 	health_panel.scale = Vector2.ONE * low_health_panel_pulse
 	health_panel.modulate.a = clampf(0.9 + low_health_strength * 0.22, 0.0, 1.0)
 
@@ -279,6 +286,7 @@ func update_health(value: int):
 		1.0
 	)
 	health_value_label.modulate = Color(1.0, lerpf(0.42, 0.98, health_ratio), lerpf(0.42, 0.98, health_ratio), 1.0)
+	_apply_adaptive_hud_presence()
 
 func update_weapon(weapon_name: String):
 	_ensure_nodes()
@@ -287,12 +295,16 @@ func update_weapon(weapon_name: String):
 
 func update_weapon_slots(active_index: int):
 	_ensure_nodes()
+	active_weapon_slot_index = active_index
 	var active_color: Color = Color(1.0, 0.85, 0.45, 1.0)
 	var inactive_color: Color = Color(0.65, 0.65, 0.65, 1.0)
-	slot_label_one.text = "1"
-	slot_label_two.text = "2"
+	slot_label_one.text = "[1]" if active_index == 0 else " 1 "
+	slot_label_two.text = "[2]" if active_index == 1 else " 2 "
 	slot_label_one.modulate = active_color if active_index == 0 else inactive_color
 	slot_label_two.modulate = active_color if active_index == 1 else inactive_color
+	slot_label_one.scale = Vector2.ONE * (1.12 if active_index == 0 else 0.94)
+	slot_label_two.scale = Vector2.ONE * (1.12 if active_index == 1 else 0.94)
+	_apply_adaptive_hud_presence()
 
 func update_ammo(current: int, max_val: int, reserve: int):
 	_ensure_nodes()
@@ -306,6 +318,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		ammo_state_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
 		ammo_state_label.text = "MAG EMPTY"
 		_set_crosshair_state("empty")
+		recent_threat_time = maxf(recent_threat_time, 0.8)
 		_start_ammo_warning()
 	elif ammo_ratio <= 0.2:
 		current_ammo_state = "LOW AMMO"
@@ -314,6 +327,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		ammo_state_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
 		ammo_state_label.text = "LOW AMMO"
 		_set_crosshair_state("warning")
+		recent_threat_time = maxf(recent_threat_time, 0.4)
 		_start_ammo_warning()
 	elif ammo_ratio <= 0.4:
 		current_ammo_state = "CHECK MAG"
@@ -331,6 +345,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		ammo_state_label.text = "READY"
 		_set_crosshair_state("default")
 		_stop_ammo_warning()
+	_apply_adaptive_hud_presence()
 
 func update_reload(active: bool, progress: float):
 	_ensure_nodes()
@@ -339,6 +354,7 @@ func update_reload(active: bool, progress: float):
 	if active:
 		reload_was_active = true
 		_set_crosshair_state("reload")
+		recent_threat_time = maxf(recent_threat_time, 0.3)
 		ammo_state_label.text = "RELOADING %02d%%" % int(round(progress * 100.0))
 		ammo_state_label.modulate = Color(1.0, 0.8, 0.35, 1.0)
 		ammo_label.modulate = Color(1.0, 0.92, 0.66, 1.0)
@@ -369,6 +385,7 @@ func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 		wave_clear_announced = true
 		show_combat_text("WAVE CLEAR", Color(1.0, 0.28, 0.24, 1.0))
 		show_status("AREA SECURE", Color(1.0, 0.28, 0.24, 1.0), 0.55)
+	_apply_adaptive_hud_presence()
 
 func update_crosshair(movement_ratio: float):
 	_ensure_nodes()
@@ -429,6 +446,7 @@ func show_kill_feedback():
 	if hit_marker_tween:
 		hit_marker_tween.kill()
 	_set_crosshair_state("kill")
+	recent_threat_time = maxf(recent_threat_time, 0.9)
 	hit_marker_tween = create_tween()
 	hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.22, 1.22), 0.05)
 	hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.0, 1.0), 0.1)
@@ -442,6 +460,7 @@ func show_shot_feedback(hit: bool):
 		hit_marker_tween.kill()
 	if hit:
 		_set_crosshair_state("hit")
+		recent_threat_time = maxf(recent_threat_time, 0.45)
 		hit_marker.visible = true
 		hit_marker.modulate = Color(1, 0.32, 0.32, 0.0)
 		hit_marker.scale = Vector2(0.55, 0.55)
@@ -463,6 +482,7 @@ func show_shot_feedback(hit: bool):
 
 func show_damage_feedback(amount: int, direction: Vector2):
 	_ensure_nodes()
+	recent_threat_time = maxf(recent_threat_time, 1.6)
 	show_status("TAKING FIRE -" + str(amount), Color(1, 0.25, 0.25, 1), 0.38)
 	show_combat_text("INCOMING", Color(1.0, 0.24, 0.22, 1.0))
 	if damage_flash_tween:
@@ -885,6 +905,39 @@ func _update_pause_menu_content():
 	pause_summary_label.text = "WAVE %02d PAUSED\n%d HOSTILES ELIMINATED" % [wave, kills]
 	pause_controls_label.text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
 	pause_settings_label.text = "SESSION SNAPSHOT\nHEADSHOTS  %d\nACCURACY   %.0f%%\nSURVIVAL   %02d:%02d" % [headshots, accuracy, minutes, seconds]
+
+func _update_adaptive_hud(delta: float):
+	var target_threat: float = clampf(maxf(recent_threat_time / 1.5, low_health_strength), 0.0, 1.0)
+	adaptive_threat_level = lerpf(adaptive_threat_level, target_threat, clampf(delta * 3.4, 0.0, 1.0))
+	_apply_adaptive_hud_presence()
+
+func _apply_adaptive_hud_presence():
+	var threat_level: float = adaptive_threat_level
+	var wave_alpha: float = lerpf(0.42, 1.0, threat_level)
+	var weapon_alpha: float = lerpf(0.5, 1.0, threat_level)
+	var ammo_alpha: float = lerpf(0.56, 1.0, threat_level)
+	var reserve_alpha: float = lerpf(0.4, 0.96, threat_level)
+	var crosshair_alpha: float = lerpf(0.6, 1.0, threat_level)
+
+	wave_panel.modulate.a = wave_alpha
+	weapon_panel.modulate.a = weapon_alpha
+	ammo_label.modulate.a = ammo_alpha
+	ammo_state_label.modulate.a = maxf(ammo_state_label.modulate.a, ammo_alpha)
+	reserve_label.modulate.a = reserve_alpha
+	crosshair_root.modulate.a = crosshair_alpha
+	wave_panel.scale = Vector2.ONE * lerpf(0.97, 1.0, threat_level)
+	weapon_panel.scale = Vector2.ONE * lerpf(0.975, 1.0, threat_level)
+
+func _update_session_milestones():
+	var session_kills: int = _get_session_elimination_count()
+	if session_kills < 10:
+		return
+	var milestone_step: int = int(session_kills / 10) * 10
+	if milestone_step <= milestone_kills_announced:
+		return
+	milestone_kills_announced = milestone_step
+	show_combat_text("%d KILLS" % milestone_step, Color(1.0, 0.86, 0.32, 1.0))
+	show_status("MILESTONE %d" % milestone_step, Color(1.0, 0.86, 0.32, 1.0), 0.4)
 
 func _update_elimination_tracking(wave: int, living_zombies: int, remaining_to_spawn: int):
 	var current_wave_total: int = _get_current_wave_total_count()
