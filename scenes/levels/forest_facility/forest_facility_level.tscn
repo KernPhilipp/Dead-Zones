@@ -7,6 +7,9 @@
 [ext_resource type="PackedScene" path="res://assets/models/buildings/cabin.glb" id="5_cabin_scene"]
 [ext_resource type="PackedScene" path="res://assets/models/buildings/Fantasy House.glb" id="6_fantasy_house_scene"]
 [ext_resource type="PackedScene" path="res://assets/models/buildings/Windmill.glb" id="7_windmill_scene"]
+[ext_resource type="Texture2D" path="res://assets/models/grass/coast_sand_rocks_02_diff_1k.jpg" id="8_ground_albedo"]
+[ext_resource type="Texture2D" path="res://assets/models/grass/coast_sand_rocks_02_rough_1k.exr" id="9_ground_roughness"]
+[ext_resource type="Texture2D" path="res://assets/models/grass/coast_sand_rocks_02_nor_gl_1k.exr" id="10_ground_normal"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(180, 2, 180)
@@ -25,7 +28,21 @@ size = Vector2(18, 12)
 [sub_resource type="PlaneMesh" id="PlaneMesh_small_patch"]
 size = Vector2(10, 8)
 
+[sub_resource type="PlaneMesh" id="PlaneMesh_river_long"]
+size = Vector2(52, 10)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_river_short"]
+size = Vector2(34, 8)
+
 [sub_resource type="BoxMesh" id="BoxMesh_unit"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_hill_large"]
+radius = 1.0
+height = 2.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_hill_medium"]
+radius = 1.0
+height = 2.0
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_tank"]
 top_radius = 2.2
@@ -105,11 +122,27 @@ size = Vector3(5, 1.8, 1.2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.115, 0.125, 0.115, 1)
+albedo_texture = ExtResource("8_ground_albedo")
 roughness = 1.0
+roughness_texture = ExtResource("9_ground_roughness")
+normal_enabled = true
+normal_scale = 0.45
+normal_texture = ExtResource("10_ground_normal")
+uv1_scale = Vector3(11, 11, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dirt"]
 albedo_color = Color(0.165, 0.155, 0.125, 1)
 roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_meadow"]
+albedo_color = Color(0.22, 0.29, 0.18, 1)
+albedo_texture = ExtResource("8_ground_albedo")
+roughness = 1.0
+roughness_texture = ExtResource("9_ground_roughness")
+normal_enabled = true
+normal_scale = 0.3
+normal_texture = ExtResource("10_ground_normal")
+uv1_scale = Vector3(7, 7, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mud"]
 albedo_color = Color(0.11, 0.105, 0.095, 1)
@@ -150,6 +183,15 @@ emission_enabled = true
 emission = Color(1, 0.84, 0.64, 1)
 emission_energy_multiplier = 1.7
 roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_water"]
+albedo_color = Color(0.08, 0.14, 0.16, 0.82)
+transparency = 1
+metallic = 0.1
+roughness = 0.08
+emission_enabled = true
+emission = Color(0.08, 0.18, 0.2, 1)
+emission_energy_multiplier = 0.2
 
 [sub_resource type="Environment" id="Environment_spooky"]
 background_mode = 1
@@ -211,6 +253,67 @@ surface_material_override/0 = SubResource("StandardMaterial3D_dirt")
 transform = Transform3D(1.2, 0, 0.08, 0, 1, 0, -0.06, 0, 1.05, 4, 0.03, 8)
 mesh = SubResource("PlaneMesh_large_patch")
 surface_material_override/0 = SubResource("StandardMaterial3D_dirt")
+
+[node name="MeadowWest" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(1.45, 0, 0.12, 0, 1, 0, -0.08, 0, 1.3, -42, 0.02, -8)
+mesh = SubResource("PlaneMesh_large_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="MeadowSouthEast" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(1.6, 0, -0.08, 0, 1, 0, 0.11, 0, 1.35, 40, 0.02, 46)
+mesh = SubResource("PlaneMesh_large_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="MeadowNorthEast" type="MeshInstance3D" parent="Geometry/GroundPatches"]
+transform = Transform3D(1.25, 0, 0.06, 0, 1, 0, -0.09, 0, 1.1, 46, 0.02, -38)
+mesh = SubResource("PlaneMesh_mid_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="Nature" type="Node3D" parent="Geometry"]
+
+[node name="Hills" type="Node3D" parent="Geometry/Nature"]
+
+[node name="NorthHill" type="MeshInstance3D" parent="Geometry/Nature/Hills"]
+transform = Transform3D(26, 0, 0, 0, 8, 0, 0, 0, 16, 6, -5.2, -58)
+mesh = SubResource("SphereMesh_hill_large")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="WestHill" type="MeshInstance3D" parent="Geometry/Nature/Hills"]
+transform = Transform3D(18, 0, 0, 0, 7, 0, 0, 0, 22, -58, -4.8, -4)
+mesh = SubResource("SphereMesh_hill_large")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="SouthHill" type="MeshInstance3D" parent="Geometry/Nature/Hills"]
+transform = Transform3D(24, 0, 0, 0, 7.5, 0, 0, 0, 18, 22, -5, 63)
+mesh = SubResource("SphereMesh_hill_large")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="RiverBankRiseA" type="MeshInstance3D" parent="Geometry/Nature/Hills"]
+transform = Transform3D(12, 0, 0, 0, 4.6, 0, 0, 0, 26, 54, -6.2, 8)
+mesh = SubResource("SphereMesh_hill_medium")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="RiverBankRiseB" type="MeshInstance3D" parent="Geometry/Nature/Hills"]
+transform = Transform3D(16, 0, 0, 0, 5.0, 0, 0, 0, 18, 46, -6.0, -38)
+mesh = SubResource("SphereMesh_hill_medium")
+surface_material_override/0 = SubResource("StandardMaterial3D_meadow")
+
+[node name="River" type="Node3D" parent="Geometry/Nature"]
+
+[node name="RiverSegmentNorth" type="MeshInstance3D" parent="Geometry/Nature/River"]
+transform = Transform3D(0.93358, 0, -0.358368, 0, 1, 0, 0.358368, 0, 0.93358, 48, -0.08, -42)
+mesh = SubResource("PlaneMesh_river_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_water")
+
+[node name="RiverSegmentMid" type="MeshInstance3D" parent="Geometry/Nature/River"]
+transform = Transform3D(0.981627, 0, -0.190809, 0, 1, 0, 0.190809, 0, 0.981627, 56, -0.08, -2)
+mesh = SubResource("PlaneMesh_river_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_water")
+
+[node name="RiverSegmentSouth" type="MeshInstance3D" parent="Geometry/Nature/River"]
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 48, -0.08, 36)
+mesh = SubResource("PlaneMesh_river_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_water")
 
 [node name="Roads" type="Node3D" parent="Geometry"]
 
@@ -377,28 +480,28 @@ surface_material_override/0 = SubResource("StandardMaterial3D_window")
 [node name="ArtPass" type="Node3D" parent="Geometry"]
 
 [node name="MainWarehouseVisual" parent="Geometry/ArtPass" instance=ExtResource("2_warehouse_scene")]
-transform = Transform3D(3.6, 0, 0, 0, 3.6, 0, 0, 0, 3.6, -1.5, 0, 4)
+transform = Transform3D(0.62, 0, 0, 0, 0.62, 0, 0, 0, 0.62, -2, 0, 5)
 
 [node name="RearSiloVisual" parent="Geometry/ArtPass" instance=ExtResource("3_silo_scene")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -14, 0, -7)
+transform = Transform3D(0.78, 0, 0, 0, 0.78, 0, 0, 0, 0.78, -16, 0, -10)
 
 [node name="GateCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 33, 0, 8)
+transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, 34, 0, 8)
 
 [node name="SouthCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("4_log_cabin_scene")]
-transform = Transform3D(2.4, 0, 0, 0, 2.4, 0, 0, 0, 2.4, 22, 0, 28)
+transform = Transform3D(0.58, 0, 0, 0, 0.58, 0, 0, 0, 0.58, 22, 0, 28)
 
 [node name="NorthAnnexVisual" parent="Geometry/ArtPass" instance=ExtResource("6_fantasy_house_scene")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -29, 0, -6)
+transform = Transform3D(0.42, 0, 0, 0, 0.42, 0, 0, 0, 0.42, -29, 0, -6)
 
 [node name="StorageCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
-transform = Transform3D(2.1, 0, 0, 0, 2.1, 0, 0, 0, 2.1, -27.5, 0, -26)
+transform = Transform3D(0.68, 0, 0, 0, 0.68, 0, 0, 0, 0.68, -28, 0, -26)
 
 [node name="WindmillLandmark" parent="Geometry/ArtPass" instance=ExtResource("7_windmill_scene")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 28, 0, -28)
+transform = Transform3D(0.62, 0, 0, 0, 0.62, 0, 0, 0, 0.62, 10, 0, -64)
 
 [node name="FarWarehouseVisual" parent="Geometry/ArtPass" instance=ExtResource("2_warehouse_scene")]
-transform = Transform3D(2.6, 0, 0, 0, 2.6, 0, 0, 0, 2.6, -31, 0, 27)
+transform = Transform3D(0.42, 0, 0, 0, 0.42, 0, 0, 0, 0.42, -58, 0, 44)
 
 [node name="ForegroundForest" type="Node3D" parent="Geometry/ArtPass"]
 
@@ -424,6 +527,14 @@ mesh = ExtResource("1_tree_mesh")
 
 [node name="SouthYardForest" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
 transform = Transform3D(0.07, 0, -0.008, 0, 0.11, 0, 0.01, 0, 0.065, -4, 0, 48)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="RiverForestNorth" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.06, 0, 0.008, 0, 0.11, 0, -0.009, 0, 0.07, 64, 0, -30)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="RiverForestSouth" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.055, 0, -0.01, 0, 0.1, 0, 0.014, 0, 0.06, 60, 0, 24)
 mesh = ExtResource("1_tree_mesh")
 
 [node name="Fence" type="Node3D" parent="Geometry"]
