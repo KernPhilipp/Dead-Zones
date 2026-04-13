@@ -385,6 +385,7 @@ func take_part_damage(part: String, amount: int) -> bool:
 		_enter_hurt_state()
 	return false
 
+
 func die():
 	if state == ZombieState.DEAD:
 		return

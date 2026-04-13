@@ -203,8 +203,8 @@ func shoot():
 		var target: Object = ray.get_collider()
 		if target.has_method("take_damage"):
 			var headshot: bool = _is_headshot(ray)
-			var applied_damage: int = damage_per_shot * (2 if headshot else 1)
-			var killed: bool = target.take_damage(applied_damage)
+			var applied_damage: int = damage_per_shot
+			var killed: bool = bool(target.take_damage(applied_damage))
 			did_hit = true
 			shots_hit += 1
 			if headshot:
@@ -326,7 +326,14 @@ func get_accuracy() -> float:
 
 func _is_headshot(ray: RayCast3D) -> bool:
 	var target: Object = ray.get_collider()
-	if target == null or not target.is_in_group("zombie"):
+	if target == null:
+		return false
+
+	var body_part: Variant = target.get("body_part") if target != null else null
+	if body_part is String:
+		return String(body_part) == "head"
+
+	if not target.is_in_group("zombie"):
 		return false
 
 	var collision_point: Vector3 = ray.get_collision_point()
