@@ -75,6 +75,7 @@ var session_start_msec: int = 0
 var low_health_panel_pulse: float = 0.0
 var last_wave_number: int = 0
 var wave_clear_announced: bool = false
+var reload_was_active: bool = false
 var tracked_total_eliminations: int = 0
 var tracked_wave_index: int = 0
 var tracked_wave_total: int = 0
@@ -273,32 +274,36 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		ammo_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
 		reserve_label.modulate = Color(0.98, 0.52, 0.42, 0.96)
 		ammo_state_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
+		ammo_state_label.text = "MAG EMPTY"
 		_start_ammo_warning()
 	elif ammo_ratio <= 0.2:
-		current_ammo_state = "EMPTY" if current <= 0 else "LOW AMMO"
+		current_ammo_state = "LOW AMMO"
 		ammo_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
 		reserve_label.modulate = Color(1.0, 0.54, 0.46, 0.96)
 		ammo_state_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
+		ammo_state_label.text = "LOW AMMO"
 		_start_ammo_warning()
 	elif ammo_ratio <= 0.4:
 		current_ammo_state = "CHECK MAG"
 		ammo_label.modulate = Color(1.0, 0.82, 0.35, 1.0)
 		reserve_label.modulate = Color(0.98, 0.82, 0.38, 0.96)
 		ammo_state_label.modulate = Color(1.0, 0.82, 0.35, 0.96)
+		ammo_state_label.text = "CHECK MAG"
 		_stop_ammo_warning()
 	else:
 		current_ammo_state = "READY"
 		ammo_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
 		reserve_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
 		ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
+		ammo_state_label.text = "READY"
 		_stop_ammo_warning()
-	ammo_state_label.text = current_ammo_state
 
 func update_reload(active: bool, progress: float):
 	_ensure_nodes()
 	reload_panel.visible = active
 	reload_bar.value = progress * 100.0
 	if active:
+		reload_was_active = true
 		ammo_state_label.text = "RELOADING %02d%%" % int(round(progress * 100.0))
 		ammo_state_label.modulate = Color(1.0, 0.8, 0.35, 1.0)
 		ammo_label.modulate = Color(1.0, 0.92, 0.66, 1.0)
@@ -306,6 +311,10 @@ func update_reload(active: bool, progress: float):
 		_stop_ammo_warning()
 	else:
 		ammo_state_label.text = current_ammo_state
+		if reload_was_active:
+			reload_was_active = false
+			show_status("RELOAD COMPLETE", Color(0.46, 1.0, 0.56, 1.0), 0.3)
+			show_combat_text("RELOADED", Color(0.76, 1.0, 0.82, 1.0))
 
 func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 	_ensure_nodes()
@@ -373,7 +382,8 @@ func show_kill_feedback():
 	hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.0, 1.0), 0.1)
 	hit_marker_tween.parallel().tween_property(crosshair_root, "modulate", Color(1, 1, 1, 1), 0.14)
 	_show_kill_confirm()
-	show_status("KILL CONFIRMED", Color(0.95, 0.16, 0.12, 1.0), 0.3)
+	show_status("KILL CONFIRMED", Color(1.0, 0.18, 0.12, 1.0), 0.36)
+	show_combat_text("ELIMINATION", Color(1.0, 0.22, 0.16, 1.0))
 
 func show_shot_feedback(hit: bool):
 	_ensure_nodes()
@@ -395,18 +405,19 @@ func show_shot_feedback(hit: bool):
 		hit_marker_tween.parallel().tween_property(crosshair_root, "modulate", Color(1, 1, 1, 1), 0.16)
 		hit_marker_tween.tween_property(hit_marker, "modulate:a", 0.0, 0.14)
 		hit_marker_tween.tween_callback(func(): hit_marker.visible = false)
-		show_status("HIT", Color(1, 0.35, 0.35, 1), 0.2)
+		show_status("TARGET HIT", Color(1, 0.35, 0.35, 1), 0.18)
 	else:
 		crosshair_root.scale = Vector2(1.0, 1.0)
 		crosshair_root.modulate = Color(1, 1, 1, 1)
 		hit_marker_tween = create_tween()
 		hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.08, 1.08), 0.05)
 		hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.0, 1.0), 0.08)
-		show_status("MISS", Color(0.9, 0.9, 0.9, 1), 0.15)
+		show_status("NO CONTACT", Color(0.82, 0.84, 0.88, 1), 0.14)
 
 func show_damage_feedback(amount: int, direction: Vector2):
 	_ensure_nodes()
-	show_status("DAMAGE -" + str(amount), Color(1, 0.25, 0.25, 1), 0.35)
+	show_status("TAKING FIRE -" + str(amount), Color(1, 0.25, 0.25, 1), 0.38)
+	show_combat_text("INCOMING", Color(1.0, 0.24, 0.22, 1.0))
 	if damage_flash_tween:
 		damage_flash_tween.kill()
 	damage_flash.modulate = Color(1, 0.15, 0.15, 0.38)
@@ -578,20 +589,21 @@ func _update_weapon_icon(weapon_name: String):
 		weapon_muzzle.color = Color(0.92, 0.12, 0.08, 1.0)
 
 func _show_combat_label(label: Label, message: String, color: Color, primary: bool):
+	var style: Dictionary = _get_combat_text_style(message, color)
 	label.position = Vector2.ZERO
 	label.text = message
-	label.modulate = color
+	label.modulate = style["color"]
 	label.modulate.a = 0.0
-	label.scale = Vector2(0.86, 0.86)
+	label.scale = style["start_scale"]
 	var tween: Tween = combat_primary_tween if primary else combat_secondary_tween
 	if tween:
 		tween.kill()
 	tween = create_tween()
-	tween.tween_property(label, "modulate:a", 1.0, 0.08)
-	tween.parallel().tween_property(label, "scale", Vector2(1.0, 1.0), 0.1)
-	tween.tween_interval(0.55)
-	tween.tween_property(label, "modulate:a", 0.0, 0.22)
-	tween.parallel().tween_property(label, "position:y", -12.0, 0.22)
+	tween.tween_property(label, "modulate:a", 1.0, float(style["fade_in"]))
+	tween.parallel().tween_property(label, "scale", style["end_scale"], float(style["settle_time"]))
+	tween.tween_interval(float(style["hold_time"]))
+	tween.tween_property(label, "modulate:a", 0.0, float(style["fade_out"]))
+	tween.parallel().tween_property(label, "position:y", float(style["rise_offset"]), float(style["fade_out"]))
 	tween.tween_callback(func():
 		label.text = ""
 		label.position = Vector2.ZERO
@@ -623,21 +635,63 @@ func _show_kill_confirm():
 		kill_confirm_label.offset_bottom = 34.0
 	)
 
+func _get_combat_text_style(message: String, base_color: Color) -> Dictionary:
+	var upper_message: String = message.to_upper()
+	var style: Dictionary = {
+		"color": base_color,
+		"start_scale": Vector2(0.86, 0.86),
+		"end_scale": Vector2(1.0, 1.0),
+		"fade_in": 0.08,
+		"settle_time": 0.1,
+		"hold_time": 0.55,
+		"fade_out": 0.22,
+		"rise_offset": -12.0
+	}
+
+	if upper_message.contains("HEADSHOT"):
+		style["color"] = Color(1.0, 0.72, 0.3, 1.0)
+		style["start_scale"] = Vector2(0.94, 0.94)
+		style["end_scale"] = Vector2(1.08, 1.08)
+		style["hold_time"] = 0.62
+		style["rise_offset"] = -18.0
+	elif upper_message.contains("ELIMINATION") or upper_message.contains("DOUBLE KILL") or upper_message.contains("TRIPLE KILL") or upper_message.contains("MULTI KILL"):
+		style["color"] = Color(1.0, 0.22, 0.16, 1.0)
+		style["start_scale"] = Vector2(0.96, 0.96)
+		style["end_scale"] = Vector2(1.12, 1.12)
+		style["hold_time"] = 0.66
+		style["rise_offset"] = -16.0
+	elif upper_message.contains("RELOADED") or upper_message.contains("WAVE CLEAR"):
+		style["color"] = Color(0.82, 1.0, 0.86, 1.0) if upper_message.contains("RELOADED") else Color(1.0, 0.3, 0.24, 1.0)
+		style["start_scale"] = Vector2(0.9, 0.9)
+		style["end_scale"] = Vector2(1.04, 1.04)
+		style["hold_time"] = 0.58
+	elif upper_message.contains("INCOMING"):
+		style["color"] = Color(1.0, 0.26, 0.24, 1.0)
+		style["start_scale"] = Vector2(0.92, 0.92)
+		style["end_scale"] = Vector2(1.04, 1.04)
+		style["hold_time"] = 0.4
+		style["fade_out"] = 0.18
+
+	return style
+
 func _start_ammo_warning():
 	if ammo_warning_tween and ammo_warning_tween.is_running():
 		return
 	ammo_warning_tween = create_tween()
 	ammo_warning_tween.set_loops()
-	ammo_warning_tween.tween_property(ammo_label, "scale", Vector2(1.08, 1.08), 0.16)
-	ammo_warning_tween.parallel().tween_property(ammo_state_label, "modulate:a", 0.55, 0.16)
+	ammo_warning_tween.tween_property(ammo_label, "scale", Vector2(1.1, 1.1), 0.14)
+	ammo_warning_tween.parallel().tween_property(ammo_state_label, "modulate:a", 0.45, 0.14)
+	ammo_warning_tween.parallel().tween_property(ammo_state_label, "scale", Vector2(1.06, 1.06), 0.14)
 	ammo_warning_tween.tween_property(ammo_label, "scale", Vector2(1.0, 1.0), 0.16)
 	ammo_warning_tween.parallel().tween_property(ammo_state_label, "modulate:a", 1.0, 0.16)
+	ammo_warning_tween.parallel().tween_property(ammo_state_label, "scale", Vector2(1.0, 1.0), 0.16)
 
 func _stop_ammo_warning():
 	if ammo_warning_tween:
 		ammo_warning_tween.kill()
 	ammo_label.scale = Vector2(1.0, 1.0)
 	ammo_state_label.modulate.a = 1.0
+	ammo_state_label.scale = Vector2(1.0, 1.0)
 
 func _resolve_game_over_stats(stats: Dictionary) -> Dictionary:
 	var resolved: Dictionary = stats.duplicate(true)
