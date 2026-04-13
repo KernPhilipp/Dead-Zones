@@ -204,7 +204,8 @@ func shoot():
 		if target.has_method("take_damage"):
 			var headshot: bool = _is_headshot(ray)
 			var applied_damage: int = damage_per_shot * (2 if headshot else 1)
-			var killed: bool = target.take_damage(applied_damage)
+			var damage_result: Variant = target.take_damage(applied_damage)
+			var killed: bool = damage_result if damage_result is bool else false
 			did_hit = true
 			shots_hit += 1
 			if headshot:
