@@ -1,6 +1,8 @@
 extends CanvasLayer
 
 const HANDBOOK_SCENE := preload("res://scenes/handbook_book.tscn")
+const PISTOL_ICON := preload("res://assets/ui/pistol_icon.svg")
+const RIFLE_ICON := preload("res://assets/ui/rifle_icon.svg")
 
 var health_bar: ProgressBar
 var health_damage_bar: ProgressBar
@@ -11,10 +13,7 @@ var weapon_label: Label
 var ammo_label: Label
 var ammo_state_label: Label
 var reserve_label: Label
-var weapon_grip: ColorRect
-var weapon_body: ColorRect
-var weapon_slide: ColorRect
-var weapon_muzzle: ColorRect
+var weapon_icon_sprite: TextureRect
 var slot_label_one: Label
 var slot_label_two: Label
 var status_label: Label
@@ -70,6 +69,11 @@ var combat_primary_tween: Tween
 var combat_secondary_tween: Tween
 var ammo_warning_tween: Tween
 var damage_compass_tween: Tween
+var health_panel_tween: Tween
+var weapon_panel_tween: Tween
+var wave_panel_tween: Tween
+var ammo_label_tween: Tween
+var reload_panel_tween: Tween
 var low_health_strength: float = 0.0
 var low_health_time: float = 0.0
 var displayed_health: float = 100.0
@@ -104,6 +108,10 @@ var active_weapon_slot_index: int = 0
 var adaptive_threat_level: float = 0.0
 var handbook_book: Control
 var handbook_opened_from_pause: bool = false
+var last_health_value: int = -1
+var last_ammo_value: int = -1
+var last_wave_seen: int = 0
+var last_weapon_seen: String = ""
 
 func _enter_tree():
 	_ensure_nodes()
@@ -129,6 +137,7 @@ func _ready():
 	combat_text_secondary.modulate.a = 0.0
 	health_bar.value = 100.0
 	health_damage_bar.value = 100.0
+	last_health_value = -1
 	low_health_label.visible = false
 	low_health_label.modulate.a = 0.0
 	start_hint_label.visible = false
@@ -144,6 +153,7 @@ func _ready():
 	ammo_state_label.text = "READY"
 	ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
 	ammo_label.text = "030 | 120"
+	last_ammo_value = -1
 	game_over_panel.modulate.a = 0.0
 	game_over_label.scale = Vector2(0.75, 0.75)
 	game_over_summary_label.modulate.a = 0.0
@@ -180,10 +190,7 @@ func _ensure_nodes():
 	ammo_label = _find_required_node("AmmoLabel") as Label
 	ammo_state_label = _find_required_node("AmmoStateLabel") as Label
 	reserve_label = _find_required_node("ReserveLabel") as Label
-	weapon_grip = _find_required_node("Grip") as ColorRect
-	weapon_body = _find_required_node("Body") as ColorRect
-	weapon_slide = _find_required_node("Slide") as ColorRect
-	weapon_muzzle = _find_required_node("Muzzle") as ColorRect
+	weapon_icon_sprite = _find_required_node("WeaponIconSprite") as TextureRect
 	slot_label_one = _find_required_node("SlotLabelOne") as Label
 	slot_label_two = _find_required_node("SlotLabelTwo") as Label
 	status_label = _find_required_node("StatusLabel") as Label
@@ -280,6 +287,10 @@ func _process(delta):
 
 func update_health(value: int):
 	_ensure_nodes()
+	if last_health_value >= 0 and value != last_health_value:
+		var took_damage: bool = value < last_health_value
+		_pulse_panel(health_panel, 1.06 if took_damage else 1.03, Color(1.0, 0.2, 0.2, 1.0) if took_damage else Color(0.62, 1.0, 0.72, 1.0), "health")
+	last_health_value = value
 	target_health = float(value)
 	health_bar.value = value
 	var health_ratio_visual: float = float(value) / 100.0
@@ -307,6 +318,9 @@ func update_health(value: int):
 
 func update_weapon(weapon_name: String):
 	_ensure_nodes()
+	if weapon_name != last_weapon_seen and last_weapon_seen != "":
+		_pulse_panel(weapon_panel, 1.04, Color(1.0, 0.82, 0.42, 1.0), "weapon")
+	last_weapon_seen = weapon_name
 	weapon_label.text = weapon_name.to_upper()
 	_update_weapon_icon(weapon_name)
 
@@ -325,6 +339,12 @@ func update_weapon_slots(active_index: int):
 
 func update_ammo(current: int, max_val: int, reserve: int):
 	_ensure_nodes()
+	if last_ammo_value >= 0 and current != last_ammo_value:
+		var ammo_color: Color = Color(1.0, 0.82, 0.42, 1.0)
+		if current < last_ammo_value:
+			ammo_color = Color(1.0, 0.34, 0.28, 1.0) if current <= 0 else Color(1.0, 0.78, 0.36, 1.0)
+		_pulse_ammo(ammo_color)
+	last_ammo_value = current
 	ammo_label.text = "%03d | %03d" % [current, reserve]
 	reserve_label.text = "MAG CAP %02d" % max_val
 	var ammo_ratio: float = float(current) / maxf(float(max_val), 1.0)
@@ -369,6 +389,7 @@ func update_reload(active: bool, progress: float):
 	reload_panel.visible = active
 	reload_bar.value = progress * 100.0
 	if active:
+		_pulse_reload_panel(1.02)
 		reload_was_active = true
 		_set_crosshair_state("reload")
 		recent_threat_time = maxf(recent_threat_time, 0.3)
@@ -387,11 +408,15 @@ func update_reload(active: bool, progress: float):
 			_set_crosshair_state("default")
 		if reload_was_active:
 			reload_was_active = false
+			_pulse_reload_panel(1.04)
 			show_status("RELOAD COMPLETE", Color(0.46, 1.0, 0.56, 1.0), 0.3)
 			show_combat_text("RELOADED", Color(0.76, 1.0, 0.82, 1.0))
 
 func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 	_ensure_nodes()
+	if wave != last_wave_seen and last_wave_seen != 0:
+		_pulse_panel(wave_panel, 1.04, Color(1.0, 0.24, 0.22, 1.0), "wave")
+	last_wave_seen = wave
 	_update_elimination_tracking(wave, living_zombies, remaining_to_spawn)
 	wave_label.text = "WAVE %02d" % wave
 	zombie_label.text = "Zombies: %d  Incoming: %d" % [living_zombies, remaining_to_spawn]
@@ -658,33 +683,11 @@ func _on_restart():
 func _update_weapon_icon(weapon_name: String):
 	var weapon_key: String = weapon_name.to_lower()
 	if weapon_key.contains("rifle"):
-		weapon_grip.position = Vector2(5.0, 8.0)
-		weapon_grip.size = Vector2(5.0, 14.0)
-		weapon_grip.rotation = -0.18
-		weapon_body.position = Vector2(10.0, 7.0)
-		weapon_body.size = Vector2(22.0, 4.0)
-		weapon_slide.position = Vector2(14.0, 4.0)
-		weapon_slide.size = Vector2(21.0, 4.0)
-		weapon_muzzle.position = Vector2(33.0, 5.0)
-		weapon_muzzle.size = Vector2(7.0, 3.0)
-		weapon_body.color = Color(0.72, 0.76, 0.8, 1.0)
-		weapon_slide.color = Color(0.42, 0.47, 0.52, 1.0)
-		weapon_grip.color = Color(0.12, 0.12, 0.13, 1.0)
-		weapon_muzzle.color = Color(0.92, 0.12, 0.08, 1.0)
+		weapon_icon_sprite.texture = RIFLE_ICON
+		weapon_icon_sprite.modulate = Color(0.95, 0.97, 1.0, 0.98)
 	else:
-		weapon_grip.position = Vector2(7.0, 9.0)
-		weapon_grip.size = Vector2(6.0, 13.0)
-		weapon_grip.rotation = -0.35
-		weapon_body.position = Vector2(10.0, 6.0)
-		weapon_body.size = Vector2(21.0, 5.0)
-		weapon_slide.position = Vector2(15.0, 3.0)
-		weapon_slide.size = Vector2(18.0, 4.0)
-		weapon_muzzle.position = Vector2(30.0, 5.0)
-		weapon_muzzle.size = Vector2(6.0, 4.0)
-		weapon_body.color = Color(0.58, 0.62, 0.66, 1.0)
-		weapon_slide.color = Color(0.84, 0.87, 0.9, 0.92)
-		weapon_grip.color = Color(0.14, 0.14, 0.15, 1.0)
-		weapon_muzzle.color = Color(0.92, 0.12, 0.08, 1.0)
+		weapon_icon_sprite.texture = PISTOL_ICON
+		weapon_icon_sprite.modulate = Color(0.95, 0.97, 1.0, 0.98)
 
 func _show_combat_label(label: Label, message: String, color: Color, primary: bool, priority: int):
 	var style: Dictionary = _get_combat_text_style(message, color)
@@ -804,6 +807,51 @@ func _show_start_hints():
 	tween.tween_interval(3.4)
 	tween.tween_property(start_hint_label, "modulate:a", 0.0, 0.28)
 	tween.tween_callback(func(): start_hint_label.visible = false)
+
+func _pulse_panel(panel: Control, target_scale: float, flash_color: Color, channel: String):
+	var tween_ref: Tween = null
+	match channel:
+		"health":
+			tween_ref = health_panel_tween
+		"weapon":
+			tween_ref = weapon_panel_tween
+		"wave":
+			tween_ref = wave_panel_tween
+	if tween_ref:
+		tween_ref.kill()
+	panel.scale = Vector2.ONE
+	var original_modulate: Color = panel.modulate
+	var tween: Tween = create_tween()
+	tween.tween_property(panel, "scale", Vector2.ONE * target_scale, 0.08)
+	tween.parallel().tween_property(panel, "modulate", Color(flash_color.r, flash_color.g, flash_color.b, original_modulate.a), 0.08)
+	tween.tween_property(panel, "scale", Vector2.ONE, 0.16)
+	tween.parallel().tween_property(panel, "modulate", original_modulate, 0.18)
+	match channel:
+		"health":
+			health_panel_tween = tween
+		"weapon":
+			weapon_panel_tween = tween
+		"wave":
+			wave_panel_tween = tween
+
+func _pulse_ammo(flash_color: Color):
+	if ammo_label_tween:
+		ammo_label_tween.kill()
+	var original_color: Color = ammo_label.modulate
+	ammo_label.scale = Vector2.ONE
+	ammo_label_tween = create_tween()
+	ammo_label_tween.tween_property(ammo_label, "scale", Vector2(1.08, 1.08), 0.06)
+	ammo_label_tween.parallel().tween_property(ammo_label, "modulate", flash_color, 0.06)
+	ammo_label_tween.tween_property(ammo_label, "scale", Vector2.ONE, 0.14)
+	ammo_label_tween.parallel().tween_property(ammo_label, "modulate", original_color, 0.16)
+
+func _pulse_reload_panel(target_scale: float):
+	if reload_panel_tween:
+		reload_panel_tween.kill()
+	reload_panel.scale = Vector2.ONE
+	reload_panel_tween = create_tween()
+	reload_panel_tween.tween_property(reload_panel, "scale", Vector2.ONE * target_scale, 0.08)
+	reload_panel_tween.tween_property(reload_panel, "scale", Vector2.ONE, 0.16)
 
 func _setup_handbook_overlay():
 	if handbook_book != null:

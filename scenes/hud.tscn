@@ -1,148 +1,156 @@
-[gd_scene load_steps=14 format=3 uid="uid://hud00001"]
+[gd_scene load_steps=22 format=3 uid="uid://hud00001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Texture2D" path="res://assets/ui/blood_overlay.svg" id="2_blood"]
+[ext_resource type="Texture2D" path="res://assets/ui/pistol_icon.svg" id="3_pistol"]
+[ext_resource type="Texture2D" path="res://assets/ui/rifle_icon.svg" id="4_rifle"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_health"]
-font_size = 14
-font_color = Color(0.78, 0.84, 0.9, 1)
+font_size = 13
+font_color = Color(0.66, 0.72, 0.79, 1)
 outline_size = 1
-outline_color = Color(0, 0, 0, 0.7)
-
-[sub_resource type="LabelSettings" id="LabelSettings_stats_highlight"]
-font_size = 20
-font_color = Color(0.96, 0.97, 1, 1)
-outline_size = 2
-outline_color = Color(0, 0, 0, 0.82)
-
-[sub_resource type="LabelSettings" id="LabelSettings_ammo"]
-font_size = 44
-font_color = Color(0.98, 0.99, 1, 1)
-outline_size = 2
 outline_color = Color(0, 0, 0, 0.8)
 
+[sub_resource type="LabelSettings" id="LabelSettings_stats_highlight"]
+font_size = 22
+font_color = Color(0.97, 0.98, 1, 1)
+outline_size = 2
+outline_color = Color(0, 0, 0, 0.9)
+
+[sub_resource type="LabelSettings" id="LabelSettings_ammo"]
+font_size = 48
+font_color = Color(0.98, 0.99, 1, 1)
+outline_size = 2
+outline_color = Color(0, 0, 0, 0.88)
+
 [sub_resource type="LabelSettings" id="LabelSettings_weapon"]
-font_size = 18
-font_color = Color(0.88, 0.92, 0.96, 1)
+font_size = 19
+font_color = Color(0.91, 0.94, 0.98, 1)
 outline_size = 1
-outline_color = Color(0, 0, 0, 0.72)
+outline_color = Color(0, 0, 0, 0.84)
 
 [sub_resource type="LabelSettings" id="LabelSettings_status"]
 font_size = 14
-font_color = Color(0.9, 0.18, 0.16, 1)
+font_color = Color(0.82, 0.87, 0.93, 0.98)
 outline_size = 1
-outline_color = Color(0, 0, 0, 0.72)
+outline_color = Color(0, 0, 0, 0.84)
 
 [sub_resource type="LabelSettings" id="LabelSettings_small_status"]
 font_size = 12
-font_color = Color(0.76, 0.8, 0.86, 0.92)
+font_color = Color(0.74, 0.79, 0.85, 0.96)
 outline_size = 1
-outline_color = Color(0, 0, 0, 0.72)
+outline_color = Color(0, 0, 0, 0.8)
 
 [sub_resource type="LabelSettings" id="LabelSettings_warning"]
-font_size = 18
-font_color = Color(0.98, 0.24, 0.22, 1)
+font_size = 20
+font_color = Color(1, 0.26, 0.24, 1)
 outline_size = 2
-outline_color = Color(0, 0, 0, 0.85)
+outline_color = Color(0, 0, 0, 0.92)
 
 [sub_resource type="LabelSettings" id="LabelSettings_wave"]
-font_size = 22
-font_color = Color(0.9, 0.94, 0.98, 1)
+font_size = 24
+font_color = Color(0.93, 0.96, 1, 1)
 outline_size = 2
-outline_color = Color(0, 0, 0, 0.82)
+outline_color = Color(0, 0, 0, 0.9)
 
 [sub_resource type="LabelSettings" id="LabelSettings_wave_announce"]
-font_size = 68
+font_size = 76
 font_color = Color(0.93, 0.96, 1, 1)
 outline_size = 8
 outline_color = Color(0.22, 0.02, 0.02, 0.98)
 
 [sub_resource type="LabelSettings" id="LabelSettings_gameover"]
-font_size = 64
-font_color = Color(0.95, 0.08, 0.08, 1)
+font_size = 70
+font_color = Color(0.98, 0.2, 0.18, 1)
 outline_size = 4
 outline_color = Color(0, 0, 0, 0.86)
 
+[sub_resource type="LabelSettings" id="LabelSettings_title_small"]
+font_size = 12
+font_color = Color(0.68, 0.73, 0.79, 0.96)
+outline_size = 1
+outline_color = Color(0, 0, 0, 0.74)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_weapon_panel"]
-bg_color = Color(0.02, 0.03, 0.04, 0.74)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+bg_color = Color(0.04, 0.05, 0.07, 0.84)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.86, 0.08, 0.08, 0.55)
-shadow_color = Color(0, 0, 0, 0.42)
+border_color = Color(0.6, 0.68, 0.78, 0.14)
+shadow_color = Color(0, 0, 0, 0.4)
 shadow_size = 18
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hit_marker"]
 bg_color = Color(0, 0, 0, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_info_panel"]
-bg_color = Color(0.02, 0.03, 0.04, 0.7)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+bg_color = Color(0.04, 0.05, 0.07, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.86, 0.08, 0.08, 0.45)
-shadow_color = Color(0, 0, 0, 0.38)
+border_color = Color(0.6, 0.68, 0.78, 0.12)
+shadow_color = Color(0, 0, 0, 0.34)
 shadow_size = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause_panel"]
-bg_color = Color(0.02, 0.02, 0.03, 0.94)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+bg_color = Color(0.035, 0.04, 0.055, 0.96)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.85, 0.1, 0.1, 0.45)
-shadow_color = Color(0, 0, 0, 0.45)
-shadow_size = 22
+border_color = Color(0.72, 0.78, 0.86, 0.12)
+shadow_color = Color(0, 0, 0, 0.42)
+shadow_size = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gameover_card"]
-bg_color = Color(0.02, 0.02, 0.03, 0.94)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+bg_color = Color(0.032, 0.035, 0.048, 0.97)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.82, 0.08, 0.08, 0.54)
-shadow_color = Color(0, 0, 0, 0.52)
-shadow_size = 30
+border_color = Color(0.72, 0.78, 0.86, 0.12)
+shadow_color = Color(0, 0, 0, 0.48)
+shadow_size = 24
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_damage_popup"]
-bg_color = Color(0.92, 0.09, 0.08, 0.58)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_color = Color(0.45, 0.02, 0.02, 0.35)
-shadow_size = 18
+bg_color = Color(0.95, 0.12, 0.1, 0.44)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.45, 0.02, 0.02, 0.42)
+shadow_size = 24
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_panel"]
-bg_color = Color(0.02, 0.03, 0.04, 0.74)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+bg_color = Color(0.04, 0.05, 0.07, 0.84)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.86, 0.08, 0.08, 0.5)
-shadow_color = Color(0, 0, 0, 0.35)
+border_color = Color(0.6, 0.68, 0.78, 0.14)
+shadow_color = Color(0, 0, 0, 0.4)
 shadow_size = 18
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_under"]
@@ -165,6 +173,62 @@ corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+bg_color = Color(0.08, 0.095, 0.12, 0.98)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.72, 0.78, 0.86, 0.14)
+shadow_color = Color(0, 0, 0, 0.28)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+bg_color = Color(0.12, 0.135, 0.17, 0.98)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.84, 0.89, 0.95, 0.22)
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+bg_color = Color(0.07, 0.085, 0.11, 0.98)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9, 0.94, 1, 0.18)
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_focus"]
+draw_center = false
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.94, 1, 0.3)
+shadow_color = Color(0.2, 0.26, 0.34, 0.18)
+shadow_size = 8
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -377,19 +441,20 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_damage_popup")
 [node name="WavePanel" type="PanelContainer" parent="."]
 offset_left = 20.0
 offset_top = 20.0
-offset_right = 260.0
-offset_bottom = 84.0
+offset_right = 276.0
+offset_bottom = 92.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_info_panel")
 
 [node name="MarginContainer" type="MarginContainer" parent="WavePanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
+theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 12
 
 [node name="VBoxContainer" type="VBoxContainer" parent="WavePanel/MarginContainer"]
 layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="WaveLabel" type="Label" parent="WavePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -400,6 +465,7 @@ label_settings = SubResource("LabelSettings_wave")
 layout_mode = 2
 text = "Zombies: 0  Incoming: 0"
 label_settings = SubResource("LabelSettings_status")
+modulate = Color(1, 1, 1, 0.72)
 
 [node name="HealthPanel" type="PanelContainer" parent="."]
 anchors_preset = 2
@@ -408,8 +474,8 @@ anchor_top = 1.0
 anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -78.0
-offset_right = 238.0
+offset_top = -86.0
+offset_right = 252.0
 offset_bottom = -20.0
 grow_horizontal = 1
 grow_vertical = 0
@@ -418,17 +484,18 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_health_panel")
 [node name="MarginContainer" type="MarginContainer" parent="HealthPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 10
+theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HealthPanel/MarginContainer"]
 layout_mode = 2
+theme_override_constants/separation = 3
 
 [node name="HealthHeader" type="Label" parent="HealthPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "VITALS"
-label_settings = SubResource("LabelSettings_health")
+label_settings = SubResource("LabelSettings_title_small")
 
 [node name="HealthBar" type="ProgressBar" parent="HealthPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -467,7 +534,7 @@ grow_horizontal = 0
 grow_vertical = 0
 horizontal_alignment = 2
 text = "READY"
-label_settings = SubResource("LabelSettings_small_status")
+label_settings = SubResource("LabelSettings_title_small")
 
 [node name="AmmoLabel" type="Label" parent="."]
 anchors_preset = 3
@@ -544,7 +611,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -240.0
-offset_top = -142.0
+offset_top = -148.0
 offset_right = -20.0
 offset_bottom = -78.0
 grow_horizontal = 0
@@ -554,45 +621,31 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_panel")
 [node name="MarginContainer" type="MarginContainer" parent="WeaponPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 10
+theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 10
 
 [node name="WeaponRow" type="HBoxContainer" parent="WeaponPanel/MarginContainer"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
 [node name="WeaponIcon" type="Control" parent="WeaponPanel/MarginContainer/WeaponRow"]
-custom_minimum_size = Vector2(44, 22)
+custom_minimum_size = Vector2(58, 26)
 layout_mode = 2
 
-[node name="Grip" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 7.0
-offset_top = 9.0
-offset_right = 13.0
-offset_bottom = 22.0
-rotation = -0.35
-color = Color(1, 0.85, 0.45, 1)
-
-[node name="Body" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 10.0
-offset_top = 6.0
-offset_right = 31.0
-offset_bottom = 11.0
-color = Color(1, 0.85, 0.45, 1)
-
-[node name="Slide" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 15.0
-offset_top = 3.0
-offset_right = 33.0
-offset_bottom = 7.0
-color = Color(1, 1, 1, 0.9)
-
-[node name="Muzzle" type="ColorRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
-offset_left = 30.0
-offset_top = 5.0
-offset_right = 36.0
-offset_bottom = 9.0
-color = Color(1, 0.55, 0.2, 1)
+[node name="WeaponIconSprite" type="TextureRect" parent="WeaponPanel/MarginContainer/WeaponRow/WeaponIcon"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_pistol")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="WeaponText" type="VBoxContainer" parent="WeaponPanel/MarginContainer/WeaponRow"]
 layout_mode = 2
@@ -628,7 +681,7 @@ label_settings = SubResource("LabelSettings_status")
 layout_mode = 2
 horizontal_alignment = 2
 text = "Reserve: 90"
-label_settings = SubResource("LabelSettings_small_status")
+label_settings = SubResource("LabelSettings_title_small")
 
 [node name="StatusLabel" type="Label" parent="."]
 anchors_preset = 3
@@ -645,6 +698,7 @@ grow_vertical = 0
 horizontal_alignment = 2
 text = "READY"
 label_settings = SubResource("LabelSettings_status")
+modulate = Color(1, 1, 1, 0.92)
 
 [node name="ReloadPanel" type="PanelContainer" parent="."]
 anchors_preset = 3
@@ -659,6 +713,7 @@ offset_bottom = -196.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_info_panel")
+modulate = Color(1, 1, 1, 0.96)
 
 [node name="MarginContainer" type="MarginContainer" parent="ReloadPanel"]
 layout_mode = 2
@@ -746,10 +801,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -190.0
-offset_right = 230.0
-offset_bottom = 190.0
+offset_left = -244.0
+offset_top = -202.0
+offset_right = 244.0
+offset_bottom = 202.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gameover_card")
@@ -757,7 +812,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_gameover_card")
 [node name="MarginContainer" type="MarginContainer" parent="GameOverPanel/GameOverCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 24
+theme_override_constants/margin_top = 28
 theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 24
 
@@ -773,7 +828,7 @@ text = "GAME OVER"
 label_settings = SubResource("LabelSettings_gameover")
 
 [node name="Divider" type="ColorRect" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(280, 3)
+custom_minimum_size = Vector2(320, 3)
 layout_mode = 2
 color = Color(0.75, 0.08, 0.08, 0.9)
 
@@ -794,6 +849,14 @@ layout_mode = 2
 size_flags_horizontal = 4
 custom_minimum_size = Vector2(200, 50)
 text = "Restart"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 
 [node name="GameOverHintLabel" type="Label" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -818,11 +881,15 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_pause_panel")
 
 [node name="MarginContainer" type="MarginContainer" parent="PausePanel"]
 layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PausePanel/MarginContainer"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="PauseLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -836,11 +903,17 @@ horizontal_alignment = 1
 text = "Wave 01 on hold. 0 kills confirmed so far."
 label_settings = SubResource("LabelSettings_stats_highlight")
 
+[node name="PauseDivider" type="ColorRect" parent="PausePanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(300, 2)
+layout_mode = 2
+color = Color(0.84, 0.89, 0.95, 0.16)
+
 [node name="PauseControlsLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
 text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
 label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.74)
 
 [node name="PauseSettingsLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -853,16 +926,40 @@ layout_mode = 2
 size_flags_horizontal = 4
 custom_minimum_size = Vector2(180, 46)
 text = "Resume"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 
 [node name="HandbookButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 custom_minimum_size = Vector2(180, 46)
 text = "Handbook"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 
 [node name="PauseRestartButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 custom_minimum_size = Vector2(180, 46)
 text = "Restart"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 
