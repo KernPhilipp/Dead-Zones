@@ -1,6 +1,12 @@
 [gd_scene format=3]
 
 [ext_resource type="Mesh" path="res://assets/models/trees/trees9.obj" id="1_tree_mesh"]
+[ext_resource type="PackedScene" path="res://assets/models/buildings/Warehouse.glb" id="2_warehouse_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/buildings/Silo House.glb" id="3_silo_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/buildings/Log cabin.glb" id="4_log_cabin_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/buildings/cabin.glb" id="5_cabin_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/buildings/Fantasy House.glb" id="6_fantasy_house_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/buildings/Windmill.glb" id="7_windmill_scene"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(180, 2, 180)
@@ -233,41 +239,49 @@ surface_material_override/0 = SubResource("StandardMaterial3D_road")
 [node name="MainHall" type="Node3D" parent="Geometry/Structures"]
 
 [node name="MainBlock" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(18, 0, 0, 0, 7, 0, 0, 0, 12, 4, 3.5, 4)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
 
 [node name="RearWing" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(10, 0, 0, 0, 6, 0, 0, 0, 8, -14, 3, -4)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
 [node name="FrontOffice" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(6, 0, 0, 0, 4.5, 0, 0, 0, 5, 18, 2.25, 0)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
 [node name="RoofUnitA" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(3.2, 0, 0, 0, 1.1, 0, 0, 0, 2.4, 0, 7.65, -1.6)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 
 [node name="RoofUnitB" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(2.2, 0, 0, 0, 0.9, 0, 0, 0, 1.8, 8, 7.55, 3)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 
 [node name="WindowStripNorth" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(8, 0, 0, 0, 1.2, 0, 0, 0, 0.15, 4, 3.1, -8.1)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_window")
 
 [node name="WindowStripSouth" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(7, 0, 0, 0, 1.1, 0, 0, 0, 0.15, 6, 2.9, 16.1)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_window")
 
 [node name="OfficeWindow" type="MeshInstance3D" parent="Geometry/Structures/MainHall"]
+visible = false
 transform = Transform3D(0.15, 0, 0, 0, 1.1, 0, 0, 0, 2.8, 24.1, 2.4, 0)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_window")
@@ -275,11 +289,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_window")
 [node name="Gatehouse" type="Node3D" parent="Geometry/Structures"]
 
 [node name="GatehouseBase" type="MeshInstance3D" parent="Geometry/Structures/Gatehouse"]
+visible = false
 transform = Transform3D(5, 0, 0, 0, 3.2, 0, 0, 0, 4.5, 34, 1.6, 8)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_concrete")
 
 [node name="GatehouseWindow" type="MeshInstance3D" parent="Geometry/Structures/Gatehouse"]
+visible = false
 transform = Transform3D(0.15, 0, 0, 0, 1.1, 0, 0, 0, 1.8, 36.6, 1.7, 8)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_window")
@@ -287,21 +303,25 @@ surface_material_override/0 = SubResource("StandardMaterial3D_window")
 [node name="Storage" type="Node3D" parent="Geometry/Structures"]
 
 [node name="WarehouseA" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+visible = false
 transform = Transform3D(9, 0, 0, 0, 5, 0, 0, 0, 7, -26, 2.5, 24)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
 [node name="WarehouseDoorA" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+visible = false
 transform = Transform3D(0.16, 0, 0, 0, 2.4, 0, 0, 0, 2.8, -17.1, 1.8, 24)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 
 [node name="ShedA" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+visible = false
 transform = Transform3D(7, 0, 0, 0, 3.8, 0, 0, 0, 5, -28, 1.9, -26)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_rust")
 
 [node name="ShedB" type="MeshInstance3D" parent="Geometry/Structures/Storage"]
+visible = false
 transform = Transform3D(5.5, 0, 0, 0, 3.4, 0, 0, 0, 4.5, 22, 1.7, 28)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_rust")
@@ -309,11 +329,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_rust")
 [node name="ServiceAnnex" type="Node3D" parent="Geometry/Structures"]
 
 [node name="AnnexBlock" type="MeshInstance3D" parent="Geometry/Structures/ServiceAnnex"]
+visible = false
 transform = Transform3D(8, 0, 0, 0, 4.6, 0, 0, 0, 6, -30, 2.3, -6)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
 [node name="AnnexDoor" type="MeshInstance3D" parent="Geometry/Structures/ServiceAnnex"]
+visible = false
 transform = Transform3D(0.16, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -22.1, 1.6, -6)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_metal")
@@ -321,11 +343,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 [node name="LoadingBay" type="Node3D" parent="Geometry/Structures"]
 
 [node name="LoadingBayBlock" type="MeshInstance3D" parent="Geometry/Structures/LoadingBay"]
+visible = false
 transform = Transform3D(10, 0, 0, 0, 3.2, 0, 0, 0, 4.5, 8, 1.6, -30)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_rust")
 
 [node name="LoadingBayDoor" type="MeshInstance3D" parent="Geometry/Structures/LoadingBay"]
+visible = false
 transform = Transform3D(2.6, 0, 0, 0, 2.2, 0, 0, 0, 0.16, 8, 1.5, -27.7)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_metal")
@@ -333,19 +357,74 @@ surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 [node name="Tower" type="Node3D" parent="Geometry/Structures"]
 
 [node name="TowerBase" type="MeshInstance3D" parent="Geometry/Structures/Tower"]
+visible = false
 transform = Transform3D(3.5, 0, 0, 0, 8, 0, 0, 0, 3.5, 28, 4, -26)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 
 [node name="TowerCabin" type="MeshInstance3D" parent="Geometry/Structures/Tower"]
+visible = false
 transform = Transform3D(4.2, 0, 0, 0, 2.4, 0, 0, 0, 4.2, 28, 9.2, -26)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_dark_concrete")
 
 [node name="TowerWindow" type="MeshInstance3D" parent="Geometry/Structures/Tower"]
+visible = false
 transform = Transform3D(1.2, 0, 0, 0, 0.8, 0, 0, 0, 0.15, 28, 9.1, -23.8)
 mesh = SubResource("BoxMesh_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_window")
+
+[node name="ArtPass" type="Node3D" parent="Geometry"]
+
+[node name="MainWarehouseVisual" parent="Geometry/ArtPass" instance=ExtResource("2_warehouse_scene")]
+transform = Transform3D(3.6, 0, 0, 0, 3.6, 0, 0, 0, 3.6, -1.5, 0, 4)
+
+[node name="RearSiloVisual" parent="Geometry/ArtPass" instance=ExtResource("3_silo_scene")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -14, 0, -7)
+
+[node name="GateCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 33, 0, 8)
+
+[node name="SouthCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("4_log_cabin_scene")]
+transform = Transform3D(2.4, 0, 0, 0, 2.4, 0, 0, 0, 2.4, 22, 0, 28)
+
+[node name="NorthAnnexVisual" parent="Geometry/ArtPass" instance=ExtResource("6_fantasy_house_scene")]
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -29, 0, -6)
+
+[node name="StorageCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
+transform = Transform3D(2.1, 0, 0, 0, 2.1, 0, 0, 0, 2.1, -27.5, 0, -26)
+
+[node name="WindmillLandmark" parent="Geometry/ArtPass" instance=ExtResource("7_windmill_scene")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 28, 0, -28)
+
+[node name="FarWarehouseVisual" parent="Geometry/ArtPass" instance=ExtResource("2_warehouse_scene")]
+transform = Transform3D(2.6, 0, 0, 0, 2.6, 0, 0, 0, 2.6, -31, 0, 27)
+
+[node name="ForegroundForest" type="Node3D" parent="Geometry/ArtPass"]
+
+[node name="EntryTreeClusterA" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.06, 0, 0.01, 0, 0.12, 0, -0.008, 0, 0.07, 38, 0, -12)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="EntryTreeClusterB" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.05, 0, -0.008, 0, 0.1, 0, 0.012, 0, 0.06, 34, 0, 30)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="WestBreachForestA" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.05, 0, 0.015, 0, 0.11, 0, -0.012, 0, 0.07, -53, 0, 8)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="WestBreachForestB" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.045, 0, -0.014, 0, 0.09, 0, 0.01, 0, 0.06, -55, 0, 24)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="NorthYardForest" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.07, 0, 0.008, 0, 0.1, 0, -0.01, 0, 0.065, 10, 0, -50)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="SouthYardForest" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.07, 0, -0.008, 0, 0.11, 0, 0.01, 0, 0.065, -4, 0, 48)
+mesh = ExtResource("1_tree_mesh")
 
 [node name="Fence" type="Node3D" parent="Geometry"]
 
