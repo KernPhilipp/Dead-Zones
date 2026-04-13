@@ -39,6 +39,7 @@ var damage_compass_marker_alt_b: Control
 var damage_flash: ColorRect
 var low_health_overlay: ColorRect
 var blood_overlay: TextureRect
+var pause_blood_overlay: TextureRect
 var pause_dimmer: ColorRect
 var pause_panel: PanelContainer
 var pause_summary_label: Label
@@ -129,6 +130,8 @@ func _ready():
 	low_health_overlay.modulate.a = 0.0
 	blood_overlay.visible = true
 	blood_overlay.modulate.a = 0.0
+	pause_blood_overlay.visible = false
+	pause_blood_overlay.modulate.a = 0.0
 	wave_announce_label.visible = false
 	wave_announce_label.modulate.a = 0.0
 	combat_text_primary.text = ""
@@ -144,6 +147,8 @@ func _ready():
 	start_hint_label.modulate.a = 0.0
 	pause_dimmer.visible = false
 	pause_dimmer.modulate.a = 0.0
+	pause_blood_overlay.visible = false
+	pause_blood_overlay.modulate.a = 0.0
 	pause_panel.visible = false
 	pause_panel.modulate.a = 0.0
 	pause_panel.scale = Vector2(0.94, 0.94)
@@ -216,6 +221,7 @@ func _ensure_nodes():
 	damage_flash = _find_required_node("DamageFlash") as ColorRect
 	low_health_overlay = _find_required_node("LowHealthOverlay") as ColorRect
 	blood_overlay = _find_required_node("BloodOverlay") as TextureRect
+	pause_blood_overlay = _find_required_node("PauseBloodOverlay") as TextureRect
 	pause_dimmer = _find_required_node("PauseDimmer") as ColorRect
 	pause_panel = _find_required_node("PausePanel") as PanelContainer
 	pause_summary_label = _find_required_node("PauseSummaryLabel") as Label
@@ -529,14 +535,14 @@ func show_damage_feedback(amount: int, direction: Vector2):
 	show_combat_text("INCOMING", Color(1.0, 0.24, 0.22, 1.0))
 	if damage_flash_tween:
 		damage_flash_tween.kill()
-	damage_flash.modulate = Color(1, 0.15, 0.15, 0.38)
+	damage_flash.modulate = Color(1, 0.16, 0.16, 0.46)
 	damage_flash_tween = create_tween()
-	damage_flash_tween.tween_property(damage_flash, "modulate:a", 0.0, 0.28)
+	damage_flash_tween.tween_property(damage_flash, "modulate:a", 0.0, 0.34)
 	if blood_overlay_tween:
 		blood_overlay_tween.kill()
-	blood_overlay.modulate = Color(1, 1, 1, 0.72)
+	blood_overlay.modulate = Color(0.82, 0.14, 0.14, 0.88)
 	blood_overlay_tween = create_tween()
-	blood_overlay_tween.tween_property(blood_overlay, "modulate:a", 0.0, 0.55)
+	blood_overlay_tween.tween_property(blood_overlay, "modulate:a", 0.0, 0.72)
 	_show_damage_indicator(direction)
 
 func show_status(message: String, color: Color, duration: float = 0.45):
@@ -554,7 +560,7 @@ func show_status(message: String, color: Color, duration: float = 0.45):
 		fade_out.tween_property(status_label, "modulate:a", 0.0, 0.12)
 		await fade_out.finished
 		status_label.text = "READY"
-		status_label.modulate = Color(0.82, 0.14, 0.12, 1)
+		status_label.modulate = Color(0.72, 0.78, 0.86, 0.98)
 
 func show_game_over(stats: Dictionary = {}):
 	_ensure_nodes()
@@ -563,6 +569,8 @@ func show_game_over(stats: Dictionary = {}):
 		pause_tween.kill()
 	pause_dimmer.visible = false
 	pause_dimmer.modulate.a = 0.0
+	pause_blood_overlay.visible = false
+	pause_blood_overlay.modulate.a = 0.0
 	pause_panel.visible = false
 	pause_panel.modulate.a = 0.0
 	pause_panel.scale = Vector2(0.94, 0.94)
@@ -602,6 +610,7 @@ func _set_pause_menu_visible(next_visible: bool):
 		pause_tween.kill()
 
 	pause_dimmer.visible = true
+	pause_blood_overlay.visible = true
 	pause_panel.visible = true
 	pause_tween = create_tween()
 	pause_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
@@ -609,21 +618,25 @@ func _set_pause_menu_visible(next_visible: bool):
 	if next_visible:
 		_update_pause_menu_content()
 		pause_dimmer.modulate.a = 0.0
+		pause_blood_overlay.modulate.a = 0.0
 		pause_panel.modulate.a = 0.0
 		pause_panel.scale = Vector2(0.94, 0.94)
 		get_tree().paused = true
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		pause_tween.tween_property(pause_dimmer, "modulate:a", 1.0, 0.16)
+		pause_tween.parallel().tween_property(pause_blood_overlay, "modulate:a", 0.34, 0.22)
 		pause_tween.parallel().tween_property(pause_panel, "modulate:a", 1.0, 0.14)
 		pause_tween.parallel().tween_property(pause_panel, "scale", Vector2(1.0, 1.0), 0.16)
 	else:
 		get_tree().paused = false
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		pause_tween.tween_property(pause_dimmer, "modulate:a", 0.0, 0.14)
+		pause_tween.parallel().tween_property(pause_blood_overlay, "modulate:a", 0.0, 0.12)
 		pause_tween.parallel().tween_property(pause_panel, "modulate:a", 0.0, 0.12)
 		pause_tween.parallel().tween_property(pause_panel, "scale", Vector2(0.96, 0.96), 0.14)
 		pause_tween.tween_callback(func():
 			pause_dimmer.visible = false
+			pause_blood_overlay.visible = false
 			pause_panel.visible = false
 		)
 
@@ -1115,7 +1128,7 @@ func _update_session_milestones():
 	if milestone_step <= milestone_kills_announced:
 		return
 	milestone_kills_announced = milestone_step
-	show_combat_text("%d KILLS" % milestone_step, Color(1.0, 0.86, 0.32, 1.0))
+	show_combat_text("%d HOSTILES" % milestone_step, Color(1.0, 0.86, 0.32, 1.0))
 	show_status("MILESTONE %d" % milestone_step, Color(1.0, 0.86, 0.32, 1.0), 0.4)
 
 func _update_elimination_tracking(wave: int, living_zombies: int, remaining_to_spawn: int):
