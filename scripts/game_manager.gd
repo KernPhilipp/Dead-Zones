@@ -11,12 +11,26 @@ var spawn_timer: Timer
 var game_active: bool = true
 
 func _ready():
+	var current_scene := get_tree().current_scene
 	player = get_tree().get_first_node_in_group("player")
-	hud = get_node("../HUD")
+	hud = current_scene.find_child("HUD", true, false) as CanvasLayer
 
-	for child in get_node("../SpawnPoints").get_children():
-		if child is Marker3D:
-			spawn_points.append(child)
+	var player_start := current_scene.find_child("PlayerStart", true, false) as Marker3D
+	if player and player_start:
+		player.global_position = player_start.global_position
+		player.global_rotation.y = player_start.global_rotation.y
+
+	var zombie_spawns := current_scene.find_child("ZombieSpawns", true, false)
+	if zombie_spawns:
+		for child in zombie_spawns.get_children():
+			if child is Marker3D:
+				spawn_points.append(child)
+	else:
+		var fallback_spawns := current_scene.find_child("SpawnPoints", true, false)
+		if fallback_spawns:
+			for child in fallback_spawns.get_children():
+				if child is Marker3D:
+					spawn_points.append(child)
 
 	spawn_timer = Timer.new()
 	spawn_timer.timeout.connect(_on_spawn_timer_timeout)
@@ -24,7 +38,7 @@ func _ready():
 	spawn_timer.start(spawn_interval)
 
 func _process(_delta):
-	if not game_active:
+	if not game_active or player == null or hud == null:
 		return
 
 	hud.update_health(player.health)
