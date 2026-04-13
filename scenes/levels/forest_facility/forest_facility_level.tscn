@@ -480,10 +480,11 @@ surface_material_override/0 = SubResource("StandardMaterial3D_window")
 [node name="ArtPass" type="Node3D" parent="Geometry"]
 
 [node name="MainWarehouseVisual" parent="Geometry/ArtPass" instance=ExtResource("2_warehouse_scene")]
+visible = false
 transform = Transform3D(0.62, 0, 0, 0, 0.62, 0, 0, 0, 0.62, -2, 0, 5)
 
 [node name="RearSiloVisual" parent="Geometry/ArtPass" instance=ExtResource("3_silo_scene")]
-transform = Transform3D(0.78, 0, 0, 0, 0.78, 0, 0, 0, 0.78, -16, 0, -10)
+transform = Transform3D(0.42, 0, 0, 0, 0.42, 0, 0, 0, 0.42, -20, 0, -14)
 
 [node name="GateCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
 transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, 34, 0, 8)
@@ -492,16 +493,27 @@ transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, 34, 0, 8)
 transform = Transform3D(0.58, 0, 0, 0, 0.58, 0, 0, 0, 0.58, 22, 0, 28)
 
 [node name="NorthAnnexVisual" parent="Geometry/ArtPass" instance=ExtResource("6_fantasy_house_scene")]
+visible = false
 transform = Transform3D(0.42, 0, 0, 0, 0.42, 0, 0, 0, 0.42, -29, 0, -6)
 
 [node name="StorageCabinVisual" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
 transform = Transform3D(0.68, 0, 0, 0, 0.68, 0, 0, 0, 0.68, -28, 0, -26)
 
 [node name="WindmillLandmark" parent="Geometry/ArtPass" instance=ExtResource("7_windmill_scene")]
-transform = Transform3D(0.62, 0, 0, 0, 0.62, 0, 0, 0, 0.62, 10, 0, -64)
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 8, 0, -68)
 
 [node name="FarWarehouseVisual" parent="Geometry/ArtPass" instance=ExtResource("2_warehouse_scene")]
+visible = false
 transform = Transform3D(0.42, 0, 0, 0, 0.42, 0, 0, 0, 0.42, -58, 0, 44)
+
+[node name="ForestCabinNorth" parent="Geometry/ArtPass" instance=ExtResource("4_log_cabin_scene")]
+transform = Transform3D(0.46, 0, 0, 0, 0.46, 0, 0, 0, 0.46, -8, 0, -42)
+
+[node name="ForestCabinWest" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
+transform = Transform3D(0.52, 0, 0, 0, 0.52, 0, 0, 0, 0.52, -48, 0, 12)
+
+[node name="RiverShack" parent="Geometry/ArtPass" instance=ExtResource("5_cabin_scene")]
+transform = Transform3D(0.44, 0, 0, 0, 0.44, 0, 0, 0, 0.44, 28, 0, 44)
 
 [node name="ForegroundForest" type="Node3D" parent="Geometry/ArtPass"]
 
@@ -535,6 +547,18 @@ mesh = ExtResource("1_tree_mesh")
 
 [node name="RiverForestSouth" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
 transform = Transform3D(0.055, 0, -0.01, 0, 0.1, 0, 0.014, 0, 0.06, 60, 0, 24)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="RiverForestMid" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.07, 0, 0.012, 0, 0.12, 0, -0.012, 0, 0.07, 70, 0, -2)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="WestForestDeep" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.08, 0, -0.01, 0, 0.13, 0, 0.014, 0, 0.08, -70, 0, -18)
+mesh = ExtResource("1_tree_mesh")
+
+[node name="SouthForestDeep" type="MeshInstance3D" parent="Geometry/ArtPass/ForegroundForest"]
+transform = Transform3D(0.08, 0, 0.012, 0, 0.12, 0, -0.014, 0, 0.08, -26, 0, 74)
 mesh = ExtResource("1_tree_mesh")
 
 [node name="Fence" type="Node3D" parent="Geometry"]
