@@ -9,8 +9,14 @@ font_color = Color(0.78, 0.84, 0.9, 1)
 outline_size = 1
 outline_color = Color(0, 0, 0, 0.7)
 
+[sub_resource type="LabelSettings" id="LabelSettings_stats_highlight"]
+font_size = 20
+font_color = Color(0.96, 0.97, 1, 1)
+outline_size = 2
+outline_color = Color(0, 0, 0, 0.82)
+
 [sub_resource type="LabelSettings" id="LabelSettings_ammo"]
-font_size = 40
+font_size = 44
 font_color = Color(0.98, 0.99, 1, 1)
 outline_size = 2
 outline_color = Color(0, 0, 0, 0.8)
@@ -24,6 +30,12 @@ outline_color = Color(0, 0, 0, 0.72)
 [sub_resource type="LabelSettings" id="LabelSettings_status"]
 font_size = 14
 font_color = Color(0.9, 0.18, 0.16, 1)
+outline_size = 1
+outline_color = Color(0, 0, 0, 0.72)
+
+[sub_resource type="LabelSettings" id="LabelSettings_small_status"]
+font_size = 12
+font_color = Color(0.76, 0.8, 0.86, 0.92)
 outline_size = 1
 outline_color = Color(0, 0, 0, 0.72)
 
@@ -361,8 +373,8 @@ anchor_top = 1.0
 anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -72.0
-offset_right = 228.0
+offset_top = -78.0
+offset_right = 238.0
 offset_bottom = -20.0
 grow_horizontal = 1
 grow_vertical = 0
@@ -404,7 +416,7 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_health_damage_fill")
 [node name="HealthValueLabel" type="Label" parent="HealthPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "HP 100"
-label_settings = SubResource("LabelSettings_health")
+label_settings = SubResource("LabelSettings_stats_highlight")
 
 [node name="AmmoStateLabel" type="Label" parent="."]
 anchors_preset = 3
@@ -413,14 +425,14 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -240.0
-offset_top = -76.0
+offset_top = -82.0
 offset_right = -20.0
-offset_bottom = -56.0
+offset_bottom = -60.0
 grow_horizontal = 0
 grow_vertical = 0
 horizontal_alignment = 2
 text = "READY"
-label_settings = SubResource("LabelSettings_status")
+label_settings = SubResource("LabelSettings_small_status")
 
 [node name="AmmoLabel" type="Label" parent="."]
 anchors_preset = 3
@@ -581,7 +593,7 @@ label_settings = SubResource("LabelSettings_status")
 layout_mode = 2
 horizontal_alignment = 2
 text = "Reserve: 90"
-label_settings = SubResource("LabelSettings_status")
+label_settings = SubResource("LabelSettings_small_status")
 
 [node name="StatusLabel" type="Label" parent="."]
 anchors_preset = 3
@@ -734,13 +746,13 @@ color = Color(0.75, 0.08, 0.08, 0.9)
 layout_mode = 2
 horizontal_alignment = 1
 text = "You held the line until Wave 1 and dropped 0 hostiles."
-label_settings = SubResource("LabelSettings_health")
+label_settings = SubResource("LabelSettings_stats_highlight")
 
 [node name="GameOverStatsLabel" type="Label" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
 text = "SESSION REPORT\nWAVE REACHED  01\nKILLS         0\nHEADSHOTS     0\nACCURACY      0%\nSURVIVAL      00:00"
-label_settings = SubResource("LabelSettings_status")
+label_settings = SubResource("LabelSettings_small_status")
 
 [node name="RestartButton" type="Button" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -786,20 +798,20 @@ label_settings = SubResource("LabelSettings_wave")
 [node name="PauseSummaryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
-text = "Combat feed halted. Take a second and reset."
-label_settings = SubResource("LabelSettings_health")
+text = "Wave 01 on hold. 0 kills confirmed so far."
+label_settings = SubResource("LabelSettings_stats_highlight")
 
 [node name="PauseControlsLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
 text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
-label_settings = SubResource("LabelSettings_status")
+label_settings = SubResource("LabelSettings_small_status")
 
 [node name="PauseSettingsLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
-text = "QUICK STATUS\nHUD  ONLINE\nAUDIO  ACTIVE"
-label_settings = SubResource("LabelSettings_health")
+text = "SESSION SNAPSHOT\nHEADSHOTS  0\nACCURACY   0%\nSURVIVAL   00:00"
+label_settings = SubResource("LabelSettings_status")
 
 [node name="ResumeButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2

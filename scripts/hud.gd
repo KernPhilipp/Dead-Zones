@@ -37,6 +37,9 @@ var low_health_overlay: ColorRect
 var blood_overlay: TextureRect
 var pause_dimmer: ColorRect
 var pause_panel: PanelContainer
+var pause_summary_label: Label
+var pause_controls_label: Label
+var pause_settings_label: Label
 var resume_button: Button
 var pause_restart_button: Button
 var game_over_panel: PanelContainer
@@ -72,6 +75,10 @@ var session_start_msec: int = 0
 var low_health_panel_pulse: float = 0.0
 var last_wave_number: int = 0
 var wave_clear_announced: bool = false
+var tracked_total_eliminations: int = 0
+var tracked_wave_index: int = 0
+var tracked_wave_total: int = 0
+var tracked_wave_eliminations: int = 0
 
 func _enter_tree():
 	_ensure_nodes()
@@ -166,6 +173,9 @@ func _ensure_nodes():
 	blood_overlay = _find_required_node("BloodOverlay") as TextureRect
 	pause_dimmer = _find_required_node("PauseDimmer") as ColorRect
 	pause_panel = _find_required_node("PausePanel") as PanelContainer
+	pause_summary_label = _find_required_node("PauseSummaryLabel") as Label
+	pause_controls_label = _find_required_node("PauseControlsLabel") as Label
+	pause_settings_label = _find_required_node("PauseSettingsLabel") as Label
 	resume_button = _find_required_node("ResumeButton") as Button
 	pause_restart_button = _find_required_node("PauseRestartButton") as Button
 	game_over_panel = _find_required_node("GameOverPanel") as PanelContainer
@@ -237,6 +247,7 @@ func update_health(value: int):
 		lerpf(0.45, 1.0, health_ratio),
 		1.0
 	)
+	health_value_label.modulate = Color(1.0, lerpf(0.42, 0.98, health_ratio), lerpf(0.42, 0.98, health_ratio), 1.0)
 
 func update_weapon(weapon_name: String):
 	_ensure_nodes()
@@ -255,7 +266,7 @@ func update_weapon_slots(active_index: int):
 func update_ammo(current: int, max_val: int, reserve: int):
 	_ensure_nodes()
 	ammo_label.text = "%03d | %03d" % [current, reserve]
-	reserve_label.text = "CAP %02d" % max_val
+	reserve_label.text = "MAG CAP %02d" % max_val
 	var ammo_ratio: float = float(current) / maxf(float(max_val), 1.0)
 	if current <= 0:
 		current_ammo_state = "EMPTY"
@@ -298,6 +309,7 @@ func update_reload(active: bool, progress: float):
 
 func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 	_ensure_nodes()
+	_update_elimination_tracking(wave, living_zombies, remaining_to_spawn)
 	wave_label.text = "WAVE %02d" % wave
 	zombie_label.text = "Zombies: %d  Incoming: %d" % [living_zombies, remaining_to_spawn]
 	if wave != last_wave_number:
@@ -470,6 +482,7 @@ func _set_pause_menu_visible(next_visible: bool):
 	pause_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 
 	if next_visible:
+		_update_pause_menu_content()
 		pause_dimmer.modulate.a = 0.0
 		pause_panel.modulate.a = 0.0
 		pause_panel.scale = Vector2(0.94, 0.94)
@@ -633,7 +646,7 @@ func _resolve_game_over_stats(stats: Dictionary) -> Dictionary:
 	if not resolved.has("wave") or int(resolved.get("wave", 0)) <= 0:
 		resolved["wave"] = _get_current_wave_number()
 	if not resolved.has("kills"):
-		resolved["kills"] = _get_node_int(player, "kills")
+		resolved["kills"] = _get_session_elimination_count()
 	if not resolved.has("headshots"):
 		resolved["headshots"] = _get_node_int(player, "headshots")
 	if not resolved.has("accuracy"):
@@ -679,10 +692,52 @@ func _get_session_time_seconds() -> int:
 		return 0
 	return maxi(0, int((Time.get_ticks_msec() - session_start_msec) / 1000))
 
+func _update_pause_menu_content():
+	var live_stats: Dictionary = _resolve_game_over_stats({})
+	var wave: int = int(live_stats.get("wave", 0))
+	var kills: int = int(live_stats.get("kills", 0))
+	var headshots: int = int(live_stats.get("headshots", 0))
+	var accuracy: float = float(live_stats.get("accuracy", 0.0)) * 100.0
+	var total_seconds: int = int(live_stats.get("time_seconds", 0))
+	var minutes: int = total_seconds / 60
+	var seconds: int = total_seconds % 60
+
+	pause_summary_label.text = "WAVE %02d PAUSED\n%d HOSTILES ELIMINATED" % [wave, kills]
+	pause_controls_label.text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
+	pause_settings_label.text = "SESSION SNAPSHOT\nHEADSHOTS  %d\nACCURACY   %.0f%%\nSURVIVAL   %02d:%02d" % [headshots, accuracy, minutes, seconds]
+
+func _update_elimination_tracking(wave: int, living_zombies: int, remaining_to_spawn: int):
+	var current_wave_total: int = _get_current_wave_total_count()
+	if wave != tracked_wave_index:
+		if tracked_wave_index > 0:
+			tracked_total_eliminations += tracked_wave_total
+		tracked_wave_index = wave
+		tracked_wave_total = current_wave_total
+		tracked_wave_eliminations = 0
+	else:
+		tracked_wave_total = maxi(tracked_wave_total, current_wave_total)
+
+	var spawned_current_wave: int = max(0, tracked_wave_total - remaining_to_spawn)
+	tracked_wave_eliminations = max(0, spawned_current_wave - living_zombies)
+
+func _get_current_wave_total_count() -> int:
+	var game_manager: Node = get_node_or_null("../GameManager")
+	if game_manager == null or not is_instance_valid(game_manager):
+		return 0
+	if not game_manager.has_method("get_runtime_state"):
+		return 0
+
+	var runtime_state: Dictionary = game_manager.call("get_runtime_state")
+	var current_wave_plan: Dictionary = runtime_state.get("current_wave_plan", {})
+	return int(current_wave_plan.get("total_count", 0))
+
+func _get_session_elimination_count() -> int:
+	return tracked_total_eliminations + tracked_wave_eliminations
+
 func _format_game_over_summary(stats: Dictionary) -> String:
 	var wave: int = int(stats.get("wave", 0))
 	var kills: int = int(stats.get("kills", 0))
-	return "You held the line until Wave %d and dropped %d hostiles." % [wave, kills]
+	return "WAVE %02d REACHED\n%d HOSTILES ELIMINATED" % [wave, kills]
 
 func _format_game_over_stats(stats: Dictionary) -> String:
 	var wave: int = int(stats.get("wave", 0))
