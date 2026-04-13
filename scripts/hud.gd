@@ -80,6 +80,13 @@ var tracked_total_eliminations: int = 0
 var tracked_wave_index: int = 0
 var tracked_wave_total: int = 0
 var tracked_wave_eliminations: int = 0
+var crosshair_flash_color: Color = Color(0.95, 0.97, 1.0, 0.92)
+var crosshair_dot_flash_color: Color = Color(0.95, 0.97, 1.0, 1.0)
+var crosshair_scale_target: Vector2 = Vector2.ONE
+var crosshair_scale_velocity: float = 0.18
+var crosshair_extra_spread: float = 0.0
+var crosshair_base_color: Color = Color(0.95, 0.97, 1.0, 0.92)
+var crosshair_dot_base_color: Color = Color(0.95, 0.97, 1.0, 1.0)
 
 func _enter_tree():
 	_ensure_nodes()
@@ -128,6 +135,7 @@ func _ready():
 	damage_compass_marker.modulate.a = 0.0
 	_hide_legacy_damage_indicators()
 	update_weapon_slots(0)
+	_set_crosshair_state("default")
 	update_crosshair(0.0)
 	resume_button.pressed.connect(_on_resume)
 	pause_restart_button.pressed.connect(_on_restart)
@@ -200,6 +208,9 @@ func _process(delta):
 	_ensure_nodes()
 	displayed_health = lerpf(displayed_health, target_health, clampf(delta * 10.0, 0.0, 1.0))
 	health_damage_bar.value = displayed_health
+	crosshair_root.scale = crosshair_root.scale.lerp(crosshair_scale_target, clampf(delta / maxf(crosshair_scale_velocity, 0.001), 0.0, 1.0))
+	crosshair_extra_spread = lerpf(crosshair_extra_spread, 0.0, clampf(delta * 9.0, 0.0, 1.0))
+	_update_crosshair_colors(delta)
 
 	if Input.is_action_just_pressed("pause_game") and not game_over_panel.visible:
 		toggle_pause_menu()
@@ -275,6 +286,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		reserve_label.modulate = Color(0.98, 0.52, 0.42, 0.96)
 		ammo_state_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
 		ammo_state_label.text = "MAG EMPTY"
+		_set_crosshair_state("empty")
 		_start_ammo_warning()
 	elif ammo_ratio <= 0.2:
 		current_ammo_state = "LOW AMMO"
@@ -282,6 +294,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		reserve_label.modulate = Color(1.0, 0.54, 0.46, 0.96)
 		ammo_state_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
 		ammo_state_label.text = "LOW AMMO"
+		_set_crosshair_state("warning")
 		_start_ammo_warning()
 	elif ammo_ratio <= 0.4:
 		current_ammo_state = "CHECK MAG"
@@ -289,6 +302,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		reserve_label.modulate = Color(0.98, 0.82, 0.38, 0.96)
 		ammo_state_label.modulate = Color(1.0, 0.82, 0.35, 0.96)
 		ammo_state_label.text = "CHECK MAG"
+		_set_crosshair_state("warning")
 		_stop_ammo_warning()
 	else:
 		current_ammo_state = "READY"
@@ -296,6 +310,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		reserve_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
 		ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
 		ammo_state_label.text = "READY"
+		_set_crosshair_state("default")
 		_stop_ammo_warning()
 
 func update_reload(active: bool, progress: float):
@@ -304,6 +319,7 @@ func update_reload(active: bool, progress: float):
 	reload_bar.value = progress * 100.0
 	if active:
 		reload_was_active = true
+		_set_crosshair_state("reload")
 		ammo_state_label.text = "RELOADING %02d%%" % int(round(progress * 100.0))
 		ammo_state_label.modulate = Color(1.0, 0.8, 0.35, 1.0)
 		ammo_label.modulate = Color(1.0, 0.92, 0.66, 1.0)
@@ -311,6 +327,12 @@ func update_reload(active: bool, progress: float):
 		_stop_ammo_warning()
 	else:
 		ammo_state_label.text = current_ammo_state
+		if current_ammo_state == "EMPTY":
+			_set_crosshair_state("empty")
+		elif current_ammo_state == "LOW AMMO" or current_ammo_state == "CHECK MAG":
+			_set_crosshair_state("warning")
+		else:
+			_set_crosshair_state("default")
 		if reload_was_active:
 			reload_was_active = false
 			show_status("RELOAD COMPLETE", Color(0.46, 1.0, 0.56, 1.0), 0.3)
@@ -332,14 +354,18 @@ func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 func update_crosshair(movement_ratio: float):
 	_ensure_nodes()
 	var ratio: float = clampf(movement_ratio, 0.0, 1.0)
-	var target_spread: float = lerpf(2.0, 5.0, ratio)
+	var target_spread: float = lerpf(2.0, 5.0, ratio) + crosshair_extra_spread
 	crosshair_spread = lerpf(crosshair_spread, target_spread, 0.2)
 	var center: float = 16.0
 	crosshair_left.position = Vector2(center - crosshair_spread - 5.0, 15.0)
 	crosshair_right.position = Vector2(center + crosshair_spread, 15.0)
 	crosshair_top.position = Vector2(15.0, center - crosshair_spread - 5.0)
 	crosshair_bottom.position = Vector2(15.0, center + crosshair_spread)
-	crosshair_dot.modulate.a = lerpf(1.0, 0.68, ratio)
+	crosshair_dot.modulate.a = lerpf(crosshair_dot.modulate.a, lerpf(1.0, 0.68, ratio), 0.22)
+	if ratio > 0.45 and current_ammo_state == "READY":
+		_set_crosshair_state("move")
+	elif current_ammo_state == "READY":
+		_set_crosshair_state("default")
 
 func show_wave_announcement(wave: int):
 	_ensure_nodes()
@@ -373,14 +399,12 @@ func show_combat_text(message: String, color: Color):
 
 func show_kill_feedback():
 	_ensure_nodes()
-	crosshair_root.modulate = Color(1.0, 0.16, 0.12, 1.0)
 	if hit_marker_tween:
 		hit_marker_tween.kill()
+	_set_crosshair_state("kill")
 	hit_marker_tween = create_tween()
 	hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.22, 1.22), 0.05)
-	hit_marker_tween.parallel().tween_property(crosshair_root, "modulate", Color(1.0, 0.16, 0.12, 1.0), 0.04)
 	hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.0, 1.0), 0.1)
-	hit_marker_tween.parallel().tween_property(crosshair_root, "modulate", Color(1, 1, 1, 1), 0.14)
 	_show_kill_confirm()
 	show_status("KILL CONFIRMED", Color(1.0, 0.18, 0.12, 1.0), 0.36)
 	show_combat_text("ELIMINATION", Color(1.0, 0.22, 0.16, 1.0))
@@ -390,25 +414,21 @@ func show_shot_feedback(hit: bool):
 	if hit_marker_tween:
 		hit_marker_tween.kill()
 	if hit:
+		_set_crosshair_state("hit")
 		hit_marker.visible = true
 		hit_marker.modulate = Color(1, 0.32, 0.32, 0.0)
 		hit_marker.scale = Vector2(0.55, 0.55)
-		crosshair_root.scale = Vector2(1.0, 1.0)
-		crosshair_root.modulate = Color(1, 0.28, 0.28, 1.0)
 		hit_marker_tween = create_tween()
 		hit_marker_tween.tween_property(hit_marker, "modulate:a", 1.0, 0.06)
 		hit_marker_tween.parallel().tween_property(hit_marker, "scale", Vector2(1.2, 1.2), 0.08)
 		hit_marker_tween.parallel().tween_property(crosshair_root, "scale", Vector2(1.18, 1.18), 0.08)
-		hit_marker_tween.parallel().tween_property(crosshair_root, "modulate", Color(1, 0.28, 0.28, 1.0), 0.04)
 		hit_marker_tween.tween_property(hit_marker, "scale", Vector2(0.9, 0.9), 0.08)
 		hit_marker_tween.parallel().tween_property(crosshair_root, "scale", Vector2(1.0, 1.0), 0.1)
-		hit_marker_tween.parallel().tween_property(crosshair_root, "modulate", Color(1, 1, 1, 1), 0.16)
 		hit_marker_tween.tween_property(hit_marker, "modulate:a", 0.0, 0.14)
 		hit_marker_tween.tween_callback(func(): hit_marker.visible = false)
 		show_status("TARGET HIT", Color(1, 0.35, 0.35, 1), 0.18)
 	else:
-		crosshair_root.scale = Vector2(1.0, 1.0)
-		crosshair_root.modulate = Color(1, 1, 1, 1)
+		_set_crosshair_state("default")
 		hit_marker_tween = create_tween()
 		hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.08, 1.08), 0.05)
 		hit_marker_tween.tween_property(crosshair_root, "scale", Vector2(1.0, 1.0), 0.08)
@@ -692,6 +712,47 @@ func _stop_ammo_warning():
 	ammo_label.scale = Vector2(1.0, 1.0)
 	ammo_state_label.modulate.a = 1.0
 	ammo_state_label.scale = Vector2(1.0, 1.0)
+
+func _set_crosshair_state(state: String):
+	match state:
+		"move":
+			crosshair_base_color = Color(0.9, 0.94, 1.0, 0.88)
+			crosshair_dot_base_color = Color(0.95, 0.97, 1.0, 0.88)
+			crosshair_scale_target = Vector2(1.03, 1.03)
+		"warning":
+			crosshair_base_color = Color(1.0, 0.78, 0.3, 0.94)
+			crosshair_dot_base_color = Color(1.0, 0.82, 0.36, 1.0)
+			crosshair_scale_target = Vector2(1.02, 1.02)
+		"empty":
+			crosshair_base_color = Color(1.0, 0.26, 0.22, 0.96)
+			crosshair_dot_base_color = Color(1.0, 0.26, 0.22, 1.0)
+			crosshair_scale_target = Vector2(1.04, 1.04)
+			crosshair_extra_spread = maxf(crosshair_extra_spread, 1.6)
+		"reload":
+			crosshair_base_color = Color(1.0, 0.82, 0.42, 0.94)
+			crosshair_dot_base_color = Color(1.0, 0.88, 0.56, 1.0)
+			crosshair_scale_target = Vector2(0.94, 0.94)
+		"hit":
+			crosshair_flash_color = Color(1.0, 0.28, 0.28, 1.0)
+			crosshair_dot_flash_color = Color(1.0, 0.28, 0.28, 1.0)
+			crosshair_scale_target = Vector2(1.08, 1.08)
+			crosshair_extra_spread = maxf(crosshair_extra_spread, 0.65)
+		"kill":
+			crosshair_flash_color = Color(1.0, 0.12, 0.1, 1.0)
+			crosshair_dot_flash_color = Color(1.0, 0.14, 0.12, 1.0)
+			crosshair_scale_target = Vector2(1.12, 1.12)
+			crosshair_extra_spread = maxf(crosshair_extra_spread, 1.0)
+		_:
+			crosshair_base_color = Color(0.95, 0.97, 1.0, 0.92)
+			crosshair_dot_base_color = Color(0.95, 0.97, 1.0, 1.0)
+			crosshair_scale_target = Vector2.ONE
+
+func _update_crosshair_colors(delta: float):
+	crosshair_flash_color = crosshair_flash_color.lerp(crosshair_base_color, clampf(delta * 9.0, 0.0, 1.0))
+	crosshair_dot_flash_color = crosshair_dot_flash_color.lerp(crosshair_dot_base_color, clampf(delta * 9.0, 0.0, 1.0))
+	for segment in [crosshair_left, crosshair_right, crosshair_top, crosshair_bottom]:
+		segment.color = crosshair_flash_color
+	crosshair_dot.color = crosshair_dot_flash_color
 
 func _resolve_game_over_stats(stats: Dictionary) -> Dictionary:
 	var resolved: Dictionary = stats.duplicate(true)
