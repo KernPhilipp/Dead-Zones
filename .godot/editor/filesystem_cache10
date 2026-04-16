@@ -1,5 +1,5 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1776353943
+::res://::1776354332
 export_presets.cfg::TextFile::-1::1776346725::0::1::::<><><>0<>0<><>::
 README.md::TextFile::-1::1776352440::0::1::::<><><>0<>0<><>::
 ::res://assets/::1776346801
@@ -85,7 +85,7 @@ grenade_projectile.tscn::PackedScene::-1::1776346850::0::1::::<><><>0<>0<><>::re
 broken_fences.tscn::PackedScene::-1::1776350350::0::1::::<><><>0<>0<><>::
 fences_clean.tscn::PackedScene::-1::1776350350::0::1::::<><><>0<>0<><>::
 ::res://scripts/::1776352440
-environment_controller.gd::GDScript::4239132016340530657::1776353830::0::1::::<>Node3D<><>0<>0<><>::
+environment_controller.gd::GDScript::4239132016340530657::1776354127::0::1::::<>Node3D<><>0<>0<><>::
 game_manager.gd::GDScript::1107880702585157809::1776352065::0::1::::<>Node<><>0<>0<><>::
 handbook_book.gd::GDScript::3982513685297990710::1776346725::0::1::::<>Control<><>0<>0<><>::
 hud.gd::GDScript::3632510194491325148::1776352065::0::1::::<>CanvasLayer<><>0<>0<><>::
