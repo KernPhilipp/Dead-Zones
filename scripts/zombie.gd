@@ -40,9 +40,25 @@ func _physics_process(delta):
 	move_and_slide()
 
 func take_damage(amount: int):
+	return _apply_damage(amount)
+
+func take_part_damage(body_part: String, amount: int) -> bool:
+	var damage_multiplier: float = 1.0
+	match body_part:
+		"head":
+			damage_multiplier = 1.0
+		"arm_l", "arm_r", "leg_l", "leg_r":
+			damage_multiplier = 1.0
+		_:
+			damage_multiplier = 1.0
+	return _apply_damage(int(round(amount * damage_multiplier)))
+
+func _apply_damage(amount: int) -> bool:
 	health -= amount
 	if health <= 0:
 		die()
+		return true
+	return false
 
 func die():
 	queue_free()
@@ -50,7 +66,7 @@ func die():
 func _on_damage_area_body_entered(body):
 	if body.is_in_group("player") and can_attack:
 		if body.has_method("take_damage"):
-			body.take_damage(damage)
+			body.take_damage(damage, global_position)
 		can_attack = false
 		attack_timer.start(attack_cooldown)
 
@@ -61,7 +77,7 @@ func _on_attack_timer_timeout():
 		var bodies = $DamageArea.get_overlapping_bodies()
 		for body in bodies:
 			if body.is_in_group("player") and body.has_method("take_damage"):
-				body.take_damage(damage)
+				body.take_damage(damage, global_position)
 				can_attack = false
 				attack_timer.start(attack_cooldown)
 				break

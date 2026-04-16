@@ -1,0 +1,13 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 300 460'>
+  <defs>
+    <linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0%' stop-color='#6B6B6B'/>
+      <stop offset='100%' stop-color='#111111'/>
+    </linearGradient>
+  </defs>
+  <rect x='0' y='0' width='300' height='460' fill='url(#bg)'/>
+  <rect x='16' y='16' width='268' height='428' fill='none' stroke='rgba(255,255,255,0.28)' stroke-width='2'/>
+  <path d='M112 246 L188 246 L194 390 L106 390 Z M132 176 A22 22 0 1 0 176 176 A22 22 0 1 0 132 176 Z' fill='#242424' opacity='0.92'/>
+  <text x='150' y='58' text-anchor='middle' font-size='28' font-family='Verdana,Arial,sans-serif' fill='#F7F1DE'>SKULLY</text>
+  <text x='150' y='425' text-anchor='middle' font-size='14' font-family='Verdana,Arial,sans-serif' fill='#E9DFC5'>Handbook Placeholder</text>
+</svg>
