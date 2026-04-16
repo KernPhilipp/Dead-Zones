@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://player001"]
+[gd_scene load_steps=16 format=3 uid="uid://player001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 
@@ -6,9 +6,71 @@
 radius = 0.4
 height = 1.8
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_gun"]
-radius = 0.02
-height = 0.4
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sleeve"]
+albedo_color = Color(0.18, 0.21, 0.19, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_glove"]
+albedo_color = Color(0.09, 0.09, 0.09, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_weapon_body"]
+albedo_color = Color(0.24, 0.22, 0.19, 1)
+roughness = 0.84
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_weapon_metal"]
+albedo_color = Color(0.16, 0.17, 0.18, 1)
+metallic = 0.35
+roughness = 0.42
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tape"]
+albedo_color = Color(0.42, 0.38, 0.29, 1)
+roughness = 0.98
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_light"]
+albedo_color = Color(1, 0.85, 0.48, 1)
+emission_enabled = true
+emission = Color(1, 0.72, 0.24, 1)
+emission_energy_multiplier = 0.45
+roughness = 0.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_forearm"]
+size = Vector3(0.16, 0.42, 0.16)
+material = SubResource("StandardMaterial3D_sleeve")
+
+[sub_resource type="BoxMesh" id="BoxMesh_hand"]
+size = Vector3(0.16, 0.16, 0.18)
+material = SubResource("StandardMaterial3D_glove")
+
+[sub_resource type="BoxMesh" id="BoxMesh_weapon_core"]
+size = Vector3(0.14, 0.2, 0.85)
+material = SubResource("StandardMaterial3D_weapon_body")
+
+[sub_resource type="BoxMesh" id="BoxMesh_weapon_receiver"]
+size = Vector3(0.18, 0.18, 0.28)
+material = SubResource("StandardMaterial3D_weapon_metal")
+
+[sub_resource type="BoxMesh" id="BoxMesh_weapon_stock"]
+size = Vector3(0.12, 0.16, 0.32)
+material = SubResource("StandardMaterial3D_weapon_body")
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_barrel"]
+top_radius = 0.025
+bottom_radius = 0.03
+height = 0.62
+material = SubResource("StandardMaterial3D_weapon_metal")
+
+[sub_resource type="BoxMesh" id="BoxMesh_mag"]
+size = Vector3(0.09, 0.24, 0.14)
+material = SubResource("StandardMaterial3D_weapon_metal")
+
+[sub_resource type="BoxMesh" id="BoxMesh_tape_wrap"]
+size = Vector3(0.16, 0.04, 0.14)
+material = SubResource("StandardMaterial3D_tape")
+
+[sub_resource type="BoxMesh" id="BoxMesh_flashlight"]
+size = Vector3(0.09, 0.09, 0.22)
+material = SubResource("StandardMaterial3D_light")
 
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 collision_layer = 1
@@ -31,6 +93,49 @@ target_position = Vector3(0, 0, -100)
 collision_mask = 2
 enabled = true
 
-[node name="GunModel" type="MeshInstance3D" parent="Head"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.3, -0.2, -0.5)
-mesh = SubResource("CapsuleMesh_gun")
+[node name="GunModel" type="Node3D" parent="Head"]
+transform = Transform3D(0.996195, -0.0871557, 0, 0.0871557, 0.996195, 0, 0, 0, 1, 0.34, -0.28, -0.62)
+
+[node name="Arm_L" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(0.939693, 0.296198, -0.17101, -0.34202, 0.813798, -0.469846, 0.00162998, 0.5, 0.866025, -0.18, -0.05, 0.08)
+mesh = SubResource("BoxMesh_forearm")
+
+[node name="Hand_L" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(0.939693, 0.296198, -0.17101, -0.34202, 0.813798, -0.469846, 0.00162998, 0.5, 0.866025, -0.24, -0.23, -0.02)
+mesh = SubResource("BoxMesh_hand")
+
+[node name="Arm_R" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(0.996195, -0.0151344, 0.0858317, 0.038685, 0.958333, -0.283129, -0.0784577, 0.285253, 0.955223, 0.18, -0.08, 0.22)
+mesh = SubResource("BoxMesh_forearm")
+
+[node name="Hand_R" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(0.996195, -0.0151344, 0.0858317, 0.038685, 0.958333, -0.283129, -0.0784577, 0.285253, 0.955223, 0.18, -0.24, 0.1)
+mesh = SubResource("BoxMesh_hand")
+
+[node name="WeaponCore" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(1, 0, 0, 0, 0.997564, -0.0697565, 0, 0.0697565, 0.997564, 0, -0.16, -0.12)
+mesh = SubResource("BoxMesh_weapon_core")
+
+[node name="Receiver" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(1, 0, 0, 0, 0.997564, -0.0697565, 0, 0.0697565, 0.997564, 0, -0.1, 0.04)
+mesh = SubResource("BoxMesh_weapon_receiver")
+
+[node name="Stock" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 0, 0, 1, 0.01, -0.08, 0.33)
+mesh = SubResource("BoxMesh_weapon_stock")
+
+[node name="Barrel" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -0.12, -0.58)
+mesh = SubResource("CylinderMesh_barrel")
+
+[node name="Magazine" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(0.996195, 0, -0.0871557, 0, 1, 0, 0.0871557, 0, 0.996195, 0, -0.3, -0.02)
+mesh = SubResource("BoxMesh_mag")
+
+[node name="TapeWrap" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(0.996195, 0, -0.0871557, 0, 1, 0, 0.0871557, 0, 0.996195, 0, -0.22, 0.1)
+mesh = SubResource("BoxMesh_tape_wrap")
+
+[node name="Flashlight" type="MeshInstance3D" parent="Head/GunModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, -0.24, -0.42)
+mesh = SubResource("BoxMesh_flashlight")

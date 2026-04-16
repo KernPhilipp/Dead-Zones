@@ -87,6 +87,9 @@ var headshots: int = 0
 var last_kill_time_ms: int = -100000
 var kill_streak_count: int = 0
 var speed_ratio: float = 0.0
+var gun_model_start_pos: Vector3
+var gun_model_start_rot: Vector3
+var view_sway: Vector2 = Vector2.ZERO
 
 func _ready():
 	health = max_health
@@ -95,6 +98,8 @@ func _ready():
 
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	head_start_pos = $Head.position
+	gun_model_start_pos = $Head/GunModel.position
+	gun_model_start_rot = $Head/GunModel.rotation
 
 	fire_timer = Timer.new()
 	fire_timer.one_shot = true
@@ -111,6 +116,7 @@ func _physics_process(delta):
 	move_player(delta)
 	rotate_player(delta)
 	update_damage_shake(delta)
+	update_viewmodel(delta)
 
 	if HEAD_BOB:
 		if velocity and is_on_floor():
@@ -136,6 +142,7 @@ func _input(event):
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotation_target_player += -event.relative.x * MOUSE_SENS
 		rotation_target_head += -event.relative.y * MOUSE_SENS
+		view_sway += Vector2(-event.relative.x, event.relative.y) * 0.00012
 		rotation_target_head = clamp(
 			rotation_target_head,
 			deg_to_rad(CLAMP_HEAD_ROTATION_MIN),
@@ -299,6 +306,22 @@ func update_damage_shake(delta):
 		0.0
 	) * shake_progress
 	$Head.position += offset
+
+func update_viewmodel(delta):
+	var gun_model: Node3D = $Head/GunModel
+	var move_wave: float = sin(tick * HEAD_BOB_FREQUENCY * 0.55) * 0.018 * speed_ratio
+	var strafe_wave: float = cos(tick * HEAD_BOB_FREQUENCY * 0.35) * 0.015 * speed_ratio
+	view_sway = view_sway.lerp(Vector2.ZERO, clampf(delta * 8.0, 0.0, 1.0))
+	gun_model.position = gun_model_start_pos + Vector3(
+		view_sway.x + strafe_wave,
+		view_sway.y + move_wave,
+		absf(move_wave) * 0.4
+	)
+	gun_model.rotation = gun_model_start_rot + Vector3(
+		-move_wave * 0.8 + view_sway.y * 0.7,
+		-view_sway.x * 0.55,
+		-view_sway.x * 0.4
+	)
 
 func _setup_weapons():
 	weapon_names = [weapon_one_name, weapon_two_name]

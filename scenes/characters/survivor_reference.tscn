@@ -1,0 +1,104 @@
+[gd_scene load_steps=14 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jacket"]
+albedo_color = Color(0.17, 0.2, 0.18, 1)
+roughness = 0.94
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pants"]
+albedo_color = Color(0.2, 0.19, 0.17, 1)
+roughness = 0.96
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_skin"]
+albedo_color = Color(0.69, 0.58, 0.5, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gear"]
+albedo_color = Color(0.24, 0.21, 0.17, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_boots"]
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_torso"]
+size = Vector3(0.62, 0.82, 0.32)
+material = SubResource("StandardMaterial3D_jacket")
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.2
+height = 0.42
+material = SubResource("StandardMaterial3D_skin")
+
+[sub_resource type="BoxMesh" id="BoxMesh_arm"]
+size = Vector3(0.18, 0.58, 0.18)
+material = SubResource("StandardMaterial3D_jacket")
+
+[sub_resource type="BoxMesh" id="BoxMesh_leg"]
+size = Vector3(0.22, 0.72, 0.22)
+material = SubResource("StandardMaterial3D_pants")
+
+[sub_resource type="BoxMesh" id="BoxMesh_boot"]
+size = Vector3(0.24, 0.14, 0.36)
+material = SubResource("StandardMaterial3D_boots")
+
+[sub_resource type="BoxMesh" id="BoxMesh_pack"]
+size = Vector3(0.34, 0.46, 0.16)
+material = SubResource("StandardMaterial3D_gear")
+
+[sub_resource type="BoxMesh" id="BoxMesh_strap"]
+size = Vector3(0.06, 0.54, 0.06)
+material = SubResource("StandardMaterial3D_gear")
+
+[sub_resource type="BoxMesh" id="BoxMesh_mask"]
+size = Vector3(0.18, 0.08, 0.12)
+material = SubResource("StandardMaterial3D_gear")
+
+[node name="SurvivorReference" type="Node3D"]
+
+[node name="Torso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, 0, 1.16, 0)
+mesh = SubResource("BoxMesh_torso")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, -0.173648, 0, 0.173648, 0.984808, 0, 1.8, 0.02)
+mesh = SubResource("SphereMesh_head")
+
+[node name="Mask" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, -0.173648, 0, 0.173648, 0.984808, 0, 1.77, 0.18)
+mesh = SubResource("BoxMesh_mask")
+
+[node name="Arm_L" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0, 1, -0.42, 1.16, 0)
+mesh = SubResource("BoxMesh_arm")
+
+[node name="Arm_R" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0, 1, 0.42, 1.16, 0)
+mesh = SubResource("BoxMesh_arm")
+
+[node name="Leg_L" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.996195, 0.0871557, 0, -0.0871557, 0.996195, 0, 0, 0, 1, -0.16, 0.46, 0)
+mesh = SubResource("BoxMesh_leg")
+
+[node name="Leg_R" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.996195, -0.0871557, 0, 0.0871557, 0.996195, 0, 0, 0, 1, 0.16, 0.46, 0)
+mesh = SubResource("BoxMesh_leg")
+
+[node name="Boot_L" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, -0.16, 0.02, 0.08)
+mesh = SubResource("BoxMesh_boot")
+
+[node name="Boot_R" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, 0.16, 0.02, 0.08)
+mesh = SubResource("BoxMesh_boot")
+
+[node name="Backpack" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 1.18, 0.23)
+mesh = SubResource("BoxMesh_pack")
+
+[node name="Strap_L" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, -0.18, 1.2, 0.11)
+mesh = SubResource("BoxMesh_strap")
+
+[node name="Strap_R" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, 0.18, 1.2, 0.11)
+mesh = SubResource("BoxMesh_strap")

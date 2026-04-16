@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/zombie.tscn" id="1_base"]
+
+[node name="Zombie" instance=ExtResource("1_base")]
+species_id = 8
+zombie_class_id = 1
+rank_id = 4
+death_subtype_id = 31
+walk_frequency = 10.0
+walk_amplitude = 0.16
+attack_anim_duration = 0.2

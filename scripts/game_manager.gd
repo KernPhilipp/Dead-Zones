@@ -6,7 +6,10 @@ extends Node
 @export var wave_growth := 3
 @export var time_between_waves := 2.0
 
-var zombie_scene: PackedScene = preload("res://scenes/zombie.tscn")
+var walker_scene: PackedScene = preload("res://scenes/zombies/walker.tscn")
+var brute_scene: PackedScene = preload("res://scenes/zombies/brute.tscn")
+var sprinter_scene: PackedScene = preload("res://scenes/zombies/sprinter.tscn")
+var skully_scene: PackedScene = preload("res://scenes/zombies/skully.tscn")
 var spawn_points: Array[Marker3D] = []
 var player: CharacterBody3D
 var hud: CanvasLayer
@@ -81,8 +84,10 @@ func _on_spawn_timer_timeout():
 		return
 
 	var spawn_point = spawn_points.pick_random()
+	var zombie_scene: PackedScene = _pick_zombie_scene_for_wave()
 	var zombie = zombie_scene.instantiate()
 	zombie.global_position = spawn_point.global_position
+	zombie.rotation.y = randf_range(-PI, PI)
 	get_tree().current_scene.add_child(zombie)
 	spawned_in_wave += 1
 	if spawned_in_wave < zombies_to_spawn_in_wave:
@@ -96,6 +101,25 @@ func start_next_wave():
 	hud.show_wave_announcement(current_wave)
 	hud.show_status("WAVE %d" % current_wave, Color(1, 0.85, 0.45, 1), 1.1)
 	spawn_timer.start(0.25)
+
+func _pick_zombie_scene_for_wave() -> PackedScene:
+	var scene_pool: Array[PackedScene] = [
+		walker_scene,
+		walker_scene,
+		walker_scene
+	]
+
+	if current_wave >= 2:
+		scene_pool.append(sprinter_scene)
+	if current_wave >= 3:
+		scene_pool.append(brute_scene)
+	if current_wave >= 5:
+		scene_pool.append(skully_scene)
+	if current_wave >= 7:
+		scene_pool.append(sprinter_scene)
+		scene_pool.append(brute_scene)
+
+	return scene_pool.pick_random()
 
 func game_over():
 	game_active = false
