@@ -341,10 +341,13 @@ func take_damage(amount: int, source_position: Vector3 = Vector3.ZERO) -> void:
 		health = max(0, health - remaining_damage)
 	damage_shake_timer = damage_shake_duration
 	damage_shake_amount = damage_shake_strength
-	var direction := Vector2.ZERO
-	if source_position != Vector3.ZERO:
-		var source_direction := (source_position - global_position).normalized()
-		var local_direction := global_transform.basis.inverse() * source_direction
+	var direction: Vector2 = Vector2.ZERO
+	var resolved_source_position: Vector3 = source_position
+	if resolved_source_position == Vector3.ZERO:
+		resolved_source_position = _get_nearest_zombie_position()
+	if resolved_source_position != Vector3.ZERO:
+		var source_direction: Vector3 = (resolved_source_position - global_position).normalized()
+		var local_direction: Vector3 = global_transform.basis.inverse() * source_direction
 		direction = Vector2(local_direction.x, local_direction.z)
 	damage_feedback.emit(incoming_damage, direction)
 
@@ -681,6 +684,12 @@ func _resolve_damage_target(collider: Object, collision_point: Vector3) -> Dicti
 			var body_part: String = ""
 			if collider.has_method("get_body_part"):
 				body_part = String(collider.call("get_body_part"))
+			else:
+				var collider_body_part: Variant = collider.get("body_part")
+				if collider_body_part is String:
+					body_part = String(collider_body_part)
+			if body_part.is_empty() and _is_headshot(zombie_owner, collision_point):
+				body_part = "head"
 			return {
 				"valid": true,
 				"damage_target": zombie_owner,
@@ -698,17 +707,28 @@ func _resolve_damage_target(collider: Object, collision_point: Vector3) -> Dicti
 		}
 
 	if collider.has_method("take_damage"):
+		var direct_body_part: String = "head" if _is_headshot(collider, collision_point) else ""
 		return {
 			"valid": true,
 			"damage_target": collider,
 			"event_key": collider.get_instance_id(),
-			"body_part": "",
+			"body_part": direct_body_part,
 		}
 
 	return {"valid": false}
 
 func _is_headshot(target: Object, collision_point: Vector3) -> bool:
-	if target == null or not target.is_in_group("zombie"):
+	if target == null:
+		return false
+
+	var body_part: Variant = target.get("body_part") if target != null else null
+	if body_part is String:
+		return String(body_part) == "head"
+
+	if target.has_method("get_body_part"):
+		return String(target.call("get_body_part")) == "head"
+
+	if not target.is_in_group("zombie"):
 		return false
 	var target_node: Node3D = target as Node3D
 	if target_node == null:
@@ -890,3 +910,16 @@ func _get_status_color(style: String) -> Color:
 
 func build_game_over_stats(current_wave: int, total_seconds: int) -> Dictionary:
 	return {"wave": current_wave, "kills": kills, "headshots": headshots, "accuracy": get_accuracy(), "time_seconds": total_seconds, "points": points}
+
+func _get_nearest_zombie_position() -> Vector3:
+	var nearest_position: Vector3 = Vector3.ZERO
+	var nearest_distance_sq: float = INF
+	for zombie_node in get_tree().get_nodes_in_group("zombie"):
+		var zombie: Node3D = zombie_node as Node3D
+		if zombie == null or not is_instance_valid(zombie):
+			continue
+		var distance_sq: float = global_position.distance_squared_to(zombie.global_position)
+		if distance_sq < nearest_distance_sq:
+			nearest_distance_sq = distance_sq
+			nearest_position = zombie.global_position
+	return nearest_position

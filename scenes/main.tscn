@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://main0001"]
+[gd_scene load_steps=19 format=3 uid="uid://main0001"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="2_hud"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/lost_place_tower_house.tscn" id="8_house"]
 [ext_resource type="PackedScene" path="res://scenes/props/broken_fences.tscn" id="9_broken_fences"]
 [ext_resource type="PackedScene" path="res://scenes/props/fences_clean.tscn" id="10_clean_fences"]
+[ext_resource type="Script" path="res://scripts/weather_controller.gd" id="11_weather"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.35, 0.35, 0.3, 1)
@@ -26,6 +27,23 @@ background_color = Color(0.4, 0.55, 0.7, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.6, 0.6, 0.65, 1)
 ambient_light_energy = 0.5
+fog_enabled = true
+fog_density = 0.01
+fog_light_color = Color(0.48, 0.5, 0.56, 1)
+fog_light_energy = 0.58
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rain"]
+emission_shape = 3
+emission_box_extents = Vector3(26, 1, 26)
+direction = Vector3(0.34, -1, 0.14)
+initial_velocity_min = 24.0
+initial_velocity_max = 34.0
+gravity = Vector3(0, -4, 0)
+scale_min = 0.6
+scale_max = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_rain"]
+size = Vector3(0.02, 0.6, 0.02)
 
 [node name="Main" type="Node3D"]
 
@@ -36,9 +54,21 @@ script = ExtResource("3_gm")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 10, 0)
 shadow_enabled = true
+light_energy = 0.92
+
+[node name="LightningFlash" type="OmniLight3D" parent="."]
+visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, -8)
+light_color = Color(0.82, 0.88, 1, 1)
+light_energy = 3.6
+omni_range = 90.0
+shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_world")
+
+[node name="WeatherController" type="Node3D" parent="."]
+script = ExtResource("11_weather")
 
 [node name="Map" type="Node3D" parent="."]
 
@@ -215,6 +245,16 @@ display_name = "Shotgun Buy"
 [node name="WeaponUpgradeStation" parent="Stations" instance=ExtResource("6_upgrade_station")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -8)
 display_name = "Weapon Upgrade"
+
+[node name="Weather" type="Node3D" parent="."]
+
+[node name="Rain" type="GPUParticles3D" parent="Weather"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0)
+amount = 2600
+lifetime = 1.5
+preprocess = 1.2
+draw_pass_1 = SubResource("BoxMesh_rain")
+process_material = SubResource("ParticleProcessMaterial_rain")
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 

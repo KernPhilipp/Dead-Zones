@@ -74,12 +74,24 @@ func _ready():
 	hud = get_node_or_null("../HUD")
 
 	if player != null and hud != null:
-		player.shot_feedback.connect(func(hit): if hud.has_method("show_shot_feedback"): hud.show_shot_feedback(hit))
-		player.kill_feedback.connect(func(): if hud.has_method("show_kill_feedback"): hud.show_kill_feedback())
-		player.reload_feedback.connect(func(msg, col): if hud.has_method("show_status"): hud.show_status(msg, col))
-		player.damage_feedback.connect(func(amt, dir): if hud.has_method("show_damage_feedback"): hud.show_damage_feedback(amt, dir))
-		player.combat_text_feedback.connect(func(msg, col): if hud.has_method("show_combat_text"): hud.show_combat_text(msg, col))
-		player.unlock_feedback.connect(func(_type, _id, display_name): if hud.has_method("show_unlock_feedback"): hud.show_unlock_feedback(display_name))
+		player.shot_feedback.connect(func(hit):
+			if hud.has_method("show_shot_feedback"):
+				hud.show_shot_feedback(hit))
+		player.kill_feedback.connect(func():
+			if hud.has_method("show_kill_feedback"):
+				hud.show_kill_feedback())
+		player.reload_feedback.connect(func(msg, col):
+			if hud.has_method("show_status"):
+				hud.show_status(msg, col))
+		player.damage_feedback.connect(func(amt, dir):
+			if hud.has_method("show_damage_feedback"):
+				hud.show_damage_feedback(amt, dir))
+		player.combat_text_feedback.connect(func(msg, col):
+			if hud.has_method("show_combat_text"):
+				hud.show_combat_text(msg, col))
+		player.unlock_feedback.connect(func(_type, _id, display_name):
+			if hud.has_method("show_unlock_feedback"):
+				hud.show_unlock_feedback(display_name))
 		if hud.has_method("update_weapon"):
 			hud.update_weapon(player.weapon_name)
 		if hud.has_method("update_weapon_slots"):
