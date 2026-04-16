@@ -54,4 +54,4 @@ func set_highlighted(active: bool) -> void:
 	_runtime_material.emission_energy_multiplier = 2.7 if _is_highlighted else 1.05
 	_runtime_material.albedo_color = _base_color.lightened(0.08 if _is_highlighted else 0.0)
 	mesh_instance.scale = _base_mesh_scale * (1.06 if _is_highlighted else 1.0)
-	label_3d.modulate = Color(1.0, 1.0, 1.0, 1.0 if _is_highlighted else 0.78)
+	label_3d.modulate = Color(1.0, 1.0, 1.0, 1.0)

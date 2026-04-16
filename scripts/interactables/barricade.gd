@@ -60,9 +60,8 @@ func blocks_zombies() -> bool:
 	return _get_intact_segment_count() > 0
 
 func set_highlighted(active: bool) -> void:
-	var label_alpha: float = 1.0 if active else 0.7
 	visual_root.scale = Vector3.ONE * (1.04 if active else 1.0)
-	label_3d.modulate = Color(1.0, 1.0, 1.0, label_alpha)
+	label_3d.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	for index in range(segment_meshes.size()):
 		var material: StandardMaterial3D = _segment_materials[index]
 		if material == null:

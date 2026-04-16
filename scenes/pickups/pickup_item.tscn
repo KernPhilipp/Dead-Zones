@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://pickupitem001"]
+[gd_scene load_steps=9 format=3 uid="uid://pickupitem001"]
 
 [ext_resource type="Script" path="res://scripts/pickups/pickup_item.gd" id="1_pickup_script"]
 
@@ -7,6 +7,25 @@ size = Vector3(1.1, 0.7, 1.1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_pickup"]
 size = Vector3(0.9, 0.45, 0.9)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pickup_base"]
+top_radius = 0.42
+bottom_radius = 0.52
+height = 0.14
+
+[sub_resource type="BoxMesh" id="BoxMesh_pickup_cap"]
+size = Vector3(0.56, 0.14, 0.56)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pickup_dark"]
+albedo_color = Color(0.08, 0.09, 0.12, 1)
+roughness = 0.82
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pickup_glow"]
+albedo_color = Color(0.92, 0.18, 0.24, 1)
+emission_enabled = true
+emission = Color(0.52, 0.08, 0.12, 1)
+emission_energy_multiplier = 1.15
+roughness = 0.3
 
 [sub_resource type="LabelSettings" id="LabelSettings_pickup"]
 font_size = 32
@@ -27,6 +46,26 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="VisualRoot"]
 mesh = SubResource("BoxMesh_pickup")
+
+[node name="BasePlate" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.32, 0)
+mesh = SubResource("CylinderMesh_pickup_base")
+material_override = SubResource("StandardMaterial3D_pickup_dark")
+
+[node name="CoreCap" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)
+mesh = SubResource("BoxMesh_pickup_cap")
+material_override = SubResource("StandardMaterial3D_pickup_glow")
+
+[node name="AccentBarX" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1.05, 0, 0, 0, 0.14, 0, 0, 0, 0.12, 0, 0.02, 0)
+mesh = SubResource("BoxMesh_pickup")
+material_override = SubResource("StandardMaterial3D_pickup_dark")
+
+[node name="AccentBarZ" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(0.12, 0, 0, 0, 0.14, 0, 0, 0, 1.05, 0, 0.02, 0)
+mesh = SubResource("BoxMesh_pickup")
+material_override = SubResource("StandardMaterial3D_pickup_dark")
 
 [node name="Label3D" type="Label3D" parent="VisualRoot"]
 transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0.75, 0)

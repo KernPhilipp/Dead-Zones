@@ -6,6 +6,8 @@ const ItemDefinitions = preload("res://scripts/player/item_definitions.gd")
 const ItemInventory = preload("res://scripts/player/item_inventory.gd")
 const PlayerProgression = preload("res://scripts/player/player_progression.gd")
 const GrenadeProjectileScene: PackedScene = preload("res://scenes/projectiles/grenade_projectile.tscn")
+const CAMERA_FIRST_PERSON := "first_person"
+const CAMERA_THIRD_PERSON := "third_person"
 
 signal shot_feedback(hit)
 signal kill_feedback()
@@ -36,6 +38,17 @@ const INFO_STATUS_COLOR := Color(0.96, 0.96, 1.0, 1.0)
 @export var sprint_speed_multiplier := 1.65
 @export var sprint_accel_multiplier := 1.15
 @export var sprint_fov_boost := 4.5
+
+@export_category("Crouch")
+@export var crouch_speed_multiplier := 0.58
+@export var crouch_capsule_height := 1.0
+@export var crouch_head_height_offset := 0.52
+@export var crouch_transition_speed := 10.0
+
+@export_category("Third Person")
+@export var third_person_camera_fov := 78.0
+@export var third_person_shoulder_offset := 0.58
+@export var third_person_pitch_weight := 0.28
 
 @export_category("Head Bob")
 @export var HEAD_BOB := true
@@ -118,6 +131,32 @@ var highlighted_interaction_target: Node = null
 var movement_slow_multiplier := 1.0
 var movement_slow_remaining := 0.0
 var movement_slow_active := false
+var active_camera_mode: String = CAMERA_FIRST_PERSON
+var is_crouching: bool = false
+var crouch_requested: bool = false
+var standing_capsule_height: float = 0.0
+var standing_collision_y: float = 0.0
+var crouch_collision_y: float = 0.0
+var standing_head_y: float = 0.0
+var crouched_head_y: float = 0.0
+var visual_anim_time: float = 0.0
+
+@onready var player_collision: CollisionShape3D = $CollisionShape3D
+@onready var player_capsule: CapsuleShape3D = $CollisionShape3D.shape as CapsuleShape3D
+@onready var head: Node3D = $Head
+@onready var first_person_camera: Camera3D = $Head/Camera3D
+@onready var third_person_pivot: Node3D = $Head/ThirdPersonPivot
+@onready var third_person_arm: SpringArm3D = $Head/ThirdPersonPivot/SpringArm3D
+@onready var third_person_camera: Camera3D = $Head/ThirdPersonPivot/SpringArm3D/ThirdPersonCamera
+@onready var gun_model: MeshInstance3D = $Head/GunModel
+@onready var visual_root: Node3D = $VisualRoot
+@onready var model_root: Node3D = $VisualRoot/ModelRoot
+@onready var model_spine: Node3D = $VisualRoot/ModelRoot/Spine
+@onready var model_neck: Node3D = $VisualRoot/ModelRoot/Spine/Neck
+@onready var left_arm: Node3D = $VisualRoot/ModelRoot/LeftArm
+@onready var right_arm: Node3D = $VisualRoot/ModelRoot/RightArm
+@onready var left_leg: Node3D = $VisualRoot/ModelRoot/LeftLeg
+@onready var right_leg: Node3D = $VisualRoot/ModelRoot/RightLeg
 
 func _ready() -> void:
 	health = max_health
@@ -126,9 +165,17 @@ func _ready() -> void:
 	weapon_loadout.initialize(DEFAULT_LOADOUT)
 	item_inventory = ItemInventory.new()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	head_start_pos = $Head.position
-	base_gun_model_position = $Head/GunModel.position
-	base_camera_fov = $Head/Camera3D.fov
+	head_start_pos = head.position
+	base_gun_model_position = gun_model.position
+	base_camera_fov = first_person_camera.fov
+	standing_capsule_height = player_capsule.height
+	standing_collision_y = player_collision.transform.origin.y
+	crouch_collision_y = standing_collision_y - ((standing_capsule_height - crouch_capsule_height) * 0.5)
+	standing_head_y = head.position.y
+	crouched_head_y = standing_head_y - crouch_head_height_offset
+	third_person_pivot.position.x = third_person_shoulder_offset
+	third_person_camera.fov = third_person_camera_fov
+	_set_camera_mode(CAMERA_FIRST_PERSON)
 	fire_timer = Timer.new()
 	fire_timer.one_shot = true
 	fire_timer.timeout.connect(_on_fire_timer_timeout)
@@ -140,10 +187,20 @@ func _ready() -> void:
 	$Head/InteractionRayCast3D.target_position = Vector3(0, 0, -interaction_distance)
 	_sync_current_weapon_view(true)
 	item_inventory.ensure_selected_item(_get_unlocked_item_ids())
+	_update_visual_model(0.0)
 	_emit_runtime_state()
 
 func _physics_process(delta: float) -> void:
 	_update_movement_slow(delta)
+	if Input.is_action_just_pressed("toggle_camera"):
+		toggle_camera_mode()
+	if Input.is_action_just_pressed("crouch"):
+		crouch_requested = not crouch_requested
+	if crouch_requested and not is_crouching:
+		is_crouching = true
+	elif not crouch_requested and is_crouching and _can_exit_crouch():
+		is_crouching = false
+	_update_crouch_pose(delta)
 	fire_input_active_this_frame = _should_fire_this_frame()
 	move_player(delta)
 	rotate_player(delta)
@@ -174,6 +231,7 @@ func _physics_process(delta: float) -> void:
 		interact_with_target()
 	if Input.is_action_just_pressed("use_item"):
 		use_item()
+	_update_visual_model(delta)
 	update_interaction_prompt()
 
 func _input(event: InputEvent) -> void:
@@ -205,7 +263,10 @@ func move_player(delta: float) -> void:
 		speed = SPEED * movement_multiplier
 		accel = ACCEL
 		var input_dir_length := Input.get_vector("move_left", "move_right", "move_forward", "move_back").length()
-		is_sprinting = input_dir_length > 0.0 and Input.is_action_pressed("sprint") and not fire_input_active_this_frame and not is_reloading
+		is_sprinting = input_dir_length > 0.0 and Input.is_action_pressed("sprint") and not fire_input_active_this_frame and not is_reloading and not is_crouching
+		if is_crouching:
+			speed *= crouch_speed_multiplier
+			accel *= 0.9
 		if is_sprinting:
 			speed *= sprint_speed_multiplier
 			accel *= sprint_accel_multiplier
@@ -327,6 +388,13 @@ func use_item() -> void:
 			reload_feedback.emit("GRENADE OUT", POSITIVE_STATUS_COLOR)
 	_emit_inventory_changed()
 
+func toggle_camera_mode() -> void:
+	_set_camera_mode(CAMERA_THIRD_PERSON if active_camera_mode == CAMERA_FIRST_PERSON else CAMERA_FIRST_PERSON)
+	show_runtime_status("CAMERA %s" % ("TP" if active_camera_mode == CAMERA_THIRD_PERSON else "FP"), "info", true)
+
+func get_camera_mode() -> String:
+	return active_camera_mode
+
 func take_damage(amount: int, source_position: Vector3 = Vector3.ZERO) -> void:
 	var incoming_damage := maxi(amount, 0)
 	if incoming_damage <= 0:
@@ -404,6 +472,75 @@ func show_runtime_status(message: String, style: String = "info", show_combat_te
 	if show_combat_text:
 		combat_text_feedback.emit(message, color)
 
+func _set_camera_mode(next_mode: String) -> void:
+	active_camera_mode = next_mode if next_mode == CAMERA_THIRD_PERSON else CAMERA_FIRST_PERSON
+	first_person_camera.current = active_camera_mode == CAMERA_FIRST_PERSON
+	third_person_camera.current = active_camera_mode == CAMERA_THIRD_PERSON
+	gun_model.visible = active_camera_mode == CAMERA_FIRST_PERSON
+	visual_root.visible = active_camera_mode == CAMERA_THIRD_PERSON
+
+func _get_active_camera() -> Camera3D:
+	return third_person_camera if active_camera_mode == CAMERA_THIRD_PERSON else first_person_camera
+
+func _get_target_head_position() -> Vector3:
+	return Vector3(head_start_pos.x, crouched_head_y if is_crouching else standing_head_y, head_start_pos.z)
+
+func _can_exit_crouch() -> bool:
+	var from: Vector3 = global_position + Vector3.UP * crouched_head_y
+	var to: Vector3 = global_position + Vector3.UP * standing_head_y
+	return _intersect_ray(from, to, 4).is_empty()
+
+func _update_crouch_pose(delta: float) -> void:
+	if not is_crouching and crouch_requested and not _can_exit_crouch():
+		is_crouching = true
+	var target_height: float = crouch_capsule_height if is_crouching else standing_capsule_height
+	var target_collision_y: float = crouch_collision_y if is_crouching else standing_collision_y
+	player_capsule.height = lerpf(player_capsule.height, target_height, clampf(crouch_transition_speed * delta, 0.0, 1.0))
+	var collision_transform: Transform3D = player_collision.transform
+	collision_transform.origin.y = lerpf(collision_transform.origin.y, target_collision_y, clampf(crouch_transition_speed * delta, 0.0, 1.0))
+	player_collision.transform = collision_transform
+	var head_position: Vector3 = head.position
+	head_position.y = lerpf(head_position.y, _get_target_head_position().y, clampf(crouch_transition_speed * delta, 0.0, 1.0))
+	head.position = head_position
+
+func _update_visual_model(delta: float) -> void:
+	if model_root == null:
+		return
+	var horizontal_speed: float = Vector2(velocity.x, velocity.z).length()
+	var motion_ratio: float = clampf(horizontal_speed / maxf(SPEED * sprint_speed_multiplier, 0.001), 0.0, 1.0)
+	var anim_speed: float = 3.0 + motion_ratio * (5.0 if is_sprinting else 3.0)
+	visual_anim_time += delta * anim_speed
+	var crouch_blend: float = 1.0 if is_crouching else 0.0
+	var swing: float = sin(visual_anim_time)
+	var counter_swing: float = sin(visual_anim_time + PI)
+	var arm_amount: float = deg_to_rad(16.0) * motion_ratio
+	var leg_amount: float = deg_to_rad(22.0) * motion_ratio
+	var torso_bob: float = sin(visual_anim_time * 2.0) * 0.03 * motion_ratio
+	model_root.position.y = lerpf(model_root.position.y, -0.28 * crouch_blend + torso_bob, clampf(8.0 * delta, 0.0, 1.0))
+	model_spine.rotation.x = lerpf(model_spine.rotation.x, deg_to_rad(12.0) * crouch_blend, clampf(8.0 * delta, 0.0, 1.0))
+	model_neck.rotation.x = lerpf(model_neck.rotation.x, -rotation_target_head * third_person_pitch_weight, clampf(10.0 * delta, 0.0, 1.0))
+	left_arm.rotation.x = lerpf(left_arm.rotation.x, counter_swing * arm_amount - deg_to_rad(8.0) * crouch_blend, clampf(10.0 * delta, 0.0, 1.0))
+	right_arm.rotation.x = lerpf(right_arm.rotation.x, swing * arm_amount - deg_to_rad(8.0) * crouch_blend, clampf(10.0 * delta, 0.0, 1.0))
+	left_leg.rotation.x = lerpf(left_leg.rotation.x, swing * leg_amount + deg_to_rad(14.0) * crouch_blend, clampf(10.0 * delta, 0.0, 1.0))
+	right_leg.rotation.x = lerpf(right_leg.rotation.x, counter_swing * leg_amount + deg_to_rad(14.0) * crouch_blend, clampf(10.0 * delta, 0.0, 1.0))
+	if not is_on_floor():
+		left_leg.rotation.x = lerpf(left_leg.rotation.x, deg_to_rad(-18.0), clampf(8.0 * delta, 0.0, 1.0))
+		right_leg.rotation.x = lerpf(right_leg.rotation.x, deg_to_rad(18.0), clampf(8.0 * delta, 0.0, 1.0))
+	if horizontal_speed <= 0.05:
+		visual_anim_time = lerpf(visual_anim_time, floor(visual_anim_time / TAU) * TAU, clampf(2.0 * delta, 0.0, 1.0))
+
+func _intersect_camera_ray(camera: Camera3D, distance: float, collision_mask: int) -> Dictionary:
+	if camera == null:
+		return {}
+	var origin: Vector3 = camera.global_position
+	var target: Vector3 = origin + (-camera.global_transform.basis.z * distance)
+	return _intersect_ray(origin, target, collision_mask)
+
+func _intersect_ray(from: Vector3, to: Vector3, collision_mask: int) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(from, to, collision_mask)
+	query.exclude = [get_rid()]
+	return get_world_3d().direct_space_state.intersect_ray(query)
+
 func head_bob_motion(delta: float) -> void:
 	var horizontal_speed := Vector2(velocity.x, velocity.z).length()
 	var bob_ratio := clampf(horizontal_speed / maxf(SPEED, 0.001), 0.0, sprint_speed_multiplier)
@@ -413,10 +550,10 @@ func head_bob_motion(delta: float) -> void:
 	var pos := Vector3.ZERO
 	pos.y += sin(bob_time) * bob_amplitude
 	pos.x += cos(bob_time * 0.5) * bob_amplitude * 2.0
-	$Head.position = head_start_pos + pos
+	head.position = _get_target_head_position() + pos
 
 func reset_head_bob(delta: float) -> void:
-	$Head.position = $Head.position.lerp(head_start_pos, clampf(12.0 * delta, 0.0, 1.0))
+	head.position = head.position.lerp(_get_target_head_position(), clampf(12.0 * delta, 0.0, 1.0))
 
 func update_damage_shake(delta: float) -> void:
 	if damage_shake_timer <= 0.0:
@@ -428,7 +565,7 @@ func update_damage_shake(delta: float) -> void:
 		randf_range(-damage_shake_amount, damage_shake_amount),
 		0.0
 	) * shake_progress
-	$Head.position += offset
+	head.position += offset
 
 func get_accuracy() -> float:
 	if shots_fired <= 0:
@@ -593,11 +730,13 @@ func update_interaction_prompt() -> void:
 	combat_text_feedback.emit(prompt.to_upper(), INTERACTION_PROMPT_COLOR)
 
 func _get_interactable_target() -> Object:
-	var interaction_ray: RayCast3D = $Head/InteractionRayCast3D
-	interaction_ray.force_raycast_update()
-	if not interaction_ray.is_colliding():
+	var camera: Camera3D = _get_active_camera()
+	if camera == null:
 		return null
-	var collider: Object = interaction_ray.get_collider()
+	var result: Dictionary = _intersect_camera_ray(camera, interaction_distance, 8)
+	if result.is_empty():
+		return null
+	var collider: Object = result.get("collider", null)
 	if collider == null or not collider.has_method("interact"):
 		return null
 	return collider
@@ -624,24 +763,24 @@ func _sync_current_weapon_view(reset_feedback: bool) -> void:
 		weapon_bloom_ratio = 0.0
 
 func _perform_weapon_shot(was_sprinting: bool) -> Array[Dictionary]:
-	var ray: RayCast3D = $Head/RayCast3D
-	var original_target_position := ray.target_position
+	var camera: Camera3D = _get_active_camera()
+	if camera == null:
+		return []
 	var pellet_count: int = maxi(int(current_weapon_data.get("pellet_count", 1)), 1)
 	var pellet_spread: float = _get_current_shot_spread(was_sprinting) * maxf(float(current_weapon_data.get("pellet_spread_multiplier", 1.0)), 0.05)
 	var base_damage: int = max(1, int(current_weapon_data.get("damage", 1)))
 	var headshot_multiplier: float = maxf(float(current_weapon_data.get("headshot_multiplier", 2.0)), 1.0)
-	var max_distance := maxf(original_target_position.length(), 100.0)
+	var max_distance := 100.0
 	var aggregated_events: Dictionary = {}
+	var shot_origin: Vector3 = camera.global_position
 
 	for _pellet_index in range(pellet_count):
 		var shot_direction := _build_shot_direction(pellet_spread)
-		var world_target := ray.global_position + shot_direction * max_distance
-		ray.target_position = ray.to_local(world_target)
-		ray.force_raycast_update()
-		if not ray.is_colliding():
+		var result: Dictionary = _intersect_ray(shot_origin, shot_origin + shot_direction * max_distance, 2)
+		if result.is_empty():
 			continue
 
-		var target_info: Dictionary = _resolve_damage_target(ray.get_collider(), ray.get_collision_point())
+		var target_info: Dictionary = _resolve_damage_target(result.get("collider", null), result.get("position", Vector3.ZERO))
 		if not bool(target_info.get("valid", false)):
 			continue
 
@@ -666,8 +805,6 @@ func _perform_weapon_shot(was_sprinting: bool) -> Array[Dictionary]:
 		event_data["headshot"] = bool(event_data.get("headshot", false)) or did_headshot
 		event_data["killed"] = bool(event_data.get("killed", false)) or killed
 		aggregated_events[event_key] = event_data
-
-	ray.target_position = original_target_position
 
 	var result: Array[Dictionary] = []
 	for event_data in aggregated_events.values():
@@ -736,7 +873,9 @@ func _is_headshot(target: Object, collision_point: Vector3) -> bool:
 	return target_node.to_local(collision_point).y >= 1.25
 
 func _build_shot_direction(spread_degrees: float) -> Vector3:
-	var camera: Camera3D = $Head/Camera3D
+	var camera: Camera3D = _get_active_camera()
+	if camera == null:
+		return -global_transform.basis.z
 	var forward := -camera.global_transform.basis.z
 	var right := camera.global_transform.basis.x
 	var up := camera.global_transform.basis.y
@@ -769,9 +908,10 @@ func _update_weapon_feedback(delta: float) -> void:
 	weapon_bloom_ratio = clampf(current_bloom / maxf(float(current_weapon_data.get("max_bloom", 0.001)), 0.001), 0.0, 1.0)
 	current_fov_kick = move_toward(current_fov_kick, 0.0, fire_fov_kick_recovery_speed * delta)
 	gun_kick_offset = gun_kick_offset.lerp(Vector3.ZERO, clampf(gun_kick_recovery_speed * delta, 0.0, 1.0))
-	$Head/GunModel.position = base_gun_model_position + gun_kick_offset
+	gun_model.position = base_gun_model_position + gun_kick_offset
 	var target_fov := base_camera_fov + (sprint_fov_boost if is_sprinting else 0.0) + current_fov_kick
-	$Head/Camera3D.fov = lerpf($Head/Camera3D.fov, target_fov, clampf(camera_fov_lerp_speed * delta, 0.0, 1.0))
+	first_person_camera.fov = lerpf(first_person_camera.fov, target_fov, clampf(camera_fov_lerp_speed * delta, 0.0, 1.0))
+	third_person_camera.fov = lerpf(third_person_camera.fov, third_person_camera_fov + current_fov_kick * 0.6, clampf(camera_fov_lerp_speed * delta, 0.0, 1.0))
 
 func _emit_kill_feedback() -> void:
 	var now_ms := Time.get_ticks_msec()
@@ -793,7 +933,9 @@ func _throw_grenade() -> void:
 	if scene_root == null or grenade == null:
 		return
 	scene_root.add_child(grenade)
-	var camera: Camera3D = $Head/Camera3D
+	var camera: Camera3D = _get_active_camera()
+	if camera == null:
+		return
 	var throw_direction := (-camera.global_transform.basis.z + Vector3.UP * 0.18).normalized()
 	if grenade.has_method("launch"):
 		grenade.call("launch", camera.global_position + throw_direction * 0.7, throw_direction, self)

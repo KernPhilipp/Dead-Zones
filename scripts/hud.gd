@@ -51,8 +51,6 @@ var pause_controls_label: Label
 var pause_settings_button: Button
 var pause_settings_content: VBoxContainer
 var pause_session_label: Label
-var hud_opacity_slider: HSlider
-var hud_opacity_value_label: Label
 var crosshair_size_slider: HSlider
 var crosshair_size_value_label: Label
 var feedback_intensity_slider: HSlider
@@ -105,12 +103,12 @@ var tracked_total_eliminations: int = 0
 var tracked_wave_index: int = 0
 var tracked_wave_total: int = 0
 var tracked_wave_eliminations: int = 0
-var crosshair_flash_color: Color = Color(0.95, 0.97, 1.0, 0.92)
+var crosshair_flash_color: Color = Color(0.95, 0.97, 1.0, 1.0)
 var crosshair_dot_flash_color: Color = Color(0.95, 0.97, 1.0, 1.0)
 var crosshair_scale_target: Vector2 = Vector2.ONE
 var crosshair_scale_velocity: float = 0.18
 var crosshair_extra_spread: float = 0.0
-var crosshair_base_color: Color = Color(0.95, 0.97, 1.0, 0.92)
+var crosshair_base_color: Color = Color(0.95, 0.97, 1.0, 1.0)
 var crosshair_dot_base_color: Color = Color(0.95, 0.97, 1.0, 1.0)
 var crosshair_segment_length: float = 4.0
 var crosshair_segment_thickness: float = 2.0
@@ -130,7 +128,6 @@ var last_health_value: int = -1
 var last_ammo_value: int = -1
 var last_wave_seen: int = 0
 var last_weapon_seen: String = ""
-var hud_opacity_setting: float = 0.92
 var crosshair_size_setting: float = 1.0
 var feedback_intensity_setting: float = 0.8
 var master_volume_setting: float = 0.85
@@ -182,7 +179,7 @@ func _ready():
 	reload_bar.value = 0.0
 	status_label.text = "READY"
 	ammo_state_label.text = "READY"
-	ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
+	ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 1.0)
 	ammo_label.text = "030 | 120"
 	last_ammo_value = -1
 	game_over_panel.modulate.a = 0.0
@@ -260,8 +257,6 @@ func _ensure_nodes():
 	pause_settings_button = _find_required_node("PauseSettingsButton") as Button
 	pause_settings_content = _find_required_node("PauseSettingsContent") as VBoxContainer
 	pause_session_label = _find_required_node("PauseSessionLabel") as Label
-	hud_opacity_slider = _find_required_node("HudOpacitySlider") as HSlider
-	hud_opacity_value_label = _find_required_node("HudOpacityValueLabel") as Label
 	crosshair_size_slider = _find_required_node("CrosshairSizeSlider") as HSlider
 	crosshair_size_value_label = _find_required_node("CrosshairSizeValueLabel") as Label
 	feedback_intensity_slider = _find_required_node("FeedbackIntensitySlider") as HSlider
@@ -287,12 +282,10 @@ func _setup_pause_settings():
 	if settings_initialized:
 		return
 	settings_initialized = true
-	hud_opacity_slider.value = hud_opacity_setting
 	crosshair_size_slider.value = crosshair_size_setting
 	feedback_intensity_slider.value = feedback_intensity_setting
 	master_volume_slider.value = master_volume_setting
 	pause_settings_button.pressed.connect(_on_pause_settings_toggled)
-	hud_opacity_slider.value_changed.connect(_on_hud_opacity_changed)
 	crosshair_size_slider.value_changed.connect(_on_crosshair_size_changed)
 	feedback_intensity_slider.value_changed.connect(_on_feedback_intensity_changed)
 	master_volume_slider.value_changed.connect(_on_master_volume_changed)
@@ -311,12 +304,6 @@ func _apply_pause_settings_dropdown():
 		return
 	pause_settings_content.visible = settings_dropdown_open
 	pause_settings_button.text = "Settings  ^" if settings_dropdown_open else "Settings  v"
-
-func _on_hud_opacity_changed(value: float):
-	hud_opacity_setting = value
-	_refresh_setting_labels()
-	_apply_adaptive_hud_presence()
-	_save_pause_settings()
 
 func _on_crosshair_size_changed(value: float):
 	crosshair_size_setting = value
@@ -338,14 +325,12 @@ func _on_master_volume_changed(value: float):
 func _refresh_setting_labels():
 	if not settings_initialized:
 		return
-	hud_opacity_value_label.text = "%d%%" % int(round(hud_opacity_setting * 100.0))
 	crosshair_size_value_label.text = "%d%%" % int(round(crosshair_size_setting * 100.0))
 	feedback_intensity_value_label.text = "%d%%" % int(round(feedback_intensity_setting * 100.0))
 	master_volume_value_label.text = "%d%%" % int(round(master_volume_setting * 100.0))
 
 func _save_pause_settings():
 	var config: ConfigFile = ConfigFile.new()
-	config.set_value("hud", "opacity", hud_opacity_setting)
 	config.set_value("hud", "crosshair_size", crosshair_size_setting)
 	config.set_value("hud", "feedback_intensity", feedback_intensity_setting)
 	config.set_value("audio", "master_volume", master_volume_setting)
@@ -356,7 +341,6 @@ func _load_pause_settings():
 	var err: int = config.load(SETTINGS_PATH)
 	if err != OK:
 		return
-	hud_opacity_setting = clampf(float(config.get_value("hud", "opacity", hud_opacity_setting)), 0.65, 1.0)
 	crosshair_size_setting = clampf(float(config.get_value("hud", "crosshair_size", crosshair_size_setting)), 0.85, 1.25)
 	feedback_intensity_setting = clampf(float(config.get_value("hud", "feedback_intensity", feedback_intensity_setting)), 0.35, 1.0)
 	master_volume_setting = clampf(float(config.get_value("audio", "master_volume", master_volume_setting)), 0.0, 1.0)
@@ -372,7 +356,7 @@ func _apply_master_volume():
 		AudioServer.set_bus_volume_db(bus_index, linear_to_db(linear_value))
 
 func _hud_alpha(alpha: float) -> float:
-	return clampf(alpha * hud_opacity_setting, 0.0, 1.0)
+	return 1.0 if alpha > 0.0 else 0.0
 
 func _feedback_alpha(alpha: float) -> float:
 	return clampf(alpha * feedback_intensity_setting, 0.0, 1.0)
@@ -421,7 +405,7 @@ func _process(delta):
 		low_health_label.modulate.a = 0.0
 		low_health_label.scale = Vector2.ONE
 		health_panel.scale = health_panel.scale.lerp(Vector2.ONE, clampf(delta * 8.0, 0.0, 1.0))
-		health_panel.modulate.a = _hud_alpha(1.0)
+		health_panel.modulate.a = 1.0
 		return
 
 	var pulse: float = 0.48 + (sin(low_health_time * 5.8) * 0.24)
@@ -432,7 +416,7 @@ func _process(delta):
 	low_health_label.modulate.a = clampf(low_health_strength * hard_pulse, 0.0, 1.0)
 	low_health_label.scale = Vector2.ONE * (1.0 + low_health_strength * 0.16)
 	health_panel.scale = Vector2.ONE * low_health_panel_pulse
-	health_panel.modulate.a = _hud_alpha(clampf(0.9 + low_health_strength * 0.22, 0.0, 1.0))
+	health_panel.modulate.a = 1.0
 
 func update_health(value: int):
 	_ensure_nodes()
@@ -518,7 +502,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 	if current <= 0:
 		current_ammo_state = "EMPTY"
 		ammo_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
-		reserve_label.modulate = Color(0.98, 0.52, 0.42, 0.96)
+		reserve_label.modulate = Color(0.98, 0.52, 0.42, 1.0)
 		ammo_state_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
 		ammo_state_label.text = "MAG EMPTY"
 		_set_crosshair_state("empty")
@@ -527,7 +511,7 @@ func update_ammo(current: int, max_val: int, reserve: int):
 	elif ammo_ratio <= 0.2:
 		current_ammo_state = "LOW AMMO"
 		ammo_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
-		reserve_label.modulate = Color(1.0, 0.54, 0.46, 0.96)
+		reserve_label.modulate = Color(1.0, 0.54, 0.46, 1.0)
 		ammo_state_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
 		ammo_state_label.text = "LOW AMMO"
 		_set_crosshair_state("warning")
@@ -536,16 +520,16 @@ func update_ammo(current: int, max_val: int, reserve: int):
 	elif ammo_ratio <= 0.4:
 		current_ammo_state = "CHECK MAG"
 		ammo_label.modulate = Color(1.0, 0.82, 0.35, 1.0)
-		reserve_label.modulate = Color(0.98, 0.82, 0.38, 0.96)
-		ammo_state_label.modulate = Color(1.0, 0.82, 0.35, 0.96)
+		reserve_label.modulate = Color(0.98, 0.82, 0.38, 1.0)
+		ammo_state_label.modulate = Color(1.0, 0.82, 0.35, 1.0)
 		ammo_state_label.text = "CHECK MAG"
 		_set_crosshair_state("warning")
 		_stop_ammo_warning()
 	else:
 		current_ammo_state = "READY"
 		ammo_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
-		reserve_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
-		ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
+		reserve_label.modulate = Color(0.82, 0.86, 0.92, 1.0)
+		ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 1.0)
 		ammo_state_label.text = "READY"
 		_set_crosshair_state("default")
 		_stop_ammo_warning()
@@ -563,7 +547,7 @@ func update_reload(active: bool, progress: float):
 		ammo_state_label.text = "RELOADING %02d%%" % int(round(progress * 100.0))
 		ammo_state_label.modulate = Color(1.0, 0.8, 0.35, 1.0)
 		ammo_label.modulate = Color(1.0, 0.92, 0.66, 1.0)
-		reserve_label.modulate = Color(1.0, 0.82, 0.42, 0.96)
+		reserve_label.modulate = Color(1.0, 0.82, 0.42, 1.0)
 		_stop_ammo_warning()
 	else:
 		ammo_state_label.text = current_ammo_state
@@ -617,7 +601,7 @@ func update_crosshair(movement_ratio: float):
 	crosshair_bottom.size = Vector2(crosshair_segment_thickness, crosshair_segment_length)
 	crosshair_dot.position = Vector2(center - floor(crosshair_dot_size * 0.5), center - floor(crosshair_dot_size * 0.5))
 	crosshair_dot.size = Vector2(crosshair_dot_size, crosshair_dot_size)
-	crosshair_dot.modulate.a = lerpf(crosshair_dot.modulate.a, lerpf(1.0, 0.68, ratio), 0.22)
+	crosshair_dot.modulate.a = lerpf(crosshair_dot.modulate.a, 1.0, 0.22)
 	if ratio > 0.45 and current_ammo_state == "READY":
 		_set_crosshair_state("move")
 	elif current_ammo_state == "READY":
@@ -737,7 +721,7 @@ func show_status(message: String, color: Color, duration: float = 0.45):
 		fade_out.tween_property(status_label, "modulate:a", 0.0, 0.12)
 		await fade_out.finished
 		status_label.text = "READY"
-		status_label.modulate = Color(0.72, 0.78, 0.86, 0.98)
+		status_label.modulate = Color(0.72, 0.78, 0.86, 1.0)
 
 func show_game_over(stats: Dictionary = {}):
 	_ensure_nodes()
@@ -1056,8 +1040,9 @@ func _setup_handbook_overlay():
 		return
 	handbook_book.visible = false
 	handbook_book.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	handbook_book.scale = Vector2(0.82, 0.82)
-	handbook_book.position = Vector2(120.0, 40.0)
+	handbook_book.scale = Vector2.ONE
+	handbook_book.position = Vector2.ZERO
+	handbook_book.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(handbook_book)
 	_apply_handbook_theme()
 
@@ -1175,20 +1160,20 @@ func _stop_ammo_warning():
 func _set_crosshair_state(state: String):
 	match state:
 		"move":
-			crosshair_base_color = Color(0.9, 0.94, 1.0, 0.88)
-			crosshair_dot_base_color = Color(0.95, 0.97, 1.0, 0.88)
+			crosshair_base_color = Color(0.9, 0.94, 1.0, 1.0)
+			crosshair_dot_base_color = Color(0.95, 0.97, 1.0, 1.0)
 			crosshair_scale_target = Vector2(1.03, 1.03)
 		"warning":
-			crosshair_base_color = Color(1.0, 0.78, 0.3, 0.94)
+			crosshair_base_color = Color(1.0, 0.78, 0.3, 1.0)
 			crosshair_dot_base_color = Color(1.0, 0.82, 0.36, 1.0)
 			crosshair_scale_target = Vector2(1.02, 1.02)
 		"empty":
-			crosshair_base_color = Color(1.0, 0.26, 0.22, 0.96)
+			crosshair_base_color = Color(1.0, 0.26, 0.22, 1.0)
 			crosshair_dot_base_color = Color(1.0, 0.26, 0.22, 1.0)
 			crosshair_scale_target = Vector2(1.04, 1.04)
 			crosshair_extra_spread = maxf(crosshair_extra_spread, 1.6)
 		"reload":
-			crosshair_base_color = Color(1.0, 0.82, 0.42, 0.94)
+			crosshair_base_color = Color(1.0, 0.82, 0.42, 1.0)
 			crosshair_dot_base_color = Color(1.0, 0.88, 0.56, 1.0)
 			crosshair_scale_target = Vector2(0.94, 0.94)
 		"hit":
@@ -1202,7 +1187,7 @@ func _set_crosshair_state(state: String):
 			crosshair_scale_target = Vector2(1.12, 1.12)
 			crosshair_extra_spread = maxf(crosshair_extra_spread, 1.0)
 		_:
-			crosshair_base_color = Color(0.95, 0.97, 1.0, 0.92)
+			crosshair_base_color = Color(0.95, 0.97, 1.0, 1.0)
 			crosshair_dot_base_color = Color(0.95, 0.97, 1.0, 1.0)
 			crosshair_scale_target = Vector2.ONE
 
@@ -1277,7 +1262,7 @@ func _update_pause_menu_content():
 	var seconds: int = total_seconds % 60
 
 	pause_summary_label.text = "WAVE %02d PAUSED\n%d HOSTILES ELIMINATED" % [wave, kills]
-	pause_controls_label.text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
+	pause_controls_label.text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nINTERACT  E\nUSE ITEM  Q\nCYCLE ITEM  Z / X\nCROUCH  C\nCAMERA  V\nPAUSE  ESC"
 	pause_session_label.text = "SESSION SNAPSHOT\nHEADSHOTS  %d\nACCURACY   %.0f%%\nSURVIVAL   %02d:%02d" % [headshots, accuracy, minutes, seconds]
 	_refresh_setting_labels()
 
@@ -1288,18 +1273,12 @@ func _update_adaptive_hud(delta: float):
 
 func _apply_adaptive_hud_presence():
 	var threat_level: float = adaptive_threat_level
-	var wave_alpha: float = lerpf(0.42, 1.0, threat_level)
-	var weapon_alpha: float = lerpf(0.5, 1.0, threat_level)
-	var ammo_alpha: float = lerpf(0.56, 1.0, threat_level)
-	var reserve_alpha: float = lerpf(0.4, 0.96, threat_level)
-	var crosshair_alpha: float = lerpf(0.6, 1.0, threat_level)
-
-	wave_panel.modulate.a = _hud_alpha(wave_alpha)
-	weapon_panel.modulate.a = _hud_alpha(weapon_alpha)
-	ammo_label.modulate.a = ammo_alpha
-	ammo_state_label.modulate.a = maxf(ammo_state_label.modulate.a, ammo_alpha)
-	reserve_label.modulate.a = reserve_alpha
-	crosshair_root.modulate.a = _hud_alpha(crosshair_alpha)
+	wave_panel.modulate.a = 1.0
+	weapon_panel.modulate.a = 1.0
+	ammo_label.modulate.a = 1.0
+	ammo_state_label.modulate.a = 1.0
+	reserve_label.modulate.a = 1.0
+	crosshair_root.modulate.a = 1.0
 	wave_panel.scale = Vector2.ONE * lerpf(0.97, 1.0, threat_level)
 	weapon_panel.scale = Vector2.ONE * lerpf(0.975, 1.0, threat_level)
 

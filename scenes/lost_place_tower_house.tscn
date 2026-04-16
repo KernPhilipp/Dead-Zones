@@ -55,6 +55,30 @@ collision_mask = 0
 size = Vector3(11.4, 0.18, 9.4)
 material = SubResource("StandardMaterial3D_trim")
 
+[node name="SouthEntryStepA" type="CSGBox3D" parent="Base"]
+position = Vector3(0, 0.09, 5.3)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(2.6, 0.18, 0.9)
+material = SubResource("StandardMaterial3D_trim")
+
+[node name="SouthEntryStepB" type="CSGBox3D" parent="Base"]
+position = Vector3(0, 0.28, 4.75)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(2.45, 0.2, 0.86)
+material = SubResource("StandardMaterial3D_trim")
+
+[node name="SouthEntryStepC" type="CSGBox3D" parent="Base"]
+position = Vector3(0, 0.48, 4.22)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(2.3, 0.2, 0.82)
+material = SubResource("StandardMaterial3D_trim")
+
 [node name="FirstFloorSlab" type="CSGBox3D" parent="Base"]
 position = Vector3(0, 3.33, 0)
 use_collision = true
@@ -385,6 +409,15 @@ collision_mask = 0
 size = Vector3(2.1, 0.22, 1.6)
 material = SubResource("StandardMaterial3D_trim")
 
+[node name="WestStairRamp" type="CSGBox3D" parent="StairsWest"]
+position = Vector3(-6.46, 2.0, 1.1)
+rotation_degrees = Vector3(-25.5, 0, 0)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1.12, 0.08, 6.95)
+material = SubResource("StandardMaterial3D_dark")
+
 [node name="StairsEastUpper" type="Node3D" parent="."]
 
 [node name="EastSupportA" type="CSGBox3D" parent="StairsEastUpper"]
@@ -507,6 +540,15 @@ collision_mask = 0
 size = Vector3(1.4, 0.12, 0.5)
 material = SubResource("StandardMaterial3D_trim")
 
+[node name="EastStairRamp" type="CSGBox3D" parent="StairsEastUpper"]
+position = Vector3(6.33, 4.82, 0.75)
+rotation_degrees = Vector3(27.0, 0, 0)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1.05, 0.08, 6.65)
+material = SubResource("StandardMaterial3D_dark")
+
 [node name="Rails" type="Node3D" parent="."]
 
 [node name="WestRailTop" type="CSGBox3D" parent="Rails"]
@@ -603,26 +645,8 @@ collision_mask = 0
 size = Vector3(3.8, 1.6, 0.04)
 material = SubResource("StandardMaterial3D_glass")
 
-[node name="BoardedSouthDoorA" type="CSGBox3D" parent="LostPlaceDetails"]
-position = Vector3(0.1, 1.85, 4.47)
-rotation_degrees = Vector3(0, 0, 18)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(2.1, 0.18, 0.1)
-material = SubResource("StandardMaterial3D_wood")
-
-[node name="BoardedSouthDoorB" type="CSGBox3D" parent="LostPlaceDetails"]
-position = Vector3(-0.2, 2.25, 4.47)
-rotation_degrees = Vector3(0, 0, -14)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(2.2, 0.18, 0.1)
-material = SubResource("StandardMaterial3D_wood")
-
 [node name="DebrisPile" type="CSGBox3D" parent="LostPlaceDetails"]
-position = Vector3(2.7, 0.82, 3.5)
+position = Vector3(3.7, 0.62, 2.8)
 rotation_degrees = Vector3(4, 18, -5)
 use_collision = true
 collision_layer = 4
