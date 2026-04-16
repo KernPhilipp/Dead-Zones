@@ -102,6 +102,7 @@ var health: int = 0
 var can_attack: bool = false
 var attack_timer: Timer
 var hurt_timer: Timer
+var idle_sound_timer: Timer
 
 var rise_elapsed := 0.0
 var rise_start_position := Vector3.ZERO
@@ -167,6 +168,11 @@ func _ready():
 	hurt_timer.one_shot = true
 	hurt_timer.timeout.connect(_on_hurt_timer_timeout)
 	add_child(hurt_timer)
+
+	idle_sound_timer = Timer.new()
+	idle_sound_timer.one_shot = true
+	idle_sound_timer.timeout.connect(_on_idle_sound_timer_timeout)
+	add_child(idle_sound_timer)
 
 	damage_area.body_entered.connect(_on_damage_area_body_entered)
 
@@ -393,6 +399,8 @@ func die():
 
 	_broadcast_ally_death_event()
 	current_barricade_target = null
+	if idle_sound_timer != null:
+		idle_sound_timer.stop()
 
 	if resolved_death_behavior == "explode":
 		_die_with_explosion()
@@ -409,6 +417,7 @@ func die():
 	body_collision.set_deferred("disabled", true)
 	_disable_all_hitboxes()
 	_apply_death_subtype_burst()
+	_play_world_sound("zombie_death")
 
 	var fall_direction: float = 1.0
 	if randf() < 0.5:
@@ -433,6 +442,7 @@ func _die_with_explosion():
 
 	_apply_death_subtype_burst()
 	_apply_explosion_damage()
+	_play_world_sound("zombie_explode")
 	model_root.visible = false
 	queue_free()
 
@@ -463,6 +473,8 @@ func _process_spawn_rise(delta: float):
 		damage_area.monitorable = true
 		can_attack = true
 		state = ZombieState.CHASE
+		_play_world_sound("zombie_spawn")
+		_schedule_idle_sound()
 
 func _process_chase(delta: float):
 	_apply_gravity(delta)
@@ -804,6 +816,7 @@ func _try_species_ranged_attack() -> bool:
 
 	if player.has_method("take_damage"):
 		var ranged_damage: int = max(1, int(round(float(_get_current_damage()) * 0.7)))
+		_play_world_sound("zombie_ranged_attack")
 		player.take_damage(ranged_damage)
 
 	_start_attack_cooldown(1.2)
@@ -816,6 +829,7 @@ func _perform_attack():
 		return
 
 	if _is_player_in_damage_area() and player and is_instance_valid(player) and player.has_method("take_damage"):
+		_play_world_sound("zombie_attack")
 		player.take_damage(target_damage)
 		_apply_touch_effect_on_player()
 		_apply_on_attack_self_heal()
@@ -823,6 +837,7 @@ func _perform_attack():
 		return
 
 	if _has_attackable_barricade() and current_barricade_target.has_method("take_zombie_damage"):
+		_play_world_sound("zombie_barricade_hit")
 		current_barricade_target.call("take_zombie_damage", target_damage)
 		_start_attack_cooldown(1.05)
 		return
@@ -1207,6 +1222,7 @@ func _enter_hurt_state():
 	if randf() < resolved_pain_resistance:
 		return
 
+	_play_world_sound("zombie_hurt")
 	state = ZombieState.HURT
 	var reduced_hurt_time: float = maxf(0.03, hurt_recovery_time * lerpf(1.0, 0.15, resolved_pain_resistance))
 	hurt_timer.start(reduced_hurt_time)
@@ -1251,9 +1267,27 @@ func _on_corpse_fall_finished():
 	tween.tween_property(model_root, "scale", Vector3.ZERO, 0.6)
 	tween.tween_callback(queue_free)
 
+func _on_idle_sound_timer_timeout() -> void:
+	if state == ZombieState.DEAD or state == ZombieState.SPAWN_RISE:
+		return
+	_play_world_sound("zombie_idle")
+	_schedule_idle_sound()
+
 func despawn_immediately():
 	if not is_instance_valid(self):
 		return
+	if idle_sound_timer != null:
+		idle_sound_timer.stop()
 	var tween = create_tween()
 	tween.tween_property(model_root, "scale", Vector3.ZERO, 0.3)
 	tween.tween_callback(queue_free)
+
+func _schedule_idle_sound() -> void:
+	if idle_sound_timer == null:
+		return
+	idle_sound_timer.start(profile_rng.randf_range(2.8, 6.5))
+
+func _play_world_sound(event_id: String) -> void:
+	if event_id.is_empty():
+		return
+	AudioManager.play_sfx(event_id, global_position, true)

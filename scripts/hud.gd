@@ -202,6 +202,11 @@ func _ready():
 	handbook_button.pressed.connect(_on_handbook_pressed)
 	pause_restart_button.pressed.connect(_on_restart)
 	restart_button.pressed.connect(_on_restart)
+	_connect_button_audio(pause_settings_button)
+	_connect_button_audio(resume_button)
+	_connect_button_audio(handbook_button)
+	_connect_button_audio(pause_restart_button)
+	_connect_button_audio(restart_button)
 	_load_pause_settings()
 	_setup_pause_settings()
 	_setup_handbook_overlay()
@@ -576,6 +581,7 @@ func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 		wave_clear_announced = false
 	if wave > 0 and living_zombies <= 0 and remaining_to_spawn <= 0 and not wave_clear_announced:
 		wave_clear_announced = true
+		AudioManager.play_music("music_wave_clear")
 		show_combat_text("WAVE CLEAR", Color(1.0, 0.28, 0.24, 1.0))
 		show_status("AREA SECURE", Color(1.0, 0.28, 0.24, 1.0), 0.55)
 	_apply_adaptive_hud_presence()
@@ -609,6 +615,7 @@ func update_crosshair(movement_ratio: float):
 
 func show_wave_announcement(wave: int):
 	_ensure_nodes()
+	AudioManager.play_music("music_wave_start")
 	if wave_announce_tween:
 		wave_announce_tween.kill()
 	wave_announce_label.text = "WAVE %02d\nINCOMING" % wave
@@ -632,6 +639,9 @@ func show_wave_announcement(wave: int):
 
 func show_combat_text(message: String, color: Color):
 	_ensure_nodes()
+	var upper_message: String = message.to_upper()
+	if upper_message.contains("HEADSHOT"):
+		AudioManager.play_ui("ui_headshot")
 	var priority: int = _get_combat_text_priority(message)
 	if (combat_text_primary.text == "" or combat_text_primary.modulate.a <= 0.05):
 		_show_combat_label(combat_text_primary, message, color, true, priority)
@@ -647,11 +657,13 @@ func show_combat_text(message: String, color: Color):
 
 func show_unlock_feedback(display_name: String):
 	_ensure_nodes()
+	AudioManager.play_ui("ui_unlock")
 	show_status("UNLOCKED %s" % display_name.to_upper(), Color(0.45, 1.0, 0.55, 1.0), 0.8)
 	show_combat_text("UNLOCKED %s" % display_name.to_upper(), Color(0.45, 1.0, 0.55, 1.0))
 
 func show_kill_feedback():
 	_ensure_nodes()
+	AudioManager.play_ui("ui_kill")
 	if hit_marker_tween:
 		hit_marker_tween.kill()
 	_set_crosshair_state("kill")
@@ -668,6 +680,7 @@ func show_shot_feedback(hit: bool):
 	if hit_marker_tween:
 		hit_marker_tween.kill()
 	if hit:
+		AudioManager.play_ui("ui_hit")
 		_set_crosshair_state("hit")
 		recent_threat_time = maxf(recent_threat_time, 0.45)
 		hit_marker.visible = true
@@ -725,6 +738,7 @@ func show_status(message: String, color: Color, duration: float = 0.45):
 
 func show_game_over(stats: Dictionary = {}):
 	_ensure_nodes()
+	AudioManager.play_music("music_game_over")
 	var resolved_stats: Dictionary = _resolve_game_over_stats(stats)
 	if pause_tween:
 		pause_tween.kill()
@@ -777,6 +791,7 @@ func _set_pause_menu_visible(next_visible: bool):
 	pause_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 
 	if next_visible:
+		AudioManager.play_ui("ui_pause_open")
 		settings_dropdown_open = false
 		_apply_pause_settings_dropdown()
 		_update_pause_menu_content()
@@ -791,6 +806,7 @@ func _set_pause_menu_visible(next_visible: bool):
 		pause_tween.parallel().tween_property(pause_panel, "modulate:a", 1.0, 0.14)
 		pause_tween.parallel().tween_property(pause_panel, "scale", Vector2(1.0, 1.0), 0.16)
 	else:
+		AudioManager.play_ui("ui_pause_close")
 		get_tree().paused = false
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		pause_tween.tween_property(pause_dimmer, "modulate:a", 0.0, 0.14)
@@ -838,6 +854,7 @@ func _on_resume():
 func _on_handbook_pressed():
 	if handbook_book == null:
 		return
+	AudioManager.play_ui("ui_handbook_open")
 	handbook_opened_from_pause = true
 	pause_panel.visible = false
 	if handbook_book.has_method("open_book"):
@@ -1047,10 +1064,28 @@ func _setup_handbook_overlay():
 	_apply_handbook_theme()
 
 func _close_handbook_overlay():
+	if handbook_book != null and handbook_book.visible:
+		AudioManager.play_ui("ui_handbook_close")
 	if handbook_book != null and handbook_book.has_method("close_book"):
 		handbook_book.call("close_book")
 	_restore_pause_menu_after_handbook()
 	handbook_opened_from_pause = false
+
+func _connect_button_audio(button: Button):
+	if button == null:
+		return
+	var hover_callable := Callable(self, "_on_ui_button_hover")
+	var pressed_callable := Callable(self, "_on_ui_button_pressed")
+	if not button.mouse_entered.is_connected(hover_callable):
+		button.mouse_entered.connect(hover_callable)
+	if not button.pressed.is_connected(pressed_callable):
+		button.pressed.connect(pressed_callable)
+
+func _on_ui_button_hover():
+	AudioManager.play_ui("ui_button_hover")
+
+func _on_ui_button_pressed():
+	AudioManager.play_ui("ui_button_click")
 
 func _restore_pause_menu_after_handbook():
 	pause_dimmer.visible = true

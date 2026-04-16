@@ -140,6 +140,8 @@ var crouch_collision_y: float = 0.0
 var standing_head_y: float = 0.0
 var crouched_head_y: float = 0.0
 var visual_anim_time: float = 0.0
+var footstep_distance_accumulator: float = 0.0
+var was_on_floor_last_frame: bool = false
 
 @onready var player_collision: CollisionShape3D = $CollisionShape3D
 @onready var player_capsule: CapsuleShape3D = $CollisionShape3D.shape as CapsuleShape3D
@@ -189,6 +191,7 @@ func _ready() -> void:
 	item_inventory.ensure_selected_item(_get_unlocked_item_ids())
 	_update_visual_model(0.0)
 	_emit_runtime_state()
+	was_on_floor_last_frame = is_on_floor()
 
 func _physics_process(delta: float) -> void:
 	_update_movement_slow(delta)
@@ -202,7 +205,9 @@ func _physics_process(delta: float) -> void:
 		is_crouching = false
 	_update_crouch_pose(delta)
 	fire_input_active_this_frame = _should_fire_this_frame()
+	var vertical_velocity_before_move: float = velocity.y
 	move_player(delta)
+	_update_movement_audio(delta, vertical_velocity_before_move)
 	rotate_player(delta)
 	_update_weapon_feedback(delta)
 	update_damage_shake(delta)
@@ -272,6 +277,8 @@ func move_player(delta: float) -> void:
 			accel *= sprint_accel_multiplier
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
+		footstep_distance_accumulator = 0.0
+		_play_sfx_event("player_jump")
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	velocity.x = move_toward(velocity.x, direction.x * speed, accel * delta)
@@ -283,6 +290,7 @@ func shoot() -> void:
 	if is_reloading or not can_shoot:
 		return
 	if ammo <= 0:
+		_play_sfx_event(_get_weapon_audio_event("empty"))
 		shot_feedback.emit(false)
 		reload_feedback.emit("EMPTY", ERROR_STATUS_COLOR)
 		return
@@ -292,6 +300,7 @@ func shoot() -> void:
 	weapon_loadout.consume_current_shot()
 	_sync_current_weapon_view(false)
 	var shot_result: Dictionary = _apply_damage_events(_perform_weapon_shot(was_sprinting), true)
+	_play_sfx_event(_get_weapon_audio_event("fire"))
 	_apply_fire_feedback(was_sprinting)
 	shot_feedback.emit(bool(shot_result.get("hit", false)))
 	fire_timer.start(float(current_weapon_data.get("fire_rate", 0.1)))
@@ -302,6 +311,7 @@ func reload_weapon() -> void:
 	is_sprinting = false
 	is_reloading = true
 	can_shoot = false
+	_play_sfx_event(_get_weapon_audio_event("reload"))
 	reload_feedback.emit("RELOADING", WARNING_STATUS_COLOR)
 	reload_timer.start(float(current_weapon_data.get("reload_time", 1.0)))
 
@@ -314,6 +324,7 @@ func switch_weapon(next_index: int) -> void:
 	weapon_loadout.set_current_slot(next_index)
 	can_shoot = true
 	_sync_current_weapon_view(true)
+	_play_sfx_event("player_weapon_switch")
 	reload_feedback.emit("%s READY" % weapon_name.to_upper(), WARNING_STATUS_COLOR)
 	combat_text_feedback.emit(_get_weapon_mode_text(), INFO_STATUS_COLOR)
 
@@ -355,9 +366,11 @@ func cycle_selected_item(step: int) -> void:
 func use_item() -> void:
 	var item_id: String = item_inventory.ensure_selected_item(_get_unlocked_item_ids())
 	if item_id.is_empty():
+		_play_ui_error()
 		reload_feedback.emit("NO ITEM", ERROR_STATUS_COLOR)
 		return
 	if item_inventory.get_count(item_id) <= 0:
+		_play_ui_error()
 		reload_feedback.emit("%s EMPTY" % ItemDefinitions.get_display_name(item_id).to_upper(), ERROR_STATUS_COLOR)
 		_emit_inventory_changed()
 		return
@@ -365,25 +378,30 @@ func use_item() -> void:
 	match String(item_data.get("effect_type", "")):
 		"heal":
 			if health >= max_health:
+				_play_ui_error()
 				reload_feedback.emit("HEALTH FULL", WARNING_STATUS_COLOR)
 				return
 			item_inventory.consume_item(item_id)
 			var previous_health := health
 			health = mini(health + int(item_data.get("effect_value", 0)), max_health)
+			_play_sfx_event("player_medkit_use")
 			reload_feedback.emit("USED MEDKIT", POSITIVE_STATUS_COLOR)
 			combat_text_feedback.emit("+%d HP" % (health - previous_health), POSITIVE_STATUS_COLOR)
 		"armor":
 			if armor >= max_armor:
+				_play_ui_error()
 				reload_feedback.emit("ARMOR FULL", WARNING_STATUS_COLOR)
 				return
 			item_inventory.consume_item(item_id)
 			var previous_armor := armor
 			armor = mini(armor + int(item_data.get("effect_value", 0)), max_armor)
+			_play_sfx_event("player_armor_use")
 			reload_feedback.emit("ARMOR RESTORED", POSITIVE_STATUS_COLOR)
 			combat_text_feedback.emit("+%d ARM" % (armor - previous_armor), INFO_STATUS_COLOR)
 			armor_changed.emit(armor, max_armor)
 		"grenade":
 			item_inventory.consume_item(item_id)
+			_play_sfx_event("player_grenade_throw")
 			_throw_grenade()
 			reload_feedback.emit("GRENADE OUT", POSITIVE_STATUS_COLOR)
 	_emit_inventory_changed()
@@ -417,6 +435,7 @@ func take_damage(amount: int, source_position: Vector3 = Vector3.ZERO) -> void:
 		var source_direction: Vector3 = (resolved_source_position - global_position).normalized()
 		var local_direction: Vector3 = global_transform.basis.inverse() * source_direction
 		direction = Vector2(local_direction.x, local_direction.z)
+	_play_sfx_event("player_damage")
 	damage_feedback.emit(incoming_damage, direction)
 
 func apply_movement_slow(strength: float, duration: float) -> void:
@@ -438,20 +457,25 @@ func upgrade_current_weapon(cost_override: int = -1, display_name: String = "") 
 	var current_tier: int = weapon_loadout.get_current_upgrade_tier()
 	var next_tier: int = current_tier + 1
 	if next_tier > WeaponDefinitions.get_max_upgrade_tier(weapon_id):
+		_play_station_fail()
 		reload_feedback.emit("%s MAXED" % WeaponDefinitions.get_display_name(weapon_id, current_tier).to_upper(), WARNING_STATUS_COLOR)
 		return false
 	var price: int = cost_override if cost_override >= 0 else WeaponDefinitions.get_upgrade_cost(weapon_id, next_tier)
 	if price <= 0:
+		_play_station_fail()
 		reload_feedback.emit("UPGRADE UNAVAILABLE", ERROR_STATUS_COLOR)
 		return false
 	if not _try_spend_points(price):
+		_play_station_fail()
 		reload_feedback.emit("NOT ENOUGH POINTS", ERROR_STATUS_COLOR)
 		return false
 	if not weapon_loadout.apply_upgrade_to_current():
 		_add_points(price)
+		_play_station_fail()
 		reload_feedback.emit("UPGRADE FAILED", ERROR_STATUS_COLOR)
 		return false
 	_sync_current_weapon_view(true)
+	_play_sfx_event("station_upgrade_success")
 	var label_name: String = display_name if not display_name.is_empty() else weapon_name
 	reload_feedback.emit("%s UPGRADED" % label_name.to_upper(), POSITIVE_STATUS_COLOR)
 	combat_text_feedback.emit("-%d PTS" % price, WARNING_STATUS_COLOR)
@@ -581,6 +605,7 @@ func try_collect_pickup(pickup_type: String, amount: int = 1, weapon_id: String 
 		"consumable":
 			return _collect_consumable_pickup(item_id, amount, display_name)
 		_:
+			_play_ui_error()
 			reload_feedback.emit("UNKNOWN PICKUP", ERROR_STATUS_COLOR)
 			return false
 
@@ -593,6 +618,7 @@ func purchase_station(station_type: String, weapon_id: String = "", item_id: Str
 		"weapon_buy":
 			return _purchase_weapon_buy(weapon_id, cost_override, display_name)
 		_:
+			_play_station_fail()
 			reload_feedback.emit("UNKNOWN STATION", ERROR_STATUS_COLOR)
 			return false
 
@@ -600,6 +626,7 @@ func _collect_ammo_pickup(amount: int, weapon_id: String, display_name: String) 
 	var target_weapon_id := weapon_id if not weapon_id.is_empty() else weapon_loadout.get_current_weapon_id()
 	var slot_index := weapon_loadout.get_slot_index_by_weapon_id(target_weapon_id)
 	if slot_index == -1:
+		_play_ui_error()
 		reload_feedback.emit("NO MATCHING WEAPON", ERROR_STATUS_COLOR)
 		return false
 	var weapon_data := WeaponDefinitions.get_weapon_data(target_weapon_id, weapon_loadout.get_upgrade_tier(slot_index))
@@ -607,15 +634,18 @@ func _collect_ammo_pickup(amount: int, weapon_id: String, display_name: String) 
 	var added_amount := weapon_loadout.add_reserve_ammo_for_weapon(target_weapon_id, resolved_amount)
 	_sync_current_weapon_view(false)
 	var pickup_name := display_name if not display_name.is_empty() else "%s Ammo" % WeaponDefinitions.get_display_name(target_weapon_id)
+	_play_sfx_event("pickup_ammo")
 	reload_feedback.emit("%s +%d" % [pickup_name.to_upper(), added_amount], POSITIVE_STATUS_COLOR)
 	combat_text_feedback.emit("%s RESERVE %03d" % [WeaponDefinitions.get_display_name(target_weapon_id).to_upper(), int(weapon_loadout.get_slot_state(slot_index).get("reserve_ammo", 0))], INFO_STATUS_COLOR)
 	return true
 
 func _collect_weapon_pickup(weapon_id: String, display_name: String) -> bool:
 	if not WeaponDefinitions.has_weapon(weapon_id):
+		_play_ui_error()
 		reload_feedback.emit("INVALID WEAPON", ERROR_STATUS_COLOR)
 		return false
 	if not progression.is_weapon_unlocked(weapon_id):
+		_play_ui_error()
 		reload_feedback.emit("%s LOCKED" % WeaponDefinitions.get_display_name(weapon_id).to_upper(), ERROR_STATUS_COLOR)
 		return false
 	var existing_slot := weapon_loadout.get_slot_index_by_weapon_id(weapon_id)
@@ -624,26 +654,32 @@ func _collect_weapon_pickup(weapon_id: String, display_name: String) -> bool:
 		weapon_loadout.add_reserve_ammo_for_weapon(weapon_id, int(owned_weapon_data.get("ammo_pickup_amount", 0)))
 		weapon_loadout.set_current_slot(existing_slot)
 		_sync_current_weapon_view(false)
+		_play_sfx_event("pickup_weapon")
 		reload_feedback.emit("%s RESTOCKED" % WeaponDefinitions.get_display_name(weapon_id).to_upper(), POSITIVE_STATUS_COLOR)
 		return true
 	weapon_loadout.assign_weapon(current_weapon_index, weapon_id)
 	weapon_loadout.set_current_slot(current_weapon_index)
 	_sync_current_weapon_view(true)
+	_play_sfx_event("pickup_weapon")
 	reload_feedback.emit("%s EQUIPPED" % (display_name if not display_name.is_empty() else WeaponDefinitions.get_display_name(weapon_id)).to_upper(), POSITIVE_STATUS_COLOR)
 	combat_text_feedback.emit(_get_weapon_mode_text(), INFO_STATUS_COLOR)
 	return true
 
 func _collect_consumable_pickup(item_id: String, amount: int, display_name: String) -> bool:
 	if not ItemDefinitions.has_item(item_id):
+		_play_ui_error()
 		reload_feedback.emit("INVALID ITEM", ERROR_STATUS_COLOR)
 		return false
 	if not progression.is_item_unlocked(item_id):
+		_play_ui_error()
 		reload_feedback.emit("%s LOCKED" % ItemDefinitions.get_display_name(item_id).to_upper(), ERROR_STATUS_COLOR)
 		return false
 	var added_amount := item_inventory.add_item(item_id, maxi(amount, 1))
 	if added_amount <= 0:
+		_play_ui_error()
 		reload_feedback.emit("%s FULL" % ItemDefinitions.get_display_name(item_id).to_upper(), WARNING_STATUS_COLOR)
 		return false
+	_play_sfx_event("pickup_consumable")
 	reload_feedback.emit("%s +%d" % [(display_name if not display_name.is_empty() else ItemDefinitions.get_display_name(item_id)).to_upper(), added_amount], POSITIVE_STATUS_COLOR)
 	_emit_inventory_changed()
 	return true
@@ -652,36 +688,44 @@ func _purchase_ammo_refill(weapon_id: String, amount: int, cost_override: int, d
 	var target_weapon_id := weapon_id if not weapon_id.is_empty() else weapon_loadout.get_current_weapon_id()
 	var slot_index: int = weapon_loadout.get_slot_index_by_weapon_id(target_weapon_id)
 	if slot_index == -1:
+		_play_station_fail()
 		reload_feedback.emit("WEAPON NOT EQUIPPED", ERROR_STATUS_COLOR)
 		return false
 	var weapon_data := WeaponDefinitions.get_weapon_data(target_weapon_id, weapon_loadout.get_upgrade_tier(slot_index))
 	var price := cost_override if cost_override >= 0 else int(weapon_data.get("ammo_refill_cost", 0))
 	if not _try_spend_points(price):
+		_play_station_fail()
 		reload_feedback.emit("NOT ENOUGH POINTS", ERROR_STATUS_COLOR)
 		return false
 	var refill_amount := amount if amount > 0 else int(weapon_data.get("ammo_pickup_amount", 0))
 	weapon_loadout.add_reserve_ammo_for_weapon(target_weapon_id, refill_amount)
 	_sync_current_weapon_view(false)
+	_play_sfx_event("station_purchase_success")
 	reload_feedback.emit("%s BOUGHT" % (display_name if not display_name.is_empty() else "%s Ammo" % WeaponDefinitions.get_display_name(target_weapon_id)).to_upper(), POSITIVE_STATUS_COLOR)
 	combat_text_feedback.emit("-%d PTS" % price, WARNING_STATUS_COLOR)
 	return true
 
 func _purchase_consumable_supply(item_id: String, amount: int, cost_override: int, display_name: String) -> bool:
 	if not ItemDefinitions.has_item(item_id):
+		_play_station_fail()
 		reload_feedback.emit("INVALID ITEM", ERROR_STATUS_COLOR)
 		return false
 	if not progression.is_item_unlocked(item_id):
+		_play_station_fail()
 		reload_feedback.emit("%s LOCKED" % ItemDefinitions.get_display_name(item_id).to_upper(), ERROR_STATUS_COLOR)
 		return false
 	if not item_inventory.can_add_item(item_id, maxi(amount, 1)):
+		_play_station_fail()
 		reload_feedback.emit("%s FULL" % ItemDefinitions.get_display_name(item_id).to_upper(), WARNING_STATUS_COLOR)
 		return false
 	var item_data := ItemDefinitions.get_item_data(item_id)
 	var price := cost_override if cost_override >= 0 else int(item_data.get("buy_cost", 0))
 	if not _try_spend_points(price):
+		_play_station_fail()
 		reload_feedback.emit("NOT ENOUGH POINTS", ERROR_STATUS_COLOR)
 		return false
 	var added_amount := item_inventory.add_item(item_id, maxi(amount, 1))
+	_play_sfx_event("station_purchase_success")
 	reload_feedback.emit("%s +%d" % [(display_name if not display_name.is_empty() else ItemDefinitions.get_display_name(item_id)).to_upper(), added_amount], POSITIVE_STATUS_COLOR)
 	combat_text_feedback.emit("-%d PTS" % price, WARNING_STATUS_COLOR)
 	_emit_inventory_changed()
@@ -689,14 +733,17 @@ func _purchase_consumable_supply(item_id: String, amount: int, cost_override: in
 
 func _purchase_weapon_buy(weapon_id: String, cost_override: int, display_name: String) -> bool:
 	if not WeaponDefinitions.has_weapon(weapon_id):
+		_play_station_fail()
 		reload_feedback.emit("INVALID WEAPON", ERROR_STATUS_COLOR)
 		return false
 	if not progression.is_weapon_unlocked(weapon_id):
+		_play_station_fail()
 		reload_feedback.emit("%s LOCKED" % WeaponDefinitions.get_display_name(weapon_id).to_upper(), ERROR_STATUS_COLOR)
 		return false
 	var weapon_data := WeaponDefinitions.get_weapon_data(weapon_id)
 	var price := cost_override if cost_override >= 0 else int(weapon_data.get("buy_cost", 0))
 	if not _try_spend_points(price):
+		_play_station_fail()
 		reload_feedback.emit("NOT ENOUGH POINTS", ERROR_STATUS_COLOR)
 		return false
 	var existing_slot := weapon_loadout.get_slot_index_by_weapon_id(weapon_id)
@@ -707,6 +754,7 @@ func _purchase_weapon_buy(weapon_id: String, cost_override: int, display_name: S
 		weapon_loadout.assign_weapon(current_weapon_index, weapon_id)
 		weapon_loadout.set_current_slot(current_weapon_index)
 	_sync_current_weapon_view(true)
+	_play_sfx_event("station_purchase_success")
 	reload_feedback.emit("%s ACQUIRED" % (display_name if not display_name.is_empty() else WeaponDefinitions.get_display_name(weapon_id)).to_upper(), POSITIVE_STATUS_COLOR)
 	combat_text_feedback.emit("-%d PTS" % price, WARNING_STATUS_COLOR)
 	return true
@@ -982,6 +1030,47 @@ func _try_spend_points(amount: int) -> bool:
 
 func _get_weapon_mode_text() -> String:
 	return "%s %s" % [weapon_name.to_upper(), "AUTO" if is_weapon_automatic else "SEMI"]
+
+func _update_movement_audio(delta: float, vertical_velocity_before_move: float) -> void:
+	var currently_on_floor: bool = is_on_floor()
+	if currently_on_floor and not was_on_floor_last_frame and vertical_velocity_before_move < -2.0:
+		_play_sfx_event("player_land")
+
+	if currently_on_floor:
+		var horizontal_speed: float = Vector2(velocity.x, velocity.z).length()
+		if horizontal_speed > 1.15:
+			footstep_distance_accumulator += horizontal_speed * delta
+			var step_distance: float = 1.8
+			if is_sprinting:
+				step_distance = 2.4
+			elif is_crouching:
+				step_distance = 1.25
+			if footstep_distance_accumulator >= step_distance:
+				footstep_distance_accumulator = fmod(footstep_distance_accumulator, step_distance)
+				_play_sfx_event("player_footstep_concrete")
+		else:
+			footstep_distance_accumulator = 0.0
+	else:
+		footstep_distance_accumulator = 0.0
+
+	was_on_floor_last_frame = currently_on_floor
+
+func _play_sfx_event(event_id: String) -> void:
+	if event_id.is_empty():
+		return
+	AudioManager.play_sfx(event_id)
+
+func _play_ui_error() -> void:
+	AudioManager.play_ui("ui_error")
+
+func _play_station_fail() -> void:
+	AudioManager.play_sfx("station_purchase_fail")
+
+func _get_weapon_audio_event(action: String) -> String:
+	var weapon_id: String = weapon_loadout.get_current_weapon_id()
+	if weapon_id.is_empty():
+		weapon_id = "pistol"
+	return "weapon_%s_%s" % [action, weapon_id]
 
 func _apply_damage_events(damage_events: Array[Dictionary], counts_as_shot: bool) -> Dictionary:
 	var any_hit := false

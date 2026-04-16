@@ -40,6 +40,7 @@ func interact(player: Node) -> bool:
 		player.call("reward_points", repair_reward, "+%d PTS REPAIR" % repair_reward)
 	if player.has_method("show_runtime_status"):
 		player.call("show_runtime_status", "BARRICADE REPAIRED", "positive")
+	AudioManager.play_sfx("barricade_repair", global_position, true)
 	return true
 
 func get_interaction_prompt() -> String:
@@ -51,9 +52,12 @@ func take_zombie_damage(amount: int) -> bool:
 	var target_index: int = _get_damage_target_index()
 	if target_index == -1:
 		return false
+	var was_active: bool = _segment_healths[target_index] > 0
 	_segment_healths[target_index] = max(0, _segment_healths[target_index] - maxi(amount, 1))
 	_update_segment_state(target_index)
 	_update_label()
+	if was_active and _segment_healths[target_index] <= 0:
+		AudioManager.play_sfx("barricade_break", global_position, true)
 	return true
 
 func blocks_zombies() -> bool:

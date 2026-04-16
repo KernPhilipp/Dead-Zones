@@ -34,6 +34,7 @@ func _explode() -> void:
 	if _exploded:
 		return
 	_exploded = true
+	AudioManager.play_sfx("zombie_explode", global_position, true)
 
 	var damage_events: Array[Dictionary] = []
 	for zombie in get_tree().get_nodes_in_group("zombie"):

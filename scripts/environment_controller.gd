@@ -104,6 +104,7 @@ var lightning_flash_duration: float = 0.0
 var lightning_flash_remaining: float = 0.0
 var lightning_peak_energy: float = 0.0
 var lightning_flash_color: Color = Color(0.9, 0.96, 1.0, 1.0)
+var current_weather_audio_event: String = ""
 
 func _ready():
 	rng.randomize()
@@ -125,6 +126,9 @@ func _ready():
 	_reset_weather_hold_timer()
 	lightning_timer = rng.randf_range(0.8, 2.0)
 	_apply_environment()
+	AudioManager.play_music("music_ambient")
+	AudioManager.play_loop("ambience_base", "ambience_base_wind")
+	_sync_weather_audio()
 
 func _process(delta: float):
 	if cycle_duration_seconds > 0.0:
@@ -133,6 +137,7 @@ func _process(delta: float):
 	_update_lightning(delta)
 	_update_effect_positions()
 	_apply_environment()
+	_sync_weather_audio()
 
 func _resolve_sun() -> DirectionalLight3D:
 	var sibling_sun := get_parent().get_node_or_null("DirectionalLight3D") as DirectionalLight3D
@@ -270,6 +275,11 @@ func _begin_lightning_flash(storminess: float):
 	if follow_target != null:
 		var offset := Vector3(rng.randf_range(-12.0, 12.0), 14.0, rng.randf_range(-12.0, 12.0))
 		lightning_light.global_position = follow_target.global_position + offset
+	AudioManager.play_sfx(
+		"ambience_thunder_near" if rng.randf() < clampf(storminess * 0.65, 0.2, 0.85) else "ambience_thunder_far",
+		lightning_light.global_position,
+		true
+	)
 
 func _update_effect_positions():
 	if follow_target == null:
@@ -407,3 +417,19 @@ func get_time_label() -> String:
 	var hours: int = total_minutes / 60
 	var minutes: int = total_minutes % 60
 	return "%02d:%02d" % [hours, minutes]
+
+func _sync_weather_audio() -> void:
+	var rain_amount: float = _get_weather_value("rain_amount")
+	var storminess: float = _get_weather_value("storminess")
+	var next_event: String = ""
+	if rain_amount > 0.05:
+		next_event = "ambience_storm" if storminess >= 0.7 else "ambience_rain"
+
+	if next_event == current_weather_audio_event:
+		return
+
+	current_weather_audio_event = next_event
+	if current_weather_audio_event.is_empty():
+		AudioManager.stop_loop("ambience_weather")
+	else:
+		AudioManager.play_loop("ambience_weather", current_weather_audio_event)
