@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://kton6sgdjnxg"]
+[gd_scene format=3 uid="uid://kton6sgdjnxg"]
 
 [ext_resource type="Script" path="res://scripts/handbook_book.gd" id="1_handbook_script"]
 

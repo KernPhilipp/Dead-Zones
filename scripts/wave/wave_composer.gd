@@ -78,8 +78,8 @@ func _build_entry(
 	mort_grade_max: int,
 	rng: RandomNumberGenerator
 ) -> Dictionary:
-	var species_id: int = ZombieDefinitions.random_species_id(rng)
-	var class_id: int = ZombieDefinitions.random_class_id(rng)
+	var species_id: int = _pick_species_for_wave(wave_index, rng)
+	var class_id: int = _pick_class_for_species(species_id)
 	var mort_grade: int = ZombieDefinitions.random_mort_grade(rng, mort_grade_min, mort_grade_max)
 	var death_subtype_id: int = ZombieDefinitions.random_death_subtype_id(rng)
 	var death_class_id: int = int(ZombieDefinitions.get_death_subtype_data(death_subtype_id)["death_class"])
@@ -99,6 +99,36 @@ func _build_entry(
 		"state": "planned",
 		"spawn_attempts": 0
 	}
+
+func _pick_species_for_wave(wave_index: int, rng: RandomNumberGenerator) -> int:
+	var species_pool: Array[int] = [
+		ZombieDefinitions.Species.WALKER,
+		ZombieDefinitions.Species.WALKER,
+		ZombieDefinitions.Species.WALKER
+	]
+
+	if wave_index >= 2:
+		species_pool.append(ZombieDefinitions.Species.SPRINTER)
+	if wave_index >= 3:
+		species_pool.append(ZombieDefinitions.Species.BRUTE)
+	if wave_index >= 5:
+		species_pool.append(ZombieDefinitions.Species.SKULLY)
+	if wave_index >= 7:
+		species_pool.append(ZombieDefinitions.Species.SPRINTER)
+		species_pool.append(ZombieDefinitions.Species.BRUTE)
+
+	if species_pool.is_empty():
+		return ZombieDefinitions.DEFAULT_SPECIES
+	return species_pool[rng.randi_range(0, species_pool.size() - 1)]
+
+func _pick_class_for_species(species_id: int) -> int:
+	match species_id:
+		ZombieDefinitions.Species.BRUTE:
+			return ZombieDefinitions.ZombieClass.ARMORED
+		ZombieDefinitions.Species.SPRINTER:
+			return ZombieDefinitions.ZombieClass.FERAL
+		_:
+			return ZombieDefinitions.ZombieClass.COMMON
 
 func _pick_weighted_rank(distribution: Dictionary, rng: RandomNumberGenerator) -> int:
 	var ranks: Array[int] = []

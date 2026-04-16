@@ -123,7 +123,24 @@ var missing_parts: Dictionary = {}
 @onready var body_collision: CollisionShape3D = $CollisionShape3D
 @onready var damage_area: Area3D = $DamageArea
 @onready var model_root: Node3D = $ModelRoot
-@onready var held_item: Node3D = $ModelRoot/Arm_R/WeaponSocket_R/HeldItem
+@onready var pelvis_mesh: MeshInstance3D = $ModelRoot/Pelvis
+@onready var torso_mesh: MeshInstance3D = $ModelRoot/Torso
+@onready var rib_wound_mesh: MeshInstance3D = $ModelRoot/RibWound
+@onready var head_mesh: MeshInstance3D = $ModelRoot/Head
+@onready var jaw_mesh: MeshInstance3D = $ModelRoot/Jaw
+@onready var eye_left_mesh: MeshInstance3D = $ModelRoot/Eye_L
+@onready var eye_right_mesh: MeshInstance3D = $ModelRoot/Eye_R
+@onready var arm_left_mesh: MeshInstance3D = $ModelRoot/Arm_L
+@onready var forearm_left_mesh: MeshInstance3D = $ModelRoot/Forearm_L
+@onready var claw_left_mesh_a: MeshInstance3D = $ModelRoot/Claw_L1
+@onready var claw_left_mesh_b: MeshInstance3D = $ModelRoot/Claw_L2
+@onready var arm_right_mesh: MeshInstance3D = $ModelRoot/Arm_R
+@onready var forearm_right_mesh: MeshInstance3D = $ModelRoot/Forearm_R
+@onready var held_item: MeshInstance3D = $ModelRoot/Forearm_R/WeaponSocket_R/HeldItem
+@onready var leg_left_mesh: MeshInstance3D = $ModelRoot/Leg_L
+@onready var shin_left_mesh: MeshInstance3D = $ModelRoot/Shin_L
+@onready var leg_right_mesh: MeshInstance3D = $ModelRoot/Leg_R
+@onready var shin_right_mesh: MeshInstance3D = $ModelRoot/Shin_R
 @onready var part_nodes: Dictionary = {
 	"head": $ModelRoot/Head,
 	"torso": $ModelRoot/Torso,
@@ -143,6 +160,9 @@ var missing_parts: Dictionary = {}
 
 var base_model_root_position := Vector3.ZERO
 var profile_rng: RandomNumberGenerator
+var visual_base_positions: Dictionary = {}
+var visual_base_rotations: Dictionary = {}
+var visual_base_scales: Dictionary = {}
 
 func _ready():
 	randomize()
@@ -151,6 +171,7 @@ func _ready():
 	limp_phase = randf_range(0.0, TAU)
 	base_model_root_position = model_root.position
 	base_head_rotation = part_nodes["head"].rotation
+	_capture_visual_base_pose()
 	profile_rng = RandomNumberGenerator.new()
 	profile_rng.randomize()
 
@@ -328,10 +349,77 @@ func _apply_visual_variant_placeholder():
 	set_meta("visual_variant", visual_variant)
 
 func _apply_behavior_pose_reset():
+	_restore_visual_base_pose()
 	model_root.position = base_model_root_position
 	model_root.rotation.x = 0.0
 	if resolved_behavior_mode == "low_crawl":
 		model_root.position = base_model_root_position + Vector3(0.0, -0.35, 0.0)
+
+func _capture_visual_base_pose():
+	visual_base_positions.clear()
+	visual_base_rotations.clear()
+	visual_base_scales.clear()
+
+	for node in [
+		model_root,
+		pelvis_mesh,
+		torso_mesh,
+		rib_wound_mesh,
+		head_mesh,
+		jaw_mesh,
+		eye_left_mesh,
+		eye_right_mesh,
+		arm_left_mesh,
+		forearm_left_mesh,
+		claw_left_mesh_a,
+		claw_left_mesh_b,
+		arm_right_mesh,
+		forearm_right_mesh,
+		held_item,
+		leg_left_mesh,
+		shin_left_mesh,
+		leg_right_mesh,
+		shin_right_mesh
+	]:
+		_store_visual_pose(node)
+
+func _restore_visual_base_pose():
+	for node in [
+		model_root,
+		pelvis_mesh,
+		torso_mesh,
+		rib_wound_mesh,
+		head_mesh,
+		jaw_mesh,
+		eye_left_mesh,
+		eye_right_mesh,
+		arm_left_mesh,
+		forearm_left_mesh,
+		claw_left_mesh_a,
+		claw_left_mesh_b,
+		arm_right_mesh,
+		forearm_right_mesh,
+		held_item,
+		leg_left_mesh,
+		shin_left_mesh,
+		leg_right_mesh,
+		shin_right_mesh
+	]:
+		_restore_visual_pose(node)
+
+func _store_visual_pose(node: Node3D):
+	if node == null:
+		return
+	visual_base_positions[node.name] = node.position
+	visual_base_rotations[node.name] = node.rotation
+	visual_base_scales[node.name] = node.scale
+
+func _restore_visual_pose(node: Node3D):
+	if node == null:
+		return
+	node.position = visual_base_positions.get(node.name, node.position)
+	node.rotation = visual_base_rotations.get(node.name, node.rotation)
+	node.scale = visual_base_scales.get(node.name, node.scale)
 
 func _initialize_part_states():
 	part_health.clear()
@@ -361,7 +449,87 @@ func _initialize_part_states():
 		part_health[part] = max(1, int(round(float(base_part_health) * part_health_mult)))
 		missing_parts[part] = false
 
+	_apply_visual_profile()
 	_apply_starting_part_losses()
+
+func _apply_visual_profile():
+	_restore_visual_base_pose()
+
+	var skin_color: Color = Color(0.34, 0.42, 0.25, 1.0)
+	var shirt_color: Color = Color(0.14, 0.16, 0.15, 1.0)
+	var pants_color: Color = Color(0.19, 0.18, 0.16, 1.0)
+	var flesh_color: Color = Color(0.42, 0.12, 0.11, 1.0)
+	var bone_color: Color = Color(0.72, 0.68, 0.58, 1.0)
+	var metal_color: Color = Color(0.2, 0.2, 0.22, 1.0)
+	var eye_color: Color = Color(1.0, 0.48, 0.16, 1.0)
+	var eye_energy: float = 0.55
+
+	match species_id:
+		ZombieDefinitions.Species.BRUTE:
+			model_root.scale *= 1.12
+			torso_mesh.scale = Vector3(1.22, 1.18, 1.08)
+			pelvis_mesh.scale = Vector3(1.18, 1.0, 1.0)
+			arm_left_mesh.scale = Vector3(1.2, 1.15, 1.15)
+			arm_right_mesh.scale = Vector3(1.2, 1.15, 1.15)
+			forearm_left_mesh.scale = Vector3(1.14, 1.12, 1.12)
+			forearm_right_mesh.scale = Vector3(1.14, 1.12, 1.12)
+			skin_color = Color(0.31, 0.36, 0.24, 1.0)
+			shirt_color = Color(0.18, 0.14, 0.12, 1.0)
+			pants_color = Color(0.12, 0.11, 0.1, 1.0)
+			held_item.visible = false
+		ZombieDefinitions.Species.SPRINTER:
+			model_root.scale *= 0.92
+			torso_mesh.scale = Vector3(0.88, 1.02, 0.92)
+			pelvis_mesh.scale = Vector3(0.9, 0.95, 0.92)
+			arm_left_mesh.scale = Vector3(0.88, 1.08, 0.88)
+			arm_right_mesh.scale = Vector3(0.88, 1.08, 0.88)
+			leg_left_mesh.scale = Vector3(0.92, 1.08, 0.92)
+			leg_right_mesh.scale = Vector3(0.92, 1.08, 0.92)
+			model_root.rotation.x += 0.08
+			skin_color = Color(0.36, 0.43, 0.24, 1.0)
+			shirt_color = Color(0.09, 0.1, 0.1, 1.0)
+			pants_color = Color(0.16, 0.15, 0.14, 1.0)
+			eye_energy = 0.78
+			held_item.visible = false
+		ZombieDefinitions.Species.SKULLY:
+			model_root.scale *= 1.03
+			torso_mesh.scale = Vector3(0.98, 1.0, 0.9)
+			skin_color = bone_color
+			shirt_color = Color(0.08, 0.08, 0.09, 1.0)
+			pants_color = Color(0.1, 0.1, 0.11, 1.0)
+			flesh_color = Color(0.28, 0.08, 0.08, 1.0)
+			eye_color = Color(0.74, 0.92, 1.0, 1.0)
+			eye_energy = 0.95
+			held_item.visible = true
+		_:
+			held_item.visible = species_id == ZombieDefinitions.Species.WALKER
+
+	if class_id == ZombieDefinitions.ZombieClass.ARMORED:
+		shirt_color = shirt_color.darkened(0.18)
+		pants_color = pants_color.darkened(0.1)
+		metal_color = Color(0.28, 0.29, 0.31, 1.0)
+	if class_id == ZombieDefinitions.ZombieClass.FERAL:
+		eye_energy += 0.16
+		flesh_color = flesh_color.lightened(0.08)
+
+	_set_mesh_material_color(head_mesh, skin_color)
+	_set_mesh_material_color(arm_left_mesh, skin_color)
+	_set_mesh_material_color(forearm_left_mesh, skin_color)
+	_set_mesh_material_color(arm_right_mesh, skin_color)
+	_set_mesh_material_color(forearm_right_mesh, skin_color)
+	_set_mesh_material_color(shin_left_mesh, skin_color)
+	_set_mesh_material_color(shin_right_mesh, skin_color)
+	_set_mesh_material_color(torso_mesh, shirt_color)
+	_set_mesh_material_color(pelvis_mesh, pants_color)
+	_set_mesh_material_color(leg_left_mesh, pants_color)
+	_set_mesh_material_color(leg_right_mesh, pants_color)
+	_set_mesh_material_color(rib_wound_mesh, flesh_color)
+	_set_mesh_material_color(jaw_mesh, bone_color)
+	_set_mesh_material_color(claw_left_mesh_a, bone_color)
+	_set_mesh_material_color(claw_left_mesh_b, bone_color)
+	_set_mesh_material_color(held_item, metal_color)
+	_set_mesh_material_color(eye_left_mesh, eye_color, eye_energy)
+	_set_mesh_material_color(eye_right_mesh, eye_color, eye_energy)
 
 func take_damage(amount: int) -> bool:
 	return take_part_damage("torso", amount)
@@ -1286,6 +1454,24 @@ func _schedule_idle_sound() -> void:
 	if idle_sound_timer == null:
 		return
 	idle_sound_timer.start(profile_rng.randf_range(2.8, 6.5))
+
+func _set_mesh_material_color(mesh_instance: MeshInstance3D, color: Color, emission_energy: float = -1.0):
+	if mesh_instance == null:
+		return
+
+	var source_material: StandardMaterial3D = mesh_instance.material_override as StandardMaterial3D
+	if source_material == null and mesh_instance.mesh != null:
+		source_material = mesh_instance.mesh.surface_get_material(0) as StandardMaterial3D
+	if source_material == null:
+		source_material = StandardMaterial3D.new()
+
+	var material: StandardMaterial3D = source_material.duplicate()
+	material.albedo_color = color
+	if emission_energy >= 0.0:
+		material.emission_enabled = true
+		material.emission = color
+		material.emission_energy_multiplier = emission_energy
+	mesh_instance.material_override = material
 
 func _play_world_sound(event_id: String) -> void:
 	if event_id.is_empty():
