@@ -18,13 +18,13 @@ config/name="Spiel HTL Projekt"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
-[filesystem]
-
-import/blender/enabled=false
-
 [dotnet]
 
 project/assembly_name="Spiel HTL Projekt"
+
+[filesystem]
+
+import/blender/enabled=false
 
 [input]
 
