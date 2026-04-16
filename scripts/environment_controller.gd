@@ -82,8 +82,8 @@ const WEATHER_WEIGHTS := {
 @export var weather_hold_duration: Vector2 = Vector2(16.0, 28.0)
 @export var weather_transition_duration: float = 9.5
 @export var rain_follow_target_path: NodePath
-@export var rain_follow_height: float = 18.0
-@export var rain_area_size: Vector2 = Vector2(18.0, 18.0)
+@export var rain_follow_height: float = 26.0
+@export var rain_area_size: Vector2 = Vector2(28.0, 28.0)
 
 var sun: DirectionalLight3D
 var world_environment: WorldEnvironment
@@ -172,25 +172,25 @@ func _configure_environment_defaults():
 func _create_weather_effects():
 	rain_particles = GPUParticles3D.new()
 	rain_particles.name = "RainParticles"
-	rain_particles.amount = 1800
-	rain_particles.lifetime = 1.35
-	rain_particles.preprocess = 0.5
-	rain_particles.local_coords = true
+	rain_particles.amount = 1600
+	rain_particles.lifetime = 0.95
+	rain_particles.preprocess = 0.15
+	rain_particles.local_coords = false
 	rain_particles.emitting = false
 	rain_particles.draw_pass_1 = _build_rain_mesh()
 	rain_particles.visibility_aabb = AABB(
-		Vector3(-rain_area_size.x, -28.0, -rain_area_size.y),
-		Vector3(rain_area_size.x * 2.0, 56.0, rain_area_size.y * 2.0)
+		Vector3(-rain_area_size.x, -42.0, -rain_area_size.y),
+		Vector3(rain_area_size.x * 2.0, 84.0, rain_area_size.y * 2.0)
 	)
 	rain_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	rain_material = ParticleProcessMaterial.new()
-	rain_material.direction = Vector3(0.0, -1.0, 0.0)
-	rain_material.spread = 4.0
-	rain_material.gravity = Vector3(0.0, -26.0, 0.0)
-	rain_material.initial_velocity_min = 18.0
-	rain_material.initial_velocity_max = 24.0
-	rain_material.scale_min = 0.75
-	rain_material.scale_max = 1.2
+	rain_material.direction = Vector3(0.08, -1.0, 0.02)
+	rain_material.spread = 1.2
+	rain_material.gravity = Vector3(0.0, -52.0, 0.0)
+	rain_material.initial_velocity_min = 34.0
+	rain_material.initial_velocity_max = 42.0
+	rain_material.scale_min = 0.45
+	rain_material.scale_max = 0.72
 	rain_material.color = Color(0.8, 0.87, 0.95, 0.55)
 	rain_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
 	rain_material.emission_box_extents = Vector3(rain_area_size.x, 1.0, rain_area_size.y)
@@ -207,7 +207,7 @@ func _create_weather_effects():
 
 func _build_rain_mesh() -> QuadMesh:
 	var mesh := QuadMesh.new()
-	mesh.size = Vector2(0.03, 0.8)
+	mesh.size = Vector2(0.018, 0.62)
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -290,14 +290,17 @@ func _apply_environment():
 		sin(elevation),
 		cos(elevation) * sin(azimuth)
 	).normalized()
-	var light_direction := -sun_position
+	var lighting_sun_position := sun_position
+	lighting_sun_position.y = maxf(lighting_sun_position.y, 0.38)
+	lighting_sun_position = lighting_sun_position.normalized()
+	var light_direction := -lighting_sun_position
 	sun.transform = Transform3D(Basis.looking_at(light_direction, Vector3.UP), sun.transform.origin)
 
 	var daylight := smoothstep(-0.16, 0.1, sun_position.y)
 	var twilight := clampf(1.0 - absf(sun_position.y * 4.0), 0.0, 1.0)
 	var sky_shadow := _get_weather_value("sky_shadow")
-	var visible_daylight := maxf(daylight, 0.68)
-	var fog_density := _get_weather_value("fog_density") + ((1.0 - daylight) * 0.005)
+	var visible_daylight := maxf(daylight, 0.86)
+	var fog_density := _get_weather_value("fog_density") + ((1.0 - daylight) * 0.003)
 	var ambient_multiplier := _get_weather_value("ambient_multiplier")
 	var light_multiplier := _get_weather_value("light_multiplier")
 	var rain_amount := _get_weather_value("rain_amount")
@@ -306,7 +309,7 @@ func _apply_environment():
 	var purple_tint := _get_weather_value("purple_tint")
 	var void_depth := _get_weather_value("void_depth")
 	var lightning_mix := clampf(lightning_light.light_energy / 5.8, 0.0, 1.0)
-	var horror_daylight := maxf(daylight, 0.42)
+	var horror_daylight := maxf(daylight, 0.54)
 
 	var void_black := Color(0.01, 0.012, 0.01, 1.0)
 	var dead_night := Color(0.02, 0.035, 0.028, 1.0)
@@ -317,7 +320,7 @@ func _apply_environment():
 	sky_color = sky_color.lerp(toxic_green, toxic_tint * 0.48)
 	sky_color = sky_color.lerp(arcane_purple, purple_tint * 0.42)
 	sky_color = sky_color.lerp(blood_red, maxf(twilight * 0.72, blood_tint * 0.5))
-	sky_color = sky_color.lerp(Color(0.0, 0.0, 0.0, 1.0), void_depth * 0.1)
+	sky_color = sky_color.lerp(Color(0.0, 0.0, 0.0, 1.0), void_depth * 0.04)
 	sky_color = sky_color.lerp(lightning_flash_color, lightning_mix * 0.24)
 
 	var ambient_base := Color(0.14, 0.15, 0.16, 1.0)
@@ -340,7 +343,7 @@ func _apply_environment():
 
 	environment.background_color = sky_color
 	environment.ambient_light_color = ambient_color
-	environment.ambient_light_energy = lerpf(0.52, 0.96, visible_daylight) * ambient_multiplier
+	environment.ambient_light_energy = lerpf(0.78, 1.08, visible_daylight) * ambient_multiplier
 	environment.fog_enabled = fog_density > 0.001
 	environment.fog_density = fog_density
 	environment.fog_aerial_perspective = lerpf(0.34, 0.62, rain_amount)
@@ -351,10 +354,10 @@ func _apply_environment():
 	fog_color = fog_color.lerp(Color(0.36, 0.08, 0.06, 1.0), blood_tint * 0.34)
 	fog_color = fog_color.lerp(lightning_flash_color, lightning_mix * 0.2)
 	environment.fog_light_color = fog_color
-	environment.fog_light_energy = lerpf(0.5, 0.72, visible_daylight) + (purple_tint * 0.08) + (lightning_mix * 0.14)
+	environment.fog_light_energy = lerpf(0.62, 0.82, visible_daylight) + (purple_tint * 0.08) + (lightning_mix * 0.14)
 
 	sun.light_color = sun_color
-	sun.light_energy = (lerpf(0.76, 1.5, visible_daylight) * light_multiplier) + (lightning_light.light_energy * 0.24)
+	sun.light_energy = (lerpf(1.08, 1.72, visible_daylight) * light_multiplier) + (lightning_light.light_energy * 0.24)
 
 	_update_rain_effect(rain_amount)
 
@@ -366,10 +369,12 @@ func _update_rain_effect(rain_amount: float):
 		return
 
 	rain_particles.emitting = true
-	rain_particles.amount = int(lerpf(1200.0, 3200.0, rain_amount))
-	rain_material.initial_velocity_min = lerpf(18.0, 28.0, rain_amount)
-	rain_material.initial_velocity_max = lerpf(24.0, 36.0, rain_amount)
-	rain_material.gravity = Vector3(0.0, lerpf(-28.0, -42.0, rain_amount), 0.0)
+	rain_particles.amount = int(lerpf(1400.0, 2400.0, rain_amount))
+	rain_material.direction = Vector3(lerpf(0.04, 0.18, rain_amount), -1.0, lerpf(0.01, 0.08, rain_amount))
+	rain_material.spread = lerpf(0.8, 1.6, rain_amount)
+	rain_material.initial_velocity_min = lerpf(34.0, 42.0, rain_amount)
+	rain_material.initial_velocity_max = lerpf(42.0, 52.0, rain_amount)
+	rain_material.gravity = Vector3(0.0, lerpf(-52.0, -66.0, rain_amount), 0.0)
 	rain_material.color = Color(0.58, 0.92, 0.66, lerpf(0.42, 0.82, rain_amount))
 
 func _pick_next_weather() -> int:
