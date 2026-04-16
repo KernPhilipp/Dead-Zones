@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://main0001"]
+[gd_scene load_steps=15 format=3 uid="uid://main0001"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="2_hud"]
@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" path="res://scenes/interactables/weapon_upgrade_station.tscn" id="6_upgrade_station"]
 [ext_resource type="PackedScene" path="res://scenes/interactables/barricade.tscn" id="7_barricade"]
 [ext_resource type="PackedScene" path="res://scenes/lost_place_tower_house.tscn" id="8_house"]
+[ext_resource type="PackedScene" path="res://scenes/props/broken_fences.tscn" id="9_broken_fences"]
+[ext_resource type="PackedScene" path="res://scenes/props/fences_clean.tscn" id="10_clean_fences"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.35, 0.35, 0.3, 1)
@@ -115,8 +117,23 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 12, 0,
 [node name="BarricadeSouth" parent="Map" instance=ExtResource("7_barricade")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 12)
 
+[node name="BrokenFenceClusterA" parent="Map" instance=ExtResource("9_broken_fences")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -15)
+
+[node name="BrokenFenceClusterB" parent="Map" instance=ExtResource("9_broken_fences")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6, 0, -15)
+
+[node name="BrokenFenceClusterC" parent="Map" instance=ExtResource("9_broken_fences")]
+transform = Transform3D(-0.87, 0, -0.5, 0, 1, 0, 0.5, 0, -0.87, 6, 0, 14)
+
+[node name="CleanFenceClusterA" parent="Map" instance=ExtResource("10_clean_fences")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -16)
+
+[node name="CleanFenceClusterB" parent="Map" instance=ExtResource("10_clean_fences")]
+transform = Transform3D(0.71, 0, -0.71, 0, 1, 0, 0.71, 0, 0.71, -14, 0, 8)
+
 [node name="Player" parent="." instance=ExtResource("1_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 7.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.2, 12)
 
 [node name="PickupTestSpawns" type="Node3D" parent="."]
 
@@ -165,38 +182,38 @@ process_mode = 3
 [node name="Stations" type="Node3D" parent="."]
 
 [node name="AmmoStation" parent="Stations" instance=ExtResource("5_station")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -8)
 station_type = "ammo_refill"
 amount = 36
 cost_override = 120
 display_name = "Ammo Refill"
 
 [node name="MedStation" parent="Stations" instance=ExtResource("5_station")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -8)
 station_type = "consumable_supply"
 item_id = "medkit"
 display_name = "Med Supply"
 
 [node name="ArmorStation" parent="Stations" instance=ExtResource("5_station")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -8)
 station_type = "consumable_supply"
 item_id = "armor_plate"
 display_name = "Armor Supply"
 
 [node name="GrenadeStation" parent="Stations" instance=ExtResource("5_station")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -8)
 station_type = "consumable_supply"
 item_id = "grenade"
 display_name = "Grenade Supply"
 
 [node name="ShotgunWallBuy" parent="Stations" instance=ExtResource("5_station")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -8)
 station_type = "weapon_buy"
 weapon_id = "shotgun"
 display_name = "Shotgun Buy"
 
 [node name="WeaponUpgradeStation" parent="Stations" instance=ExtResource("6_upgrade_station")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -8)
 display_name = "Weapon Upgrade"
 
 [node name="SpawnPoints" type="Node3D" parent="."]
