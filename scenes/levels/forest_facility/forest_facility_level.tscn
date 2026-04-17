@@ -107,7 +107,7 @@ bottom_radius = 2.4
 height = 4.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_main_block"]
-size = Vector3(18, 7, 12)
+size = Vector3(25.294495, 7, 12)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rear_wing"]
 size = Vector3(10, 6, 8)
@@ -178,6 +178,18 @@ size = Vector3(196, 14, 2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_boundary_east_west"]
 size = Vector3(2, 14, 196)
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_tree_large"]
+height = 14.0
+radius = 7.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_tree_medium"]
+height = 12.0
+radius = 4.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_tree_small"]
+height = 10.0
+radius = 2.2
+
 [sub_resource type="CylinderMesh" id="CylinderMesh_pole"]
 top_radius = 0.16
 bottom_radius = 0.2
@@ -221,6 +233,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_ground")
 
 [node name="GroundMesh" type="MeshInstance3D" parent="Geometry/Ground" unique_id=752556895]
+transform = Transform3D(1, 0, 0, 0, 1.3858565, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("PlaneMesh_ground")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
@@ -247,7 +260,7 @@ mesh = SubResource("PlaneMesh_mid_patch")
 surface_material_override/0 = SubResource("StandardMaterial3D_dirt")
 
 [node name="InnerYardDirt" type="MeshInstance3D" parent="Geometry/GroundPatches" unique_id=1998374649]
-transform = Transform3D(1.2, 0, 0.08, 0, 1, 0, -0.06, 0, 1.05, 4, 0.03, 8)
+transform = Transform3D(1.2, 0, 0.08, 0, 1, 0, -0.06, 0, 1.05, 4.015972, 0.006701736, 7.9937744)
 mesh = SubResource("PlaneMesh_large_patch")
 surface_material_override/0 = SubResource("StandardMaterial3D_dirt")
 
@@ -484,7 +497,7 @@ visible = false
 transform = Transform3D(3.9110913, 0, 0, 0, 5.5019894, 0, 0, 0, 5.1037316, -20, 0, 35.046192)
 
 [node name="GateCabinVisual" parent="Geometry/ArtPass" unique_id=2072647448 instance=ExtResource("5_cabin_scene")]
-transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, 34, 0, 8)
+transform = Transform3D(11.694196, 0, 0, 0, 13.886133, 0, 0, 0, 7.3007283, 34, 15.743133, 8)
 
 [node name="SouthCabinVisual" parent="Geometry/ArtPass" unique_id=2073209688 instance=ExtResource("4_log_cabin_scene")]
 transform = Transform3D(0.01905917, 0, 0, 0, 0.025366742, 0, 0, 0, 0.026472665, 62.245438, -1.8426476, 73.16911)
@@ -686,15 +699,15 @@ collision_layer = 4
 collision_mask = 0
 
 [node name="MainBlockCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1085539691]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 3.5, 4)
+transform = Transform3D(1.1061641, 0, 0, 0, 5.145699, 0, 0, 0, 1.3332955, 27.683794, 6.231634, 13.367434)
 shape = SubResource("BoxShape3D_main_block")
 
 [node name="RearWingCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1691394895]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 3, -4)
+transform = Transform3D(1.3387334, 0, 0, 0, 10.422568, 0, 0, 0, 1.9336727, -18.770624, 8.3696785, 33.764755)
 shape = SubResource("BoxShape3D_rear_wing")
 
 [node name="FrontOfficeCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1770884501]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.25, 0)
+transform = Transform3D(3.847624, 0, 0, 0, 10.728236, 0, 0, 0, 4.076318, 69.864784, 2.25, 64.53139)
 shape = SubResource("BoxShape3D_front_office")
 
 [node name="GatehouseCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=701100013]
@@ -702,7 +715,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 1.6, 8)
 shape = SubResource("BoxShape3D_gatehouse")
 
 [node name="WarehouseCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=928569412]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.5, 24)
+transform = Transform3D(2.76391, 0, 0, 0, 3.903738, 0, 0, 0, 2.7071228, -58.77853, 10.0336685, 69.68855)
 shape = SubResource("BoxShape3D_warehouse")
 
 [node name="ShedACollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1246303773]
@@ -710,7 +723,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1.9, -26)
 shape = SubResource("BoxShape3D_shed_a")
 
 [node name="ShedBCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=383430680]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1.7, 28)
+transform = Transform3D(2.421939, 0, 0, 0, 20.938875, 0, 0, 0, 2.424354, -63.474125, 8.076294, -78.2806)
 shape = SubResource("BoxShape3D_shed_b")
 
 [node name="ServiceAnnexCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=780585877]
@@ -718,11 +731,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 2.3, -6)
 shape = SubResource("BoxShape3D_service_annex")
 
 [node name="LoadingBayCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1304712230]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.6, -30)
+transform = Transform3D(3.005689, 0, 0, 0, 11.067291, 0, 0, 0, 3.8900354, 8, 1.6, -67.31343)
 shape = SubResource("BoxShape3D_loading_bay")
 
 [node name="TowerCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=421129513]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, -26)
+transform = Transform3D(8.578222, 0, 0, 0, 3.5256484, 0, 0, 0, 6.659951, 65.2133, 13.669868, -71.349106)
 shape = SubResource("BoxShape3D_tower")
 
 [node name="NorthFenceCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1808613324]
@@ -781,21 +794,101 @@ shape = SubResource("BoxShape3D_barricade_short")
 transform = Transform3D(0.996802, 0, 0.0799147, 0, 1, 0, -0.0799147, 0, 0.996802, 6, 0.9, 24)
 shape = SubResource("BoxShape3D_barricade_short")
 
-[node name="NorthBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+[node name="NorthBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=582340651]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -92)
 shape = SubResource("BoxShape3D_boundary_north_south")
 
-[node name="SouthBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+[node name="SouthBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=376688455]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 92)
 shape = SubResource("BoxShape3D_boundary_north_south")
 
-[node name="WestBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+[node name="WestBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=812703310]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -92, 6, 0)
 shape = SubResource("BoxShape3D_boundary_east_west")
 
-[node name="EastBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions"]
+[node name="EastBoundaryCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=864897748]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 92, 6, 0)
 shape = SubResource("BoxShape3D_boundary_east_west")
+
+[node name="NorthForestCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=713032017]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -82)
+shape = SubResource("CylinderShape3D_tree_large")
+
+[node name="SouthForestCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1954568674]
+transform = Transform3D(1.7653608, 0, 0, 0, 1, 0, 0, 0, 0.31981078, 0, 6, 82)
+shape = SubResource("CylinderShape3D_tree_large")
+
+[node name="WestForestCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=976359048]
+transform = Transform3D(0.41600192, 0, 0, 0, 1, 0, 0, 0, 0.33689624, -82, 6, 0)
+shape = SubResource("CylinderShape3D_tree_large")
+
+[node name="EastForestCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=2101204543]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82, 6, 16.6)
+shape = SubResource("CylinderShape3D_tree_large")
+
+[node name="NorthWestMassCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1081545003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58, 6, -57.5)
+shape = SubResource("CylinderShape3D_tree_medium")
+
+[node name="NorthEastMassCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=624440507]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58, 6, -58)
+shape = SubResource("CylinderShape3D_tree_medium")
+
+[node name="SouthWestMassCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1160913469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 6, 58)
+shape = SubResource("CylinderShape3D_tree_medium")
+
+[node name="SouthEastMassCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=300244249]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 6, 60)
+shape = SubResource("CylinderShape3D_tree_medium")
+
+[node name="EntryTreeClusterACollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=445363727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 5, -12)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="EntryTreeClusterBCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1669899675]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 5, 30)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="WestBreachForestACollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1380223351]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -53, 5, 8)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="WestBreachForestBCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1146040815]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55, 5, 24)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="NorthYardForestCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1776292305]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -50)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="SouthYardForestCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1027378594]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 5, 48)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="RiverForestNorthCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=463356952]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 5, -30)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="RiverForestSouthCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=484925669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 5, 24)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="RiverForestMidCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=391708453]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 5, -2)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="WestForestDeepCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=2115830403]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, -1.4917134, -70, 5, -26.613874)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="WestForestDeepCollision" type="CollisionShape3D" parent="Geometry/Collisions/WestForestDeepCollision" unique_id=1467455798]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, -1.4917134, -70, 5, -26.613874)
+shape = SubResource("CylinderShape3D_tree_small")
+
+[node name="SouthForestDeepCollision" type="CollisionShape3D" parent="Geometry/Collisions" unique_id=1583380926]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 5, 74)
+shape = SubResource("CylinderShape3D_tree_small")
 
 [node name="Lights" type="Node3D" parent="Geometry" unique_id=576644111]
 
