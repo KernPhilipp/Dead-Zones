@@ -156,8 +156,8 @@ func _spawn_player_for_peer(peer_id: int):
 	var p: Node3D = player_scene.instantiate() as Node3D
 	p.name = "NetPlayer_%d" % peer_id
 	p.set_multiplayer_authority(peer_id)
-	scene_root.add_child(p)
-	# Position player near map centre; fine-tune per spawn point if available
+	scene_root.add_child.call_deferred(p)
+	await get_tree().process_frame
 	p.global_position = Vector3(0, 1, 0)
 	if p is CharacterBody3D:
 		var cb := p as CharacterBody3D
@@ -232,8 +232,14 @@ func _unhandled_input(event: InputEvent):
 			get_viewport().set_input_as_handled()
 
 func _all_players_dead() -> bool:
+	# Not ready yet — don't trigger game over before players have spawned
+	if NetworkManager.is_active() and players.is_empty():
+		return false
 	if players.is_empty():
-		return player != null and is_instance_valid(player) and player.health <= 0
+		# Solo mode: use single player reference
+		if player == null or not is_instance_valid(player):
+			return false
+		return player.health <= 0
 	for p in players:
 		if is_instance_valid(p) and p.has_method("get") and p.get("health") != null:
 			if int(p.get("health")) > 0:
