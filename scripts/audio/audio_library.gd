@@ -65,15 +65,15 @@ static func _build_events() -> Dictionary:
 		),
 		"ambience_thunder_far": _entry(_seq("%s/ambience/amb_thunder_far" % ROOT, 1, 4), "Ambience", -4.0, Vector2(0.97, 1.03), false, true, 70.0),
 		"ambience_thunder_near": _entry(_seq("%s/ambience/amb_thunder_near" % ROOT, 1, 3), "Ambience", -1.5, Vector2(0.98, 1.04), false, true, 85.0),
-		"weapon_fire_pistol": _entry(["%s/sfx/weapons/pistol/pistol.mp3" % ROOT], "SFX", -3.0, Vector2(0.98, 1.04)),
-		"weapon_reload_pistol": _entry(["%s/sfx/weapons/pistol/pistol.mp3" % ROOT], "SFX", -6.0, Vector2(0.98, 1.02)),
-		"weapon_empty_pistol": _entry(["%s/sfx/weapons/pistol/pistol.mp3" % ROOT], "SFX", -8.0, Vector2(1.0, 1.04)),
-		"weapon_fire_rifle": _entry(["%s/sfx/weapons/rifle/rifle.mp3" % ROOT], "SFX", -4.0, Vector2(0.98, 1.03)),
-		"weapon_reload_rifle": _entry(["%s/sfx/weapons/rifle/rifle.mp3" % ROOT], "SFX", -6.5, Vector2(0.98, 1.02)),
-		"weapon_empty_rifle": _entry(["%s/sfx/weapons/rifle/rifle.mp3" % ROOT], "SFX", -8.0, Vector2(1.0, 1.04)),
-		"weapon_fire_shotgun": _entry(["%s/sfx/weapons/shotgun/shotgun.mp3" % ROOT], "SFX", -2.0, Vector2(0.98, 1.02)),
-		"weapon_reload_shotgun": _entry(["%s/sfx/weapons/shotgun/shotgun.mp3" % ROOT], "SFX", -6.0, Vector2(0.98, 1.02)),
-		"weapon_empty_shotgun": _entry(["%s/sfx/weapons/shotgun/shotgun.mp3" % ROOT], "SFX", -8.0, Vector2(1.0, 1.04)),
+		"weapon_fire_pistol": _entry(["%s/sfx/weapons/pistol/pistol.mp3" % ROOT], "SFX", -3.0, Vector2(3.0, 3.0)),
+		"weapon_reload_pistol": _entry(["%s/sfx/weapons/pistol/pistol.mp3" % ROOT], "SFX", -6.0, Vector2(3.0, 3.0)),
+		"weapon_empty_pistol": _entry(["%s/sfx/weapons/pistol/pistol.mp3" % ROOT], "SFX", -8.0, Vector2(3.0, 3.0)),
+		"weapon_fire_rifle": _entry(["%s/sfx/weapons/rifle/rifle.mp3" % ROOT], "SFX", -4.0, Vector2(3.0, 3.0)),
+		"weapon_reload_rifle": _entry(["%s/sfx/weapons/rifle/rifle.mp3" % ROOT], "SFX", -6.5, Vector2(3.0, 3.0)),
+		"weapon_empty_rifle": _entry(["%s/sfx/weapons/rifle/rifle.mp3" % ROOT], "SFX", -8.0, Vector2(3.0, 3.0)),
+		"weapon_fire_shotgun": _entry(["%s/sfx/weapons/shotgun/shotgun.mp3" % ROOT], "SFX", -2.0, Vector2(3.0, 3.0)),
+		"weapon_reload_shotgun": _entry(["%s/sfx/weapons/shotgun/shotgun.mp3" % ROOT], "SFX", -6.0, Vector2(3.0, 3.0)),
+		"weapon_empty_shotgun": _entry(["%s/sfx/weapons/shotgun/shotgun.mp3" % ROOT], "SFX", -8.0, Vector2(3.0, 3.0)),
 		"player_footstep_concrete": _entry(_seq("%s/sfx/player/plr_footstep_concrete" % ROOT, 1, 6), "SFX", -12.0, Vector2(0.95, 1.06)),
 		"player_jump": _entry(["%s/sfx/player/plr_jump_01.ogg" % ROOT], "SFX", -10.0, Vector2(1.0, 1.03)),
 		"player_land": _entry(_seq("%s/sfx/player/plr_land" % ROOT, 1, 3), "SFX", -8.5, Vector2(0.98, 1.03)),
@@ -87,7 +87,7 @@ static func _build_events() -> Dictionary:
 		"zombie_hurt": _entry(["%s/sfx/zombie/zombie2.mp3" % ROOT], "SFX", -6.5, Vector2(0.95, 1.05), false, true, 32.0),
 		"zombie_attack": _entry(["%s/sfx/zombie/zombie1.mp3" % ROOT], "SFX", -5.5, Vector2(0.95, 1.04), false, true, 28.0),
 		"zombie_barricade_hit": _entry(["%s/sfx/zombie/zombie2.mp3" % ROOT], "SFX", -4.5, Vector2(0.96, 1.04), false, true, 24.0),
-		"zombie_death": _entry(["%s/sfx/zombie/zombie1.mp3" % ROOT], "SFX", -4.5, Vector2(0.95, 1.03), false, true, 30.0),
+		"zombie_death": _entry(["%s/sfx/zombie/zombie1.mp3" % ROOT, "%s/sfx/zombie/zombie2.mp3" % ROOT], "SFX", -4.5, Vector2(0.95, 1.03), false, true, 30.0, "round_robin"),
 		"zombie_explode": _entry(["%s/sfx/zombie/zombie2.mp3" % ROOT], "SFX", -1.5, Vector2(0.98, 1.02), false, true, 46.0),
 		"zombie_ranged_attack": _entry(["%s/sfx/zombie/zombie1.mp3" % ROOT], "SFX", -4.5, Vector2(0.98, 1.02), false, true, 36.0),
 		"pickup_ammo": _entry(["%s/sfx/interactables/pickup_ammo_01.ogg" % ROOT], "SFX", -6.0, Vector2(1.0, 1.03)),
@@ -118,7 +118,8 @@ static func _entry(
 	pitch_range: Vector2,
 	loop: bool = false,
 	default_3d: bool = false,
-	max_distance: float = 24.0
+	max_distance: float = 24.0,
+	selection_mode: String = "random"
 ) -> Dictionary:
 	return {
 		"paths": paths,
@@ -128,6 +129,7 @@ static func _entry(
 		"loop": loop,
 		"default_3d": default_3d,
 		"max_distance": max_distance,
+		"selection_mode": selection_mode,
 	}
 
 static func _seq(prefix: String, from_index: int, to_index: int) -> Array[String]:

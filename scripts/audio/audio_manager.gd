@@ -10,6 +10,7 @@ var _missing_paths_warned: Dictionary = {}
 var _missing_events_warned: Dictionary = {}
 var _stream_cache: Dictionary = {}
 var _loop_players: Dictionary = {}
+var _event_rotation_indices: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -128,7 +129,7 @@ func _resolve_stream(event_id: String, event: Dictionary) -> AudioStream:
 		_warn_missing_event(event_id)
 		return null
 
-	var selected_path: String = available_paths[_rng.randi_range(0, available_paths.size() - 1)]
+	var selected_path: String = _select_path_for_event(event_id, event, available_paths)
 	if _stream_cache.has(selected_path):
 		return _stream_cache[selected_path] as AudioStream
 
@@ -138,6 +139,15 @@ func _resolve_stream(event_id: String, event: Dictionary) -> AudioStream:
 		return null
 	_stream_cache[selected_path] = stream
 	return stream
+
+func _select_path_for_event(event_id: String, event: Dictionary, available_paths: Array[String]) -> String:
+	var selection_mode: String = String(event.get("selection_mode", "random"))
+	if selection_mode == "round_robin":
+		var next_index: int = int(_event_rotation_indices.get(event_id, 0))
+		var selected_path: String = available_paths[next_index % available_paths.size()]
+		_event_rotation_indices[event_id] = next_index + 1
+		return selected_path
+	return available_paths[_rng.randi_range(0, available_paths.size() - 1)]
 
 func _resolve_pitch(event: Dictionary) -> float:
 	var pitch_range: Vector2 = event.get("pitch_range", Vector2.ONE)
