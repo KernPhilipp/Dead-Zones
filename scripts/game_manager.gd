@@ -277,7 +277,7 @@ func _update_hud():
 		hud.update_ammo(player.ammo, player.max_ammo, player.reserve_ammo)
 	if hud.has_method("update_currency"):
 		hud.update_currency(player.points)
-	if hud.has_method("update_inventory"):
+	if hud.has_method("update_inventory") and player.get("item_inventory") != null and player.get("progression") != null:
 		hud.update_inventory(player.item_inventory.build_state(player.progression.get_unlocked_items()))
 	if hud.has_method("update_weapon"):
 		hud.update_weapon(player.weapon_name)

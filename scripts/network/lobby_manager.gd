@@ -63,11 +63,14 @@ func on_connected_to_server():
 	rpc_id(1, "register_player", my_id, local_player_name)
 
 func send_ready(is_ready: bool):
+	if not NetworkManager.is_active():
+		return
 	var my_id := multiplayer.get_unique_id()
 	if multiplayer.is_server():
 		set_player_ready(my_id, is_ready)
 	else:
-		rpc_id(1, "set_player_ready", my_id, is_ready)
+		if multiplayer.multiplayer_peer != null:
+			rpc_id(1, "set_player_ready", my_id, is_ready)
 
 func start_game():
 	if not multiplayer.is_server():
