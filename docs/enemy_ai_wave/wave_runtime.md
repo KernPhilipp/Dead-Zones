@@ -183,3 +183,15 @@ Bei `show_wave_debug_overlay=true` zeigt das Overlay live:
 - Rank-Weight-Modifikation
 - Spawn-Intervall-Modifikation
 - Extra-Budget-Modifikation
+
+## 14. Vorbereitung fuer spaetere Zombie-Sprungtests
+
+Separat von der Hauptmap existiert eine isolierte Testvorlage:
+- `res://scenes/wave/zombie_jump_test_area.tscn`
+
+Obstacle-Prefab:
+- `res://scenes/wave/jump_test_obstacle.tscn`
+
+Die Objekte sind gruppiert/metadatiert (`jump_test_obstacle`, `jumpable_candidate`, Hoehenklassen), damit spaetere Jump-/Traversal-Logik direkt andocken kann, ohne die Wellenruntime zu refactoren.
+
+Die aktuelle unabhaengige Sprung-Basislogik selbst ist in `scripts/zombie.gd` umgesetzt und in [zombie_jump_basics.md](./zombie_jump_basics.md) dokumentiert.

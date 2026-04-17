@@ -15,12 +15,17 @@ func build_schedule(
 
 	var scheduled: Array[Dictionary] = entries.duplicate(true)
 	_shuffle_entries(scheduled, rng)
-	_enforce_single_rank_spacing(scheduled, ZombieDefinitions.Rank.ALPHA, 4)
+	var protected_group_ranks := {
+		ZombieDefinitions.Rank.BETA: true,
+		ZombieDefinitions.Rank.GAMMA: true
+	}
+	_enforce_single_rank_spacing(scheduled, ZombieDefinitions.Rank.ALPHA, 4, protected_group_ranks)
 	_enforce_rank_group_spacing(
 		scheduled,
 		[ZombieDefinitions.Rank.BETA, ZombieDefinitions.Rank.GAMMA],
 		2
 	)
+	_enforce_single_rank_spacing(scheduled, ZombieDefinitions.Rank.ALPHA, 4, protected_group_ranks)
 
 	var base_interval: float = maxf(0.08, base_spawn_interval_seconds)
 	var current_time: float = 0.0
@@ -56,7 +61,12 @@ func _shuffle_entries(entries: Array[Dictionary], rng: RandomNumberGenerator):
 		entries[index] = entries[swap_index]
 		entries[swap_index] = current
 
-func _enforce_single_rank_spacing(entries: Array[Dictionary], target_rank: int, min_index_distance: int):
+func _enforce_single_rank_spacing(
+	entries: Array[Dictionary],
+	target_rank: int,
+	min_index_distance: int,
+	avoid_swap_ranks: Dictionary = {}
+):
 	var last_seen_index: int = -9999
 	for index in range(entries.size()):
 		var rank_id: int = int(entries[index].get("rank_id", ZombieDefinitions.DEFAULT_RANK))
@@ -64,7 +74,7 @@ func _enforce_single_rank_spacing(entries: Array[Dictionary], target_rank: int, 
 			continue
 
 		if index - last_seen_index < min_index_distance:
-			var swap_index: int = _find_non_target_swap_index(entries, index, target_rank)
+			var swap_index: int = _find_non_target_swap_index(entries, index, target_rank, avoid_swap_ranks)
 			if swap_index != -1:
 				var current: Dictionary = entries[index]
 				entries[index] = entries[swap_index]
@@ -94,12 +104,22 @@ func _enforce_rank_group_spacing(entries: Array[Dictionary], rank_group: Array[i
 		if group_lookup.has(rank_id):
 			last_seen_index = index
 
-func _find_non_target_swap_index(entries: Array[Dictionary], from_index: int, target_rank: int) -> int:
+func _find_non_target_swap_index(
+	entries: Array[Dictionary],
+	from_index: int,
+	target_rank: int,
+	avoid_swap_ranks: Dictionary = {}
+) -> int:
+	var fallback_index: int = -1
 	for candidate_index in range(from_index + 1, entries.size()):
 		var candidate_rank: int = int(entries[candidate_index].get("rank_id", ZombieDefinitions.DEFAULT_RANK))
-		if candidate_rank != target_rank:
+		if candidate_rank == target_rank:
+			continue
+		if avoid_swap_ranks.is_empty() or not avoid_swap_ranks.has(candidate_rank):
 			return candidate_index
-	return -1
+		if fallback_index == -1:
+			fallback_index = candidate_index
+	return fallback_index
 
 func _find_non_group_swap_index(entries: Array[Dictionary], from_index: int, rank_group_lookup: Dictionary) -> int:
 	for candidate_index in range(from_index + 1, entries.size()):

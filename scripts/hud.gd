@@ -789,12 +789,12 @@ func _process(delta):
 	_update_adaptive_hud(delta)
 	_update_session_milestones()
 
-	if handbook_book != null and handbook_book.visible:
+	if _is_handbook_open():
 		if Input.is_action_just_pressed("pause_game"):
 			_close_handbook_overlay()
 		return
 
-	if handbook_opened_from_pause and handbook_book != null and not handbook_book.visible:
+	if handbook_opened_from_pause and not _is_handbook_open():
 		_restore_pause_menu_after_handbook()
 		handbook_opened_from_pause = false
 
@@ -1260,9 +1260,11 @@ func _hide_legacy_damage_indicators():
 		indicator.modulate.a = 0.0
 
 func _on_resume():
+	_close_handbook()
 	_set_pause_menu_visible(false)
 
 func _on_handbook_pressed():
+	_ensure_handbook_book()
 	if handbook_book == null:
 		return
 	AudioManager.play_ui("ui_handbook_open")
@@ -1295,7 +1297,31 @@ func _prepare_scene_transition(next_mouse_mode: Input.MouseMode):
 	pause_panel.scale = Vector2(0.94, 0.94)
 	game_over_panel.visible = false
 	game_over_panel.modulate.a = 0.0
+	_close_handbook()
 	Input.mouse_mode = next_mouse_mode
+
+func _on_open_handbook():
+	_on_handbook_pressed()
+
+func _ensure_handbook_book():
+	if handbook_book != null and is_instance_valid(handbook_book):
+		return
+	_setup_handbook_overlay()
+
+func _close_handbook():
+	if handbook_book == null or not is_instance_valid(handbook_book):
+		return
+	if handbook_book.visible:
+		AudioManager.play_ui("ui_handbook_close")
+	if handbook_book.has_method("close_book"):
+		handbook_book.call("close_book")
+
+func _is_handbook_open() -> bool:
+	if handbook_book == null or not is_instance_valid(handbook_book):
+		return false
+	if handbook_book.has_method("is_open"):
+		return bool(handbook_book.call("is_open"))
+	return bool(handbook_book.visible)
 
 func _update_weapon_icon(weapon_name: String):
 	var weapon_key: String = weapon_name.to_lower()

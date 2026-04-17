@@ -1,0 +1,61 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/wave/jump_test_obstacle.tscn" id="1_jump_obstacle_scene"]
+
+[node name="JumpTestBoxVariants" type="Node3D" groups=["jump_test_box_variants"]]
+
+[node name="BoxTinyCrate" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(0.8, 0, 0, 0, 0.4, 0, 0, 0, 0.8, -4.6, 0.2, -1.6)
+jump_test_id = "BX_tiny_crate"
+obstacle_type = "box_tiny"
+obstacle_height_class = "very_low"
+display_color = Color(0.54, 0.76, 0.5, 1)
+
+[node name="BoxNarrowTall" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(0.7, 0, 0, 0, 1.2, 0, 0, 0, 0.7, -1.8, 0.6, -1.6)
+jump_test_id = "BX_narrow_tall"
+obstacle_type = "box_narrow_tall"
+obstacle_height_class = "medium"
+display_color = Color(0.52, 0.66, 0.88, 1)
+
+[node name="BoxWideFlat" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(2.2, 0, 0, 0, 0.55, 0, 0, 0, 1.1, 1.5, 0.275, -1.6)
+jump_test_id = "BX_wide_flat"
+obstacle_type = "box_wide_flat"
+obstacle_height_class = "low"
+display_color = Color(0.76, 0.62, 0.39, 1)
+
+[node name="BoxLongLow" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(3.1, 0, 0, 0, 0.45, 0, 0, 0, 0.65, 6.2, 0.225, -1.6)
+jump_test_id = "BX_long_low"
+obstacle_type = "box_long_low"
+obstacle_height_class = "very_low"
+display_color = Color(0.69, 0.58, 0.44, 1)
+
+[node name="BoxMediumCube" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(1.2, 0, 0, 0, 1, 0, 0, 0, 1.2, -4.2, 0.5, 1.8)
+jump_test_id = "BX_medium_cube"
+obstacle_type = "box_medium_cube"
+obstacle_height_class = "low"
+display_color = Color(0.63, 0.52, 0.79, 1)
+
+[node name="BoxBorderlineTall" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(1.1, 0, 0, 0, 1.75, 0, 0, 0, 1.1, -1.2, 0.875, 1.8)
+jump_test_id = "BX_borderline_tall"
+obstacle_type = "box_borderline_tall"
+obstacle_height_class = "borderline"
+display_color = Color(0.86, 0.4, 0.35, 1)
+
+[node name="BoxStepBase" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(1.5, 0, 0, 0, 0.75, 0, 0, 0, 1.5, 2.2, 0.375, 1.8)
+jump_test_id = "BX_step_base"
+obstacle_type = "box_step"
+obstacle_height_class = "low"
+display_color = Color(0.73, 0.54, 0.37, 1)
+
+[node name="BoxStepTop" parent="." instance=ExtResource("1_jump_obstacle_scene")]
+transform = Transform3D(0.9, 0, 0, 0, 0.8, 0, 0, 0, 0.9, 2.7, 1.15, 2.15)
+jump_test_id = "BX_step_top"
+obstacle_type = "box_step"
+obstacle_height_class = "medium"
+display_color = Color(0.83, 0.66, 0.46, 1)

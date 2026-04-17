@@ -32,7 +32,8 @@ func _is_distance_valid(position: Vector3, player_node: Node3D, min_spawn_distan
 	if player_node == null or not is_instance_valid(player_node):
 		return true
 	var min_distance: float = maxf(0.0, min_spawn_distance_from_player)
-	return position.distance_to(player_node.global_position) >= min_distance
+	var player_position: Vector3 = player_node.global_position if player_node.is_inside_tree() else player_node.position
+	return position.distance_to(player_position) >= min_distance
 
 func _invalid_result(attempts: int) -> Dictionary:
 	return {

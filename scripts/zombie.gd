@@ -1,7 +1,11 @@
 extends CharacterBody3D
 
 const ZombieDefinitions = preload("res://scripts/zombie_definitions.gd")
+const ZombieDeathVisualController = preload("res://scripts/zombie_death_visual_controller.gd")
 const ZombieDeathEffects = preload("res://scripts/zombie_death_effects.gd")
+const ZombieDeathVisuals = preload("res://scripts/zombie_death_visuals.gd")
+const ZombieMortVisuals = preload("res://scripts/zombie_mort_visuals.gd")
+const ZombieSpeciesVisuals = preload("res://scripts/zombie_species_visuals.gd")
 
 enum ZombieState {
 	SPAWN_RISE,
@@ -35,6 +39,30 @@ enum ZombieState {
 
 @export_category("Death")
 @export var corpse_fall_duration := 0.35
+
+@export_category("Jump")
+@export var jump_force := 4.8
+@export_range(0.2, 2.5, 0.05) var jump_gravity_scale := 1.0
+@export_range(0.2, 3.0, 0.05) var fall_gravity_scale := 1.25
+@export_range(0.0, 1.0, 0.01) var air_control_multiplier := 0.42
+@export_range(0.0, 2.0, 0.01) var jump_cooldown_seconds := 0.45
+@export_range(0.0, 1.0, 0.01) var landing_recovery_seconds := 0.08
+@export var jump_requires_legs := false
+@export var auto_jump_on_obstacle_probe := false
+@export_range(0.4, 3.0, 0.05) var jump_obstacle_probe_distance := 1.15
+@export_range(0.1, 2.0, 0.05) var jump_obstacle_probe_height := 0.65
+@export var debug_jump_once := false
+@export var debug_auto_jump_enabled := false
+@export_range(0.1, 10.0, 0.1) var debug_auto_jump_interval := 2.2
+
+@export_category("Hidder")
+@export_range(2.0, 24.0, 0.1) var hidder_detect_radius := 8.0
+@export_range(2.0, 12.0, 0.1) var hidder_attack_radius := 4.4
+@export_range(1.0, 3.0, 0.05) var hidder_escape_speed_mult := 1.7
+@export_range(0.1, 6.0, 0.1) var hidder_escape_boost_seconds := 1.8
+@export_range(0.1, 6.0, 0.1) var hidder_repath_cooldown_seconds := 0.85
+@export_range(2.0, 30.0, 0.1) var hidder_min_cover_player_distance := 5.8
+@export_range(0.1, 8.0, 0.1) var hidder_aggressive_hold_seconds := 1.4
 
 const PART_MAX_HEALTH: Dictionary = {
 	"head": 25,
@@ -71,6 +99,7 @@ var resolved_attack_cooldown_variance: float = 0.0
 var resolved_part_fragility_mult: float = 1.0
 var resolved_crawl_transition_threshold: float = 0.0
 var resolved_revenge_bonus: bool = false
+var resolved_jump_profile: Dictionary = {}
 
 var death_effect_profile: Dictionary = {}
 var death_effect_status_id: String = ZombieDeathEffects.STATUS_SIMPLIFIED_NOW
@@ -114,11 +143,28 @@ var base_head_rotation := Vector3.ZERO
 
 var behavior_triggered: bool = false
 var hidder_ground_mode: bool = false
+var hidder_escape_active: bool = false
+var hidder_escape_target: Vector3 = Vector3.ZERO
+var hidder_escape_boost_remaining: float = 0.0
+var hidder_repath_cooldown: float = 0.0
+var hidder_aggressive_remaining: float = 0.0
+var hidder_current_cover: Node3D = null
 var cover_nodes: Array[Node3D] = []
 var current_barricade_target: Node3D = null
+var is_grounded: bool = false
+var is_jumping: bool = false
+var is_falling: bool = false
+var jump_cooldown_remaining: float = 0.0
+var landing_recovery_remaining: float = 0.0
+var debug_auto_jump_timer: float = 0.0
 
 var part_health: Dictionary = {}
 var missing_parts: Dictionary = {}
+var species_visual_profile: Dictionary = {}
+var mort_visual_profile: Dictionary = {}
+var death_visual_profile: Dictionary = {}
+var death_visual_instance: Dictionary = {}
+var death_visual_controller: ZombieDeathVisualController = ZombieDeathVisualController.new()
 
 @onready var body_collision: CollisionShape3D = $CollisionShape3D
 @onready var damage_area: Area3D = $DamageArea
@@ -159,10 +205,28 @@ var missing_parts: Dictionary = {}
 }
 
 var base_model_root_position := Vector3.ZERO
+var base_model_root_rotation := Vector3.ZERO
+var species_base_model_root_position := Vector3.ZERO
+var species_base_model_root_rotation := Vector3.ZERO
 var profile_rng: RandomNumberGenerator
 var visual_base_positions: Dictionary = {}
 var visual_base_rotations: Dictionary = {}
 var visual_base_scales: Dictionary = {}
+
+var base_part_positions: Dictionary = {}
+var base_part_rotations_deg: Dictionary = {}
+var base_part_scales: Dictionary = {}
+var hitbox_shape_nodes: Dictionary = {}
+var base_hitbox_transforms: Dictionary = {}
+var base_hitbox_box_sizes: Dictionary = {}
+var base_hitbox_sphere_radii: Dictionary = {}
+var base_body_collision_radius: float = 0.28
+var base_body_collision_height: float = 1.5
+var base_body_collision_y: float = 0.75
+var base_weapon_socket_position := Vector3.ZERO
+var base_weapon_socket_rotation_deg := Vector3.ZERO
+var base_weapon_socket_scale := Vector3.ONE
+var base_held_item_scale := Vector3.ONE
 
 func _ready():
 	randomize()
@@ -170,10 +234,14 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	limp_phase = randf_range(0.0, TAU)
 	base_model_root_position = model_root.position
+	base_model_root_rotation = model_root.rotation
+	species_base_model_root_position = base_model_root_position
+	species_base_model_root_rotation = base_model_root_rotation
 	base_head_rotation = part_nodes["head"].rotation
 	_capture_visual_base_pose()
 	profile_rng = RandomNumberGenerator.new()
 	profile_rng.randomize()
+	_cache_base_visual_state()
 
 	_collect_cover_nodes()
 	_apply_profile_data()
@@ -203,9 +271,17 @@ func _ready():
 	body_collision.set_deferred("disabled", true)
 	damage_area.monitoring = false
 	velocity = Vector3.ZERO
+	debug_auto_jump_timer = maxf(0.1, debug_auto_jump_interval)
+	is_grounded = false
+	is_jumping = false
+	is_falling = true
+	_update_jump_debug_meta()
 	state = ZombieState.SPAWN_RISE
 
 func _physics_process(delta):
+	_ensure_player_reference()
+	_update_jump_runtime_timers(delta)
+	_process_jump_debug_trigger()
 	_process_death_effect_runtime(delta)
 
 	match state:
@@ -219,6 +295,11 @@ func _physics_process(delta):
 			_process_hurt(delta)
 		ZombieState.DEAD:
 			pass
+
+func _ensure_player_reference():
+	if player != null and is_instance_valid(player):
+		return
+	player = get_tree().get_first_node_in_group("player")
 
 func configure_profile(
 	new_species_id: int,
@@ -268,6 +349,7 @@ func _apply_profile_data():
 	resolved_death_rarity_key = String(profile_data["death_rarity_id"])
 	resolved_limp_frequency = limp_frequency
 	resolved_limp_strength = limp_strength
+	resolved_jump_profile = ZombieDefinitions.get_species_jump_profile(species_id)
 
 	var resolved_scale: float = float(profile_data["scale"])
 	scale = Vector3.ONE * resolved_scale
@@ -276,6 +358,9 @@ func _apply_profile_data():
 	_apply_death_effect_profile_modifiers()
 	_reset_death_effect_runtime_state()
 
+	_apply_mort_visual_profile()
+	_apply_species_visual_profile()
+	_apply_death_subtype_visual_layer()
 	_apply_visual_variant_placeholder()
 	_apply_behavior_pose_reset()
 	set_meta("death_class_id", resolved_death_class_key)
@@ -289,6 +374,16 @@ func _apply_profile_data():
 	set_meta("mort_speed_mult", float(profile_data.get("mort_speed_mult", 1.0)))
 	set_meta("mort_damage_mult", float(profile_data.get("mort_damage_mult", 1.0)))
 	set_meta("mort_attack_cooldown_mult", float(profile_data.get("mort_attack_cooldown_mult", 1.0)))
+	set_meta("mort_visual_darkness", float(mort_visual_profile.get("darkness", 0.0)))
+	set_meta("mort_visual_tier", String(mort_visual_profile.get("tier_label", "")))
+	set_meta("death_visual_mode", String(death_visual_profile.get("visual_mode", ZombieDeathVisuals.VISUAL_MODE_NONE)))
+	set_meta("death_visual_color_hex", String(death_visual_profile.get("display_color_hex", "#7a92a1")))
+	set_meta("death_visual_intensity", float(death_visual_profile.get("intensity", 0.0)))
+	set_meta("death_visual_anchor", String(death_visual_profile.get("spawn_anchor", "torso")))
+	set_meta("death_visual_placeholder", bool(death_visual_profile.get("is_placeholder", true)))
+	set_meta("jump_species_can_jump", bool(resolved_jump_profile.get("can_jump", true)))
+	set_meta("jump_species_force_mult", float(resolved_jump_profile.get("force_mult", 1.0)))
+	set_meta("jump_species_cooldown_mult", float(resolved_jump_profile.get("cooldown_mult", 1.0)))
 
 func _apply_death_effect_profile_modifiers():
 	var speed_mult: float = float(death_effect_profile.get("speed_mult", 1.0))
@@ -342,6 +437,256 @@ func _reset_death_effect_runtime_state():
 	external_pull_remaining = 0.0
 	death_crawl_mode = false
 
+func _apply_mort_visual_profile():
+	var resolved_mort_grade: int = int(profile_data.get("mort_grade", mort_grade))
+	mort_visual_profile = ZombieMortVisuals.get_visual_profile(resolved_mort_grade)
+
+func _apply_death_subtype_visual_layer():
+	_clear_death_subtype_visual_layer()
+	death_visual_profile = ZombieDeathVisuals.get_visual_profile(death_subtype_id)
+	var anchor_map: Dictionary = _build_death_visual_anchor_map()
+	death_visual_instance = death_visual_controller.spawn_visual_instance(self, death_visual_profile, anchor_map)
+	if death_visual_instance.is_empty():
+		return
+
+	var visual_mode: String = String(death_visual_instance.get("mode", ZombieDeathVisuals.VISUAL_MODE_NONE))
+	var is_active: bool = bool(death_visual_instance.get("is_active", false))
+	var is_placeholder: bool = bool(death_visual_instance.get("is_placeholder", true))
+
+	death_visual_profile["runtime_mode"] = visual_mode
+	death_visual_profile["runtime_active"] = is_active
+	death_visual_profile["is_placeholder"] = is_placeholder
+
+func _clear_death_subtype_visual_layer():
+	if death_visual_instance.is_empty():
+		return
+	death_visual_controller.clear_instance(death_visual_instance)
+	death_visual_instance.clear()
+
+func _build_death_visual_anchor_map() -> Dictionary:
+	return {
+		"root": model_root,
+		"torso": part_nodes.get("torso", model_root),
+		"head": part_nodes.get("head", model_root),
+		"arm_l": part_nodes.get("arm_l", model_root),
+		"arm_r": part_nodes.get("arm_r", model_root)
+	}
+
+func _cache_base_visual_state():
+	base_part_positions.clear()
+	base_part_rotations_deg.clear()
+	base_part_scales.clear()
+	hitbox_shape_nodes.clear()
+	base_hitbox_transforms.clear()
+	base_hitbox_box_sizes.clear()
+	base_hitbox_sphere_radii.clear()
+
+	for part_key_variant in part_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var part_node: Node3D = part_nodes[part_key]
+		base_part_positions[part_key] = part_node.position
+		base_part_rotations_deg[part_key] = part_node.rotation_degrees
+		base_part_scales[part_key] = part_node.scale
+
+	var weapon_socket: Node3D = $ModelRoot/Arm_R/WeaponSocket_R
+	base_weapon_socket_position = weapon_socket.position
+	base_weapon_socket_rotation_deg = weapon_socket.rotation_degrees
+	base_weapon_socket_scale = weapon_socket.scale
+	base_held_item_scale = held_item.scale
+
+	for part_key_variant in hitbox_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var hitbox: StaticBody3D = hitbox_nodes[part_key]
+		var shape_node: CollisionShape3D = _find_hitbox_collision_shape(hitbox)
+		if shape_node == null:
+			continue
+
+		if shape_node.shape != null:
+			shape_node.shape = shape_node.shape.duplicate(true)
+
+		hitbox_shape_nodes[part_key] = shape_node
+		base_hitbox_transforms[part_key] = shape_node.transform
+
+		if shape_node.shape is BoxShape3D:
+			base_hitbox_box_sizes[part_key] = (shape_node.shape as BoxShape3D).size
+		elif shape_node.shape is SphereShape3D:
+			base_hitbox_sphere_radii[part_key] = (shape_node.shape as SphereShape3D).radius
+
+	if body_collision.shape != null:
+		body_collision.shape = body_collision.shape.duplicate(true)
+	if body_collision.shape is CapsuleShape3D:
+		var capsule: CapsuleShape3D = body_collision.shape as CapsuleShape3D
+		base_body_collision_radius = capsule.radius
+		base_body_collision_height = capsule.height
+	base_body_collision_y = body_collision.position.y
+
+func _find_hitbox_collision_shape(hitbox: StaticBody3D) -> CollisionShape3D:
+	for child in hitbox.get_children():
+		if child is CollisionShape3D:
+			return child as CollisionShape3D
+	return null
+
+func _apply_species_visual_profile():
+	species_visual_profile = ZombieSpeciesVisuals.get_species_visual_config(species_id)
+	if species_visual_profile.is_empty():
+		return
+
+	var model_root_offset: Vector3 = _read_vec3(species_visual_profile, "model_root_offset", Vector3.ZERO)
+	var model_root_rotation_deg: Vector3 = _read_vec3(species_visual_profile, "model_root_rotation_deg", Vector3.ZERO)
+
+	species_base_model_root_position = base_model_root_position + model_root_offset
+	species_base_model_root_rotation = base_model_root_rotation + Vector3(
+		deg_to_rad(model_root_rotation_deg.x),
+		deg_to_rad(model_root_rotation_deg.y),
+		deg_to_rad(model_root_rotation_deg.z)
+	)
+
+	model_root.position = species_base_model_root_position
+	model_root.rotation = species_base_model_root_rotation
+
+	_apply_species_part_profile()
+	_apply_species_hitbox_profile()
+	_apply_species_body_collision_profile()
+	_apply_species_placeholder_materials()
+
+	base_head_rotation = part_nodes["head"].rotation
+
+	set_meta("species_visual_template_id", String(species_visual_profile.get("template_id", "default_visual_template")))
+	set_meta("species_visual_reference_image", String(species_visual_profile.get("reference_image", "")))
+	set_meta("species_visual_silhouette_tags", species_visual_profile.get("silhouette_tags", []))
+
+func _apply_species_part_profile():
+	var part_scale_map: Dictionary = species_visual_profile.get("part_scale", {})
+	var part_offset_map: Dictionary = species_visual_profile.get("part_offset", {})
+	var part_rotation_map: Dictionary = species_visual_profile.get("part_rotation_deg", {})
+
+	for part_key_variant in part_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var part_node: Node3D = part_nodes[part_key]
+		var base_position: Vector3 = base_part_positions.get(part_key, part_node.position)
+		var base_rotation_deg: Vector3 = base_part_rotations_deg.get(part_key, part_node.rotation_degrees)
+		var base_scale: Vector3 = base_part_scales.get(part_key, part_node.scale)
+
+		var part_offset: Vector3 = _read_map_vec3(part_offset_map, part_key, Vector3.ZERO)
+		var part_rotation_deg: Vector3 = _read_map_vec3(part_rotation_map, part_key, Vector3.ZERO)
+		var part_scale: Vector3 = _read_map_vec3(part_scale_map, part_key, Vector3.ONE)
+
+		part_node.position = base_position + part_offset
+		part_node.rotation_degrees = base_rotation_deg + part_rotation_deg
+		part_node.scale = Vector3(
+			base_scale.x * maxf(0.05, part_scale.x),
+			base_scale.y * maxf(0.05, part_scale.y),
+			base_scale.z * maxf(0.05, part_scale.z)
+		)
+
+	var weapon_socket: Node3D = $ModelRoot/Arm_R/WeaponSocket_R
+	var weapon_socket_offset: Vector3 = _read_vec3(species_visual_profile, "weapon_socket_offset", Vector3.ZERO)
+	var weapon_socket_rotation: Vector3 = _read_vec3(species_visual_profile, "weapon_socket_rotation_deg", Vector3.ZERO)
+	var held_item_scale: Vector3 = _read_vec3(species_visual_profile, "held_item_scale", Vector3.ONE)
+
+	weapon_socket.position = base_weapon_socket_position + weapon_socket_offset
+	weapon_socket.rotation_degrees = base_weapon_socket_rotation_deg + weapon_socket_rotation
+	weapon_socket.scale = base_weapon_socket_scale
+	held_item.scale = Vector3(
+		base_held_item_scale.x * maxf(0.0, held_item_scale.x),
+		base_held_item_scale.y * maxf(0.0, held_item_scale.y),
+		base_held_item_scale.z * maxf(0.0, held_item_scale.z)
+	)
+
+func _apply_species_hitbox_profile():
+	var part_scale_map: Dictionary = species_visual_profile.get("part_scale", {})
+	var part_offset_map: Dictionary = species_visual_profile.get("part_offset", {})
+	var part_rotation_map: Dictionary = species_visual_profile.get("part_rotation_deg", {})
+	var hitbox_scale_map: Dictionary = species_visual_profile.get("hitbox_scale", {})
+	var hitbox_offset_map: Dictionary = species_visual_profile.get("hitbox_offset", {})
+	var hitbox_rotation_map: Dictionary = species_visual_profile.get("hitbox_rotation_deg", {})
+
+	for part_key_variant in hitbox_shape_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var shape_node: CollisionShape3D = hitbox_shape_nodes[part_key]
+		var base_transform: Transform3D = base_hitbox_transforms.get(part_key, shape_node.transform)
+		shape_node.transform = base_transform
+
+		var offset_from_part: Vector3 = _read_map_vec3(part_offset_map, part_key, Vector3.ZERO)
+		var offset_from_hitbox: Vector3 = _read_map_vec3(hitbox_offset_map, part_key, Vector3.ZERO)
+		shape_node.position += offset_from_part + offset_from_hitbox
+
+		var rotation_from_part: Vector3 = _read_map_vec3(part_rotation_map, part_key, Vector3.ZERO)
+		var rotation_from_hitbox: Vector3 = _read_map_vec3(hitbox_rotation_map, part_key, Vector3.ZERO)
+		shape_node.rotation_degrees += rotation_from_part + rotation_from_hitbox
+
+		var shape_scale: Vector3 = _read_map_vec3(hitbox_scale_map, part_key, _read_map_vec3(part_scale_map, part_key, Vector3.ONE))
+		if shape_node.shape is BoxShape3D:
+			var shape_box: BoxShape3D = shape_node.shape as BoxShape3D
+			var base_size: Vector3 = base_hitbox_box_sizes.get(part_key, shape_box.size)
+			shape_box.size = Vector3(
+				maxf(0.05, base_size.x * maxf(0.05, shape_scale.x)),
+				maxf(0.05, base_size.y * maxf(0.05, shape_scale.y)),
+				maxf(0.05, base_size.z * maxf(0.05, shape_scale.z))
+			)
+		elif shape_node.shape is SphereShape3D:
+			var shape_sphere: SphereShape3D = shape_node.shape as SphereShape3D
+			var base_radius: float = float(base_hitbox_sphere_radii.get(part_key, shape_sphere.radius))
+			var avg_scale: float = (shape_scale.x + shape_scale.y + shape_scale.z) / 3.0
+			shape_sphere.radius = maxf(0.05, base_radius * maxf(0.1, avg_scale))
+
+func _apply_species_body_collision_profile():
+	if not (body_collision.shape is CapsuleShape3D):
+		return
+
+	var body_collision_cfg: Dictionary = species_visual_profile.get("body_collision", {})
+	var radius_mult: float = maxf(0.5, float(body_collision_cfg.get("radius_mult", 1.0)))
+	var height_mult: float = maxf(0.35, float(body_collision_cfg.get("height_mult", 1.0)))
+	var y_offset: float = float(body_collision_cfg.get("y_offset", 0.0))
+
+	var capsule: CapsuleShape3D = body_collision.shape as CapsuleShape3D
+	capsule.radius = maxf(0.1, base_body_collision_radius * radius_mult)
+	capsule.height = maxf(0.35, base_body_collision_height * height_mult)
+	body_collision.position.y = base_body_collision_y + y_offset
+
+func _apply_species_placeholder_materials():
+	var palette: Dictionary = species_visual_profile.get("palette", {})
+	for part_key_variant in part_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var part_node: MeshInstance3D = part_nodes[part_key]
+		var base_part_color: Color = _read_color_map(palette, part_key, Color(0.2, 0.45, 0.15, 1.0))
+		var part_color: Color = ZombieMortVisuals.apply_to_color(base_part_color, mort_visual_profile, 1.0)
+		part_node.material_override = _build_placeholder_material(part_color)
+
+	var base_weapon_color: Color = _read_color_map(palette, "weapon", Color(0.18, 0.18, 0.19, 1.0))
+	var weapon_color: Color = ZombieMortVisuals.apply_to_color(base_weapon_color, mort_visual_profile, 0.45)
+	held_item.material_override = _build_placeholder_material(weapon_color, 0.85)
+
+func _build_placeholder_material(base_color: Color, roughness: float = 0.95) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = base_color
+	material.roughness = clampf(roughness, 0.0, 1.0)
+	return material
+
+func _read_vec3(source: Dictionary, key: String, fallback: Vector3) -> Vector3:
+	if not source.has(key):
+		return fallback
+	var value: Variant = source[key]
+	if value is Vector3:
+		return value
+	return fallback
+
+func _read_map_vec3(source: Dictionary, key: String, fallback: Vector3) -> Vector3:
+	if not source.has(key):
+		return fallback
+	var value: Variant = source[key]
+	if value is Vector3:
+		return value
+	return fallback
+
+func _read_color_map(source: Dictionary, key: String, fallback: Color) -> Color:
+	if not source.has(key):
+		return fallback
+	var value: Variant = source[key]
+	if value is Color:
+		return value
+	return fallback
+
 func _apply_visual_variant_placeholder():
 	var allowed: Array = profile_data.get("allowed_visual_variants", [ZombieDefinitions.DEFAULT_VISUAL_VARIANT])
 	if not allowed.has(visual_variant):
@@ -350,10 +695,10 @@ func _apply_visual_variant_placeholder():
 
 func _apply_behavior_pose_reset():
 	_restore_visual_base_pose()
-	model_root.position = base_model_root_position
-	model_root.rotation.x = 0.0
+	model_root.position = species_base_model_root_position
+	model_root.rotation = species_base_model_root_rotation
 	if resolved_behavior_mode == "low_crawl":
-		model_root.position = base_model_root_position + Vector3(0.0, -0.35, 0.0)
+		model_root.position = species_base_model_root_position + Vector3(0.0, -0.35, 0.0)
 
 func _capture_visual_base_pose():
 	visual_base_positions.clear()
@@ -426,7 +771,20 @@ func _initialize_part_states():
 	missing_parts.clear()
 	behavior_triggered = false
 	hidder_ground_mode = false
+	hidder_escape_active = false
+	hidder_escape_target = Vector3.ZERO
+	hidder_escape_boost_remaining = 0.0
+	hidder_repath_cooldown = 0.0
+	hidder_aggressive_remaining = 0.0
+	hidder_current_cover = null
 	move_direction = Vector3.ZERO
+	jump_cooldown_remaining = 0.0
+	landing_recovery_remaining = 0.0
+	debug_auto_jump_timer = maxf(0.1, debug_auto_jump_interval)
+	is_grounded = is_on_floor()
+	is_jumping = false
+	is_falling = not is_grounded
+	_update_jump_debug_meta()
 
 	for part in part_nodes.keys():
 		var part_node: Node3D = part_nodes[part]
@@ -540,6 +898,9 @@ func take_part_damage(part: String, amount: int) -> bool:
 
 	if resolved_behavior_mode == "corpse_feeder" or resolved_behavior_mode == "passive_trigger":
 		behavior_triggered = true
+	elif resolved_behavior_mode == "cover_ambush":
+		behavior_triggered = true
+		hidder_repath_cooldown = 0.0
 
 	var effective_part = part
 	if not part_health.has(effective_part):
@@ -579,6 +940,7 @@ func die():
 	add_to_group("zombie_corpse")
 	can_attack = false
 	velocity = Vector3.ZERO
+	_reset_jump_state_on_death()
 
 	damage_area.monitoring = false
 	damage_area.monitorable = false
@@ -603,6 +965,7 @@ func _die_with_explosion():
 	remove_from_group("zombie")
 	can_attack = false
 	current_barricade_target = null
+	_reset_jump_state_on_death()
 	damage_area.monitoring = false
 	damage_area.monitorable = false
 	body_collision.set_deferred("disabled", true)
@@ -631,6 +994,9 @@ func _apply_explosion_damage():
 				zombie_node.take_damage(max(1, int(round(float(damage_out) * 0.5))))
 
 func _process_spawn_rise(delta: float):
+	is_grounded = false
+	is_jumping = false
+	is_falling = true
 	rise_elapsed += delta
 	var t: float = clampf(rise_elapsed / rise_duration, 0.0, 1.0)
 	global_position = rise_start_position.lerp(rise_end_position, t)
@@ -640,12 +1006,18 @@ func _process_spawn_rise(delta: float):
 		damage_area.monitoring = true
 		damage_area.monitorable = true
 		can_attack = true
+		_update_air_state(delta)
 		state = ZombieState.CHASE
 		_play_world_sound("zombie_spawn")
 		_schedule_idle_sound()
 
 func _process_chase(delta: float):
 	_apply_gravity(delta)
+	if not _is_airborne():
+		if _can_request_state_driven_jump():
+			request_jump("state_chase")
+	if resolved_behavior_mode == "cover_ambush":
+		_update_hidder_runtime_state(delta)
 	var target_position: Vector3 = _get_behavior_target_position()
 	_update_behavior_pose(delta)
 
@@ -687,6 +1059,8 @@ func _process_chase(delta: float):
 		var jitter: float = sin((limp_time * 0.5) + limp_phase * 1.7) * jitter_strength
 		var walk_direction: Vector3 = (move_direction + right * jitter).normalized()
 		var speed: float = _get_current_speed() * limp_multiplier
+		if _is_airborne():
+			speed *= air_control_multiplier
 		velocity.x = walk_direction.x * speed
 		velocity.z = walk_direction.z * speed
 		_look_at_point(global_position + move_direction)
@@ -695,9 +1069,17 @@ func _process_chase(delta: float):
 		velocity.z = move_toward(velocity.z, 0.0, 12.0 * delta)
 
 	move_and_slide()
+	_update_air_state(delta)
 	_refresh_barricade_target()
 
 	if hidder_ground_mode:
+		return
+	if _is_airborne():
+		return
+
+	if resolved_behavior_mode == "cover_ambush" and _is_hidder_attack_radius_reached():
+		hidder_aggressive_remaining = maxf(hidder_aggressive_remaining, hidder_aggressive_hold_seconds)
+		state = ZombieState.ATTACK
 		return
 
 	if can_attack and _is_player_in_damage_area():
@@ -710,6 +1092,11 @@ func _process_attack(delta: float):
 		state = ZombieState.CHASE
 		return
 
+	if resolved_behavior_mode == "cover_ambush":
+		_update_hidder_runtime_state(delta)
+		if _is_hidder_attack_radius_reached():
+			hidder_aggressive_remaining = maxf(hidder_aggressive_remaining, hidder_aggressive_hold_seconds)
+
 	_apply_gravity(delta)
 	velocity.x = move_toward(velocity.x, 0.0, 16.0 * delta)
 	velocity.z = move_toward(velocity.z, 0.0, 16.0 * delta)
@@ -721,8 +1108,15 @@ func _process_attack(delta: float):
 		current_barricade_target = null
 		_look_at_player()
 	move_and_slide()
+	_update_air_state(delta)
+	if _is_airborne():
+		state = ZombieState.CHASE
+		return
 
 	if not _is_player_in_damage_area() and not _has_attackable_barricade():
+		if resolved_behavior_mode == "cover_ambush" and hidder_aggressive_remaining > 0.0:
+			state = ZombieState.CHASE
+			return
 		if _try_species_ranged_attack():
 			state = ZombieState.CHASE
 			return
@@ -738,24 +1132,216 @@ func _process_hurt(delta: float):
 	velocity.z = move_toward(velocity.z, 0.0, 18.0 * delta)
 	_look_at_player()
 	move_and_slide()
+	_update_air_state(delta)
 
 func _apply_gravity(delta: float):
 	if not is_on_floor():
-		velocity.y -= gravity * delta
+		var gravity_scale: float = fall_gravity_scale
+		if velocity.y > 0.0:
+			gravity_scale = jump_gravity_scale
+		velocity.y -= gravity * gravity_scale * delta
+	elif velocity.y < 0.0:
+		velocity.y = 0.0
+
+func request_jump(reason: String = "manual") -> bool:
+	if not can_jump():
+		return false
+	_start_jump(reason)
+	return true
+
+func request_jump_for_obstacle(_obstacle: Node3D = null) -> bool:
+	return request_jump("obstacle_hook")
+
+func can_jump() -> bool:
+	if state == ZombieState.DEAD or state == ZombieState.SPAWN_RISE:
+		return false
+	if jump_cooldown_remaining > 0.0:
+		return false
+	if landing_recovery_remaining > 0.0:
+		return false
+	if is_jumping or is_falling:
+		return false
+	if not is_on_floor() and not is_grounded:
+		return false
+	var runtime_jump_profile: Dictionary = _get_jump_runtime_profile()
+	if not bool(runtime_jump_profile.get("can_jump", true)):
+		return false
+	if jump_requires_legs and not _has_functional_jump_legs():
+		return false
+	return true
+
+func _start_jump(reason: String):
+	var runtime_jump_profile: Dictionary = _get_jump_runtime_profile()
+	is_grounded = false
+	is_jumping = true
+	is_falling = false
+	velocity.y = _get_jump_force()
+	var jump_cooldown_mult: float = clampf(float(runtime_jump_profile.get("cooldown_mult", 1.0)), 0.4, 3.0)
+	jump_cooldown_remaining = maxf(jump_cooldown_remaining, jump_cooldown_seconds * jump_cooldown_mult)
+	set_meta("jump_last_reason", reason)
+	set_meta("jump_last_force", velocity.y)
+
+func _update_jump_runtime_timers(delta: float):
+	if jump_cooldown_remaining > 0.0:
+		jump_cooldown_remaining = maxf(0.0, jump_cooldown_remaining - delta)
+	if landing_recovery_remaining > 0.0:
+		landing_recovery_remaining = maxf(0.0, landing_recovery_remaining - delta)
+	if debug_auto_jump_enabled:
+		debug_auto_jump_timer = maxf(0.0, debug_auto_jump_timer - delta)
+	else:
+		debug_auto_jump_timer = maxf(0.1, debug_auto_jump_interval)
+
+func _process_jump_debug_trigger():
+	if state == ZombieState.DEAD or state == ZombieState.SPAWN_RISE:
+		return
+	if debug_jump_once:
+		debug_jump_once = false
+		request_jump("debug_once")
+		return
+	if debug_auto_jump_enabled and debug_auto_jump_timer <= 0.0:
+		request_jump("debug_auto")
+		debug_auto_jump_timer = maxf(0.1, debug_auto_jump_interval)
+
+func _can_request_state_driven_jump() -> bool:
+	if not auto_jump_on_obstacle_probe:
+		return false
+	return _has_jumpable_obstacle_ahead()
+
+func _update_air_state(_delta: float):
+	var on_floor_now: bool = is_on_floor()
+	if on_floor_now:
+		if not is_grounded and (is_jumping or is_falling):
+			_handle_landing()
+		is_grounded = true
+		is_jumping = false
+		is_falling = false
+	else:
+		if is_grounded:
+			is_grounded = false
+		if velocity.y > 0.02:
+			is_jumping = true
+			is_falling = false
+		else:
+			is_jumping = false
+			is_falling = true
+	_update_jump_debug_meta()
+
+func _handle_landing():
+	is_grounded = true
+	is_jumping = false
+	is_falling = false
+	landing_recovery_remaining = maxf(landing_recovery_remaining, landing_recovery_seconds)
+
+func _is_airborne() -> bool:
+	return is_jumping or is_falling or (not is_on_floor() and not is_grounded)
+
+func _get_jump_force() -> float:
+	return maxf(0.2, jump_force * _get_jump_force_multiplier())
+
+func _get_jump_force_multiplier() -> float:
+	var runtime_jump_profile: Dictionary = _get_jump_runtime_profile()
+	return clampf(float(runtime_jump_profile.get("force_mult", 1.0)), 0.0, 1.6)
+
+func _get_jump_runtime_profile() -> Dictionary:
+	var leg_state: Dictionary = _build_current_leg_jump_state()
+	return ZombieDefinitions.build_jump_runtime_profile(species_id, rank_id, mort_grade, leg_state)
+
+func _build_current_leg_jump_state() -> Dictionary:
+	var max_left: float = float(PART_MAX_HEALTH.get("leg_l", 35))
+	var max_right: float = float(PART_MAX_HEALTH.get("leg_r", 35))
+	var current_left: float = float(part_health.get("leg_l", max_left))
+	var current_right: float = float(part_health.get("leg_r", max_right))
+	var left_missing: bool = bool(missing_parts.get("leg_l", false))
+	var right_missing: bool = bool(missing_parts.get("leg_r", false))
+	var left_damaged: bool = (not left_missing) and current_left < max_left * 0.6
+	var right_damaged: bool = (not right_missing) and current_right < max_right * 0.6
+	return {
+		"leg_l_missing": left_missing,
+		"leg_r_missing": right_missing,
+		"leg_l_damaged": left_damaged,
+		"leg_r_damaged": right_damaged
+	}
+
+func _has_functional_jump_legs() -> bool:
+	if missing_parts.is_empty():
+		return true
+	var left_missing: bool = bool(missing_parts.get("leg_l", false))
+	var right_missing: bool = bool(missing_parts.get("leg_r", false))
+	return not (left_missing and right_missing)
+
+func _update_jump_debug_meta():
+	var runtime_jump_profile: Dictionary = _get_jump_runtime_profile()
+	set_meta("jump_grounded", is_grounded)
+	set_meta("jump_is_jumping", is_jumping)
+	set_meta("jump_is_falling", is_falling)
+	set_meta("jump_cooldown_remaining", jump_cooldown_remaining)
+	set_meta("jump_landing_recovery_remaining", landing_recovery_remaining)
+	set_meta("jump_runtime_can_jump", bool(runtime_jump_profile.get("can_jump", true)))
+	set_meta("jump_runtime_force_mult", float(runtime_jump_profile.get("force_mult", 1.0)))
+	set_meta("jump_runtime_cooldown_mult", float(runtime_jump_profile.get("cooldown_mult", 1.0)))
+	set_meta("jump_runtime_willingness", float(runtime_jump_profile.get("willingness", 1.0)))
+
+func _reset_jump_state_on_death():
+	is_grounded = false
+	is_jumping = false
+	is_falling = false
+	jump_cooldown_remaining = 0.0
+	landing_recovery_remaining = 0.0
+	debug_auto_jump_timer = maxf(0.1, debug_auto_jump_interval)
+	_update_jump_debug_meta()
+
+func _has_jumpable_obstacle_ahead() -> bool:
+	if get_world_3d() == null:
+		return false
+	var probe_direction: Vector3 = _get_jump_probe_direction()
+	if probe_direction == Vector3.ZERO:
+		return false
+
+	var origin: Vector3 = global_position + Vector3.UP * jump_obstacle_probe_height
+	var target: Vector3 = origin + probe_direction * jump_obstacle_probe_distance
+	var query := PhysicsRayQueryParameters3D.create(origin, target)
+	query.exclude = [self]
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return false
+
+	var collider: Variant = hit.get("collider")
+	if collider is Node:
+		var hit_node: Node = collider
+		if hit_node.is_in_group("jumpable_candidate"):
+			return true
+		if hit_node.get_parent() != null and hit_node.get_parent().is_in_group("jumpable_candidate"):
+			return true
+		if hit_node.get_parent() != null and hit_node.get_parent().get_parent() != null:
+			var parent2: Node = hit_node.get_parent().get_parent()
+			if parent2.is_in_group("jumpable_candidate"):
+				return true
+	return false
+
+func _get_jump_probe_direction() -> Vector3:
+	if move_direction != Vector3.ZERO:
+		return move_direction.normalized()
+	var planar_velocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
+	if planar_velocity.length_squared() > 0.01:
+		return planar_velocity.normalized()
+	if player and is_instance_valid(player):
+		var to_player: Vector3 = player.global_position - global_position
+		to_player.y = 0.0
+		if to_player.length_squared() > 0.01:
+			return to_player.normalized()
+	return Vector3.ZERO
 
 func _get_behavior_target_position() -> Vector3:
 	if not player or not is_instance_valid(player):
 		return global_position
 
-	match resolved_behavior_mode:
-		"corpse_feeder":
-			return _get_feeder_target_position()
-		"passive_trigger":
-			return _get_passive_target_position()
-		"cover_ambush":
-			return _get_hidder_target_position()
-		_:
-			return player.global_position
+	# Player-Tracking ist fuer alle Arten dauerhaft aktiv, ausser Hidder.
+	if resolved_behavior_mode == "cover_ambush":
+		return _get_hidder_target_position()
+
+	return player.global_position
 
 func _get_feeder_target_position() -> Vector3:
 	if _is_player_close_for_trigger(2.5):
@@ -777,31 +1363,181 @@ func _get_passive_target_position() -> Vector3:
 
 func _get_hidder_target_position() -> Vector3:
 	hidder_ground_mode = false
+	if _is_hidder_attack_radius_reached():
+		hidder_aggressive_remaining = maxf(hidder_aggressive_remaining, hidder_aggressive_hold_seconds)
 
-	var cover: Node3D = _find_best_cover_node()
-	if cover:
-		var cover_pos: Vector3 = cover.global_position
-		var away: Vector3 = cover_pos - player.global_position
-		away.y = 0.0
-		if away.length_squared() <= 0.0001:
-			away = Vector3.FORWARD
-		else:
-			away = away.normalized()
-		return cover_pos + away * 1.25
+	if hidder_aggressive_remaining > 0.0:
+		hidder_escape_active = false
+		return player.global_position
 
-	var ally: Node3D = _find_nearest_live_zombie()
-	if ally:
-		var ally_pos: Vector3 = ally.global_position
-		var away_from_player: Vector3 = ally_pos - player.global_position
-		away_from_player.y = 0.0
-		if away_from_player.length_squared() <= 0.0001:
-			away_from_player = Vector3.FORWARD
-		else:
-			away_from_player = away_from_player.normalized()
-		return ally_pos + away_from_player * 0.8
+	if _is_hidder_detected():
+		_trigger_hidder_escape()
+
+	if hidder_escape_active:
+		return hidder_escape_target
+
+	var cover_target: Dictionary = _resolve_hidder_cover_target(false)
+	if bool(cover_target.get("valid", false)):
+		hidder_current_cover = cover_target.get("cover", null)
+		return cover_target.get("position", global_position)
+
+	var ally_target: Dictionary = _resolve_hidder_ally_target_position()
+	if bool(ally_target.get("valid", false)):
+		return ally_target.get("position", global_position)
 
 	hidder_ground_mode = true
 	return global_position
+
+func _update_hidder_runtime_state(delta: float):
+	if hidder_escape_boost_remaining > 0.0:
+		hidder_escape_boost_remaining = maxf(0.0, hidder_escape_boost_remaining - delta)
+	if hidder_repath_cooldown > 0.0:
+		hidder_repath_cooldown = maxf(0.0, hidder_repath_cooldown - delta)
+
+	if hidder_aggressive_remaining > 0.0:
+		if _is_hidder_attack_radius_reached():
+			hidder_aggressive_remaining = hidder_aggressive_hold_seconds
+		else:
+			hidder_aggressive_remaining = maxf(0.0, hidder_aggressive_remaining - delta)
+
+	if hidder_escape_active and global_position.distance_to(hidder_escape_target) <= 0.9:
+		hidder_escape_active = false
+
+func _is_hidder_detected() -> bool:
+	if not player or not is_instance_valid(player):
+		return false
+	if behavior_triggered:
+		return true
+	if _is_hidder_attack_radius_reached():
+		return true
+	if _is_player_close_for_trigger(hidder_detect_radius):
+		return true
+	return _hidder_has_player_line_of_sight()
+
+func _is_hidder_attack_radius_reached() -> bool:
+	if not player or not is_instance_valid(player):
+		return false
+	return global_position.distance_to(player.global_position) <= hidder_attack_radius
+
+func _trigger_hidder_escape():
+	if hidder_repath_cooldown > 0.0 and hidder_escape_active:
+		return
+
+	var cover_target: Dictionary = _resolve_hidder_cover_target(true)
+	if bool(cover_target.get("valid", false)):
+		hidder_escape_target = cover_target.get("position", global_position)
+		hidder_current_cover = cover_target.get("cover", null)
+		hidder_escape_active = true
+		hidder_escape_boost_remaining = maxf(hidder_escape_boost_remaining, hidder_escape_boost_seconds)
+		hidder_repath_cooldown = hidder_repath_cooldown_seconds
+		return
+
+	var ally_target: Dictionary = _resolve_hidder_ally_target_position()
+	if bool(ally_target.get("valid", false)):
+		hidder_escape_target = ally_target.get("position", global_position)
+		hidder_escape_active = true
+		hidder_escape_boost_remaining = maxf(hidder_escape_boost_remaining, hidder_escape_boost_seconds)
+		hidder_repath_cooldown = hidder_repath_cooldown_seconds
+		return
+
+	hidder_escape_active = false
+
+func _resolve_hidder_cover_target(exclude_current_cover: bool) -> Dictionary:
+	if not player or not is_instance_valid(player):
+		return {"valid": false}
+
+	var best_cover: Node3D = null
+	var best_target: Vector3 = Vector3.ZERO
+	var best_score: float = -INF
+	var can_exclude: bool = exclude_current_cover and cover_nodes.size() > 1
+
+	for node in cover_nodes:
+		if not is_instance_valid(node):
+			continue
+		if can_exclude and node == hidder_current_cover:
+			continue
+
+		var candidate_target: Vector3 = _get_hidder_position_behind_cover(node)
+		var distance_to_player: float = candidate_target.distance_to(player.global_position)
+		if distance_to_player < hidder_min_cover_player_distance:
+			continue
+
+		var distance_to_self: float = candidate_target.distance_to(global_position)
+		var score: float = distance_to_player * 1.35 - distance_to_self * 0.4
+		if score > best_score:
+			best_score = score
+			best_cover = node
+			best_target = candidate_target
+
+	if best_cover == null:
+		var fallback_cover: Node3D = _find_best_cover_node()
+		if fallback_cover != null and (not can_exclude or fallback_cover != hidder_current_cover):
+			best_cover = fallback_cover
+			best_target = _get_hidder_position_behind_cover(fallback_cover)
+
+	if best_cover == null:
+		return {"valid": false}
+
+	return {
+		"valid": true,
+		"cover": best_cover,
+		"position": best_target
+	}
+
+func _resolve_hidder_ally_target_position() -> Dictionary:
+	if not player or not is_instance_valid(player):
+		return {"valid": false}
+
+	var ally: Node3D = _find_nearest_live_zombie()
+	if ally == null:
+		return {"valid": false}
+
+	var ally_pos: Vector3 = ally.global_position
+	var away_from_player: Vector3 = ally_pos - player.global_position
+	away_from_player.y = 0.0
+	if away_from_player.length_squared() <= 0.0001:
+		away_from_player = Vector3.FORWARD
+	else:
+		away_from_player = away_from_player.normalized()
+
+	return {
+		"valid": true,
+		"position": ally_pos + away_from_player * 1.1
+	}
+
+func _get_hidder_position_behind_cover(cover: Node3D) -> Vector3:
+	var cover_pos: Vector3 = cover.global_position
+	var away: Vector3 = cover_pos - player.global_position
+	away.y = 0.0
+	if away.length_squared() <= 0.0001:
+		away = Vector3.FORWARD
+	else:
+		away = away.normalized()
+	return cover_pos + away * 1.25
+
+func _hidder_has_player_line_of_sight() -> bool:
+	if not player or not is_instance_valid(player):
+		return false
+	if get_world_3d() == null:
+		return false
+
+	var from: Vector3 = global_position + Vector3(0.0, 1.0, 0.0)
+	var to: Vector3 = player.global_position + Vector3(0.0, 1.0, 0.0)
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	query.exclude = [self]
+
+	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return true
+
+	var collider: Variant = hit.get("collider")
+	if collider == player:
+		return true
+	if collider is Node and (collider as Node).is_in_group("player"):
+		return true
+	return false
 
 func _update_behavior_pose(delta: float):
 	if state == ZombieState.DEAD:
@@ -812,7 +1548,7 @@ func _update_behavior_pose(delta: float):
 	elif death_crawl_mode:
 		model_root.rotation.x = lerp_angle(model_root.rotation.x, deg_to_rad(42.0), minf(1.0, delta * 8.0))
 	else:
-		model_root.rotation.x = lerp_angle(model_root.rotation.x, 0.0, minf(1.0, delta * 8.0))
+		model_root.rotation.x = lerp_angle(model_root.rotation.x, species_base_model_root_rotation.x, minf(1.0, delta * 8.0))
 
 	if part_nodes.has("head") and not bool(missing_parts.get("head", false)):
 		var head_node: Node3D = part_nodes["head"]
@@ -1052,7 +1788,13 @@ func _get_current_speed() -> float:
 		speed *= 0.35
 
 	if resolved_behavior_mode == "passive_trigger" and not behavior_triggered:
-		speed *= 0.2
+		if not _is_force_global_chase_for_this_zombie():
+			speed *= 0.2
+	elif resolved_behavior_mode == "cover_ambush":
+		if hidder_escape_boost_remaining > 0.0:
+			speed *= hidder_escape_speed_mult
+		elif hidder_aggressive_remaining > 0.0:
+			speed *= 1.12
 
 	if death_crawl_mode:
 		speed *= 0.45
@@ -1068,6 +1810,9 @@ func _get_current_speed() -> float:
 		speed *= float(death_effect_profile.get("rage_speed_mult", 1.0))
 
 	return speed
+
+func _is_force_global_chase_for_this_zombie() -> bool:
+	return resolved_behavior_mode != "cover_ambush"
 
 func _process_death_effect_runtime(delta: float):
 	if state == ZombieState.DEAD:
@@ -1352,7 +2097,7 @@ func _apply_crawl_transition_if_needed():
 		return
 
 	death_crawl_mode = true
-	model_root.position = base_model_root_position + Vector3(0.0, -0.28, 0.0)
+	model_root.position = species_base_model_root_position + Vector3(0.0, -0.28, 0.0)
 
 func _remove_part(part: String):
 	missing_parts[part] = true
@@ -1398,10 +2143,15 @@ func _enter_hurt_state():
 func _on_damage_area_body_entered(body):
 	if state == ZombieState.SPAWN_RISE or state == ZombieState.DEAD:
 		return
-	if hidder_ground_mode:
+	if _is_airborne():
+		return
+	if hidder_ground_mode and resolved_behavior_mode != "cover_ambush":
 		return
 
 	if body.is_in_group("player") and can_attack:
+		if resolved_behavior_mode == "cover_ambush":
+			hidder_ground_mode = false
+			hidder_aggressive_remaining = maxf(hidder_aggressive_remaining, hidder_aggressive_hold_seconds)
 		state = ZombieState.ATTACK
 
 func _on_attack_timer_timeout():
@@ -1412,7 +2162,11 @@ func _on_attack_timer_timeout():
 	if state == ZombieState.HURT:
 		return
 
-	if _is_player_in_damage_area():
+	if _is_airborne():
+		state = ZombieState.CHASE
+		return
+
+	if (resolved_behavior_mode == "cover_ambush" and _is_hidder_attack_radius_reached()) or _is_player_in_damage_area():
 		state = ZombieState.ATTACK
 	else:
 		state = ZombieState.CHASE
@@ -1421,7 +2175,11 @@ func _on_hurt_timer_timeout():
 	if state == ZombieState.DEAD:
 		return
 
-	if _is_player_in_damage_area():
+	if _is_airborne():
+		state = ZombieState.CHASE
+		return
+
+	if (resolved_behavior_mode == "cover_ambush" and _is_hidder_attack_radius_reached()) or _is_player_in_damage_area():
 		state = ZombieState.ATTACK
 	else:
 		state = ZombieState.CHASE
@@ -1477,3 +2235,6 @@ func _play_world_sound(event_id: String) -> void:
 	if event_id.is_empty():
 		return
 	AudioManager.play_sfx(event_id, global_position, true)
+
+func _exit_tree():
+	_clear_death_subtype_visual_layer()
