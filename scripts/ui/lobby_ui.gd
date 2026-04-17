@@ -162,11 +162,11 @@ func _on_host_pressed():
 	if player_name.is_empty():
 		player_name = "Host"
 	_lobby.host_lobby(player_name)
-	var err := _net.host_game()
+	var err: Error = _net.host_game()
 	if err != OK:
 		_lbl_status.text = "Fehler beim Starten des Servers: %s" % error_string(err)
 		return
-	var code := _lobby.generate_room_code()
+	var code: String = _lobby.generate_room_code()
 	print("Lobby room code: %s" % code)
 	_show_hosting()
 	_on_lobby_updated(_lobby.players)
@@ -198,7 +198,7 @@ func _on_connect_button_pressed():
 	var url := _input_url.text.strip_edges()
 	if url.is_empty():
 		url = DEFAULT_SERVER_URL
-	var err := _net.join_game(url)
+	var err: Error = _net.join_game(url)
 	if err != OK:
 		_lbl_status.text = "Verbindungsfehler: %s" % error_string(err)
 
