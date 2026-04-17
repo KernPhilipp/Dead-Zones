@@ -53,6 +53,15 @@ var pause_divider: ColorRect
 var pause_controls_label: Label
 var pause_settings_button: Button
 var pause_settings_content: ScrollContainer
+var settings_tab_hud_button: Button
+var settings_tab_crosshair_button: Button
+var settings_tab_audio_button: Button
+var hud_settings_section: VBoxContainer
+var crosshair_settings_section: VBoxContainer
+var audio_settings_section: VBoxContainer
+var hud_settings_grid: GridContainer
+var crosshair_settings_grid: GridContainer
+var audio_settings_grid: GridContainer
 var pause_session_label: Label
 var settings_hint_label: Label
 var reset_settings_button: Button
@@ -83,6 +92,7 @@ var back_to_level_select_button: Button
 var health_panel: PanelContainer
 var wave_panel: PanelContainer
 var weapon_panel: PanelContainer
+var game_over_card: PanelContainer
 
 var status_timer: SceneTreeTimer
 var damage_flash_tween: Tween
@@ -151,6 +161,26 @@ var master_volume_setting: float = 0.85
 var settings_initialized: bool = false
 var settings_screen_open: bool = false
 var settings_state_timer: SceneTreeTimer
+var settings_tab_key: String = "hud"
+var settings_grid_list: Array[GridContainer] = []
+
+const SETTINGS_TAB_HINTS := {
+	"hud": "CONTROL OVERLAY VISIBILITY AND FEEDBACK STRENGTH.",
+	"crosshair": "TUNE AIM SIZE AND PICK THE CLEANEST CROSSHAIR STYLE.",
+	"audio": "SET THE MASTER OUTPUT LEVEL FOR THIS SESSION."
+}
+
+const SETTINGS_CONTROL_HINTS := {
+	"HudTabButton": "HUD OPTIONS FOCUS ON READABILITY AND SCREEN CLARITY.",
+	"CrosshairTabButton": "CROSSHAIR OPTIONS CHANGE YOUR AIM LOOK AND SCALE.",
+	"AudioTabButton": "AUDIO OPTIONS ADJUST SESSION-WIDE VOLUME.",
+	"HudOpacitySlider": "RAISE OR LOWER THE OVERALL HUD VISIBILITY.",
+	"FeedbackIntensitySlider": "CONTROLS DAMAGE, BLOOD AND HIT FEEDBACK INTENSITY.",
+	"CrosshairSizeSlider": "SCALES THE CROSSHAIR WITHOUT SHIFTING IT OFF-CENTER.",
+	"CrosshairStyleOption": "SWITCH BETWEEN CLASSIC, TACTICAL AND MINIMAL AIM STYLES.",
+	"MasterVolumeSlider": "SETS THE MASTER AUDIO LEVEL FOR THE GAME.",
+	"ResetSettingsButton": "RESTORES ALL SETTINGS TO THE DEFAULT VALUES."
+}
 
 func _enter_tree():
 	_ensure_nodes()
@@ -238,9 +268,15 @@ func _ready():
 	_connect_button_audio(pause_level_select_button)
 	_connect_button_audio(restart_button)
 	_connect_button_audio(back_to_level_select_button)
+	_connect_button_audio(settings_tab_hud_button)
+	_connect_button_audio(settings_tab_crosshair_button)
+	_connect_button_audio(settings_tab_audio_button)
 	_load_pause_settings()
 	_setup_pause_settings()
 	_setup_handbook_overlay()
+	if not get_viewport().size_changed.is_connected(_on_viewport_resized):
+		get_viewport().size_changed.connect(_on_viewport_resized)
+	_apply_responsive_layout()
 	_show_start_hints()
 
 func _ensure_nodes():
@@ -295,6 +331,15 @@ func _ensure_nodes():
 	pause_controls_label = _find_required_node("PauseControlsLabel") as Label
 	pause_settings_button = _find_required_node("PauseSettingsButton") as Button
 	pause_settings_content = _find_required_node("PauseSettingsContent") as ScrollContainer
+	settings_tab_hud_button = _find_required_node("HudTabButton") as Button
+	settings_tab_crosshair_button = _find_required_node("CrosshairTabButton") as Button
+	settings_tab_audio_button = _find_required_node("AudioTabButton") as Button
+	hud_settings_section = _find_required_node("HudSettingsSection") as VBoxContainer
+	crosshair_settings_section = _find_required_node("CrosshairSettingsSection") as VBoxContainer
+	audio_settings_section = _find_required_node("AudioSettingsSection") as VBoxContainer
+	hud_settings_grid = _find_required_node("HudSettingsGrid") as GridContainer
+	crosshair_settings_grid = _find_required_node("CrosshairSettingsGrid") as GridContainer
+	audio_settings_grid = _find_required_node("AudioSettingsGrid") as GridContainer
 	pause_session_label = _find_required_node("PauseSessionLabel") as Label
 	settings_hint_label = _find_required_node("SettingsHintLabel") as Label
 	reset_settings_button = _find_required_node("ResetSettingsButton") as Button
@@ -325,7 +370,9 @@ func _ensure_nodes():
 	health_panel = _find_required_node("HealthPanel") as PanelContainer
 	wave_panel = _find_required_node("WavePanel") as PanelContainer
 	weapon_panel = _find_required_node("WeaponPanel") as PanelContainer
+	game_over_card = _find_required_node("GameOverCard") as PanelContainer
 	damage_compass_markers = [damage_compass_marker, damage_compass_marker_alt_a, damage_compass_marker_alt_b]
+	settings_grid_list = [hud_settings_grid, crosshair_settings_grid, audio_settings_grid]
 	nodes_initialized = true
 
 func _setup_pause_settings():
@@ -338,29 +385,60 @@ func _setup_pause_settings():
 	master_volume_slider.value = master_volume_setting
 	_refresh_crosshair_style_option()
 	pause_settings_button.pressed.connect(_on_pause_settings_toggled)
+	settings_tab_hud_button.pressed.connect(func(): _select_settings_tab("hud"))
+	settings_tab_crosshair_button.pressed.connect(func(): _select_settings_tab("crosshair"))
+	settings_tab_audio_button.pressed.connect(func(): _select_settings_tab("audio"))
 	hud_opacity_slider.value_changed.connect(_on_hud_opacity_changed)
 	crosshair_size_slider.value_changed.connect(_on_crosshair_size_changed)
 	crosshair_style_option.item_selected.connect(_on_crosshair_style_selected)
 	feedback_intensity_slider.value_changed.connect(_on_feedback_intensity_changed)
 	master_volume_slider.value_changed.connect(_on_master_volume_changed)
+	for node_name in SETTINGS_CONTROL_HINTS.keys():
+		var target: Control = _find_required_node(node_name) as Control
+		if target != null:
+			target.focus_entered.connect(_on_settings_control_hint.bind(node_name))
+			target.mouse_entered.connect(_on_settings_control_hint.bind(node_name))
 	_refresh_setting_labels()
 	_apply_master_volume()
 	_apply_crosshair_size()
 	_apply_adaptive_hud_presence()
+	_select_settings_tab(settings_tab_key)
 	_apply_pause_screen_mode()
 
 func _on_pause_settings_toggled():
 	settings_screen_open = not settings_screen_open
 	_apply_pause_screen_mode()
 
+func _on_settings_control_hint(control_name: String):
+	settings_hint_label.text = str(SETTINGS_CONTROL_HINTS.get(control_name, SETTINGS_TAB_HINTS.get(settings_tab_key, "")))
+
+func _select_settings_tab(tab_name: String):
+	settings_tab_key = tab_name
+	var hud_active: bool = tab_name == "hud"
+	var crosshair_active: bool = tab_name == "crosshair"
+	var audio_active: bool = tab_name == "audio"
+	hud_settings_section.visible = hud_active
+	crosshair_settings_section.visible = crosshair_active
+	audio_settings_section.visible = audio_active
+	settings_tab_hud_button.button_pressed = hud_active
+	settings_tab_crosshair_button.button_pressed = crosshair_active
+	settings_tab_audio_button.button_pressed = audio_active
+	_style_settings_tab_button(settings_tab_hud_button, hud_active)
+	_style_settings_tab_button(settings_tab_crosshair_button, crosshair_active)
+	_style_settings_tab_button(settings_tab_audio_button, audio_active)
+	settings_hint_label.text = str(SETTINGS_TAB_HINTS.get(tab_name, "CHANGES APPLY LIVE AND SAVE AUTOMATICALLY."))
+	_apply_responsive_layout()
+
+func _style_settings_tab_button(button: Button, active: bool):
+	if button == null:
+		return
+	button.modulate = Color(1.0, 1.0, 1.0, 1.0) if active else Color(0.82, 0.86, 0.92, 0.82)
+	button.scale = Vector2.ONE * (1.0 if active else 0.98)
+
 func _apply_pause_screen_mode():
 	if pause_panel == null or pause_settings_button == null:
 		return
 	if settings_screen_open:
-		pause_panel.offset_left = -300.0
-		pause_panel.offset_top = -220.0
-		pause_panel.offset_right = 300.0
-		pause_panel.offset_bottom = 220.0
 		pause_label.text = "SETTINGS"
 		pause_summary_label.visible = false
 		pause_meta_label.text = "LIVE SETTINGS  |  ESC TO GO BACK"
@@ -376,7 +454,12 @@ func _apply_pause_screen_mode():
 		pause_restart_button.visible = false
 		pause_level_select_button.visible = false
 		pause_settings_button.text = "Back"
+		_select_settings_tab(settings_tab_key)
 	else:
+		pause_panel.anchor_left = 0.5
+		pause_panel.anchor_top = 0.5
+		pause_panel.anchor_right = 0.5
+		pause_panel.anchor_bottom = 0.5
 		pause_panel.offset_left = -220.0
 		pause_panel.offset_top = -156.0
 		pause_panel.offset_right = 220.0
@@ -396,6 +479,7 @@ func _apply_pause_screen_mode():
 		pause_restart_button.visible = true
 		pause_level_select_button.visible = true
 		pause_settings_button.text = "Settings"
+	_apply_responsive_layout()
 
 func _on_reset_settings_pressed():
 	hud_opacity_setting = 0.92
@@ -413,6 +497,7 @@ func _on_reset_settings_pressed():
 	_apply_crosshair_size()
 	_apply_adaptive_hud_presence()
 	_apply_master_volume()
+	_select_settings_tab(settings_tab_key)
 	_save_pause_settings()
 	_show_settings_state("DEFAULTS RESTORED", Color(0.78, 0.94, 1.0, 0.84))
 
@@ -552,6 +637,140 @@ func _apply_crosshair_size():
 		crosshair_segment_thickness = round(lerpf(2.0, 3.0, size_ratio))
 		crosshair_dot_size = round(lerpf(2.0, 3.0, size_ratio))
 		crosshair_gap_scale = lerpf(0.95, 1.08, size_ratio)
+	_apply_responsive_layout()
+
+func _on_viewport_resized():
+	_apply_responsive_layout()
+
+func _apply_responsive_layout():
+	if not nodes_initialized:
+		return
+
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+
+	var safe_x: float = clampf(viewport_size.x * 0.018, 16.0, 28.0)
+	var safe_y: float = clampf(viewport_size.y * 0.022, 16.0, 28.0)
+	var left_panel_width: float = clampf(viewport_size.x * 0.22, 180.0, 286.0)
+	var right_panel_width: float = clampf(viewport_size.x * 0.24, 190.0, 300.0)
+
+	wave_panel.offset_left = safe_x
+	wave_panel.offset_top = safe_y
+	wave_panel.offset_right = safe_x + left_panel_width
+	wave_panel.offset_bottom = safe_y + clampf(viewport_size.y * 0.095, 68.0, 88.0)
+
+	health_panel.offset_left = safe_x
+	health_panel.offset_right = safe_x + left_panel_width
+	health_panel.offset_top = -clampf(viewport_size.y * 0.125, 76.0, 102.0)
+	health_panel.offset_bottom = -safe_y
+
+	var right_left: float = -safe_x - right_panel_width
+	var right_right: float = -safe_x
+	var ammo_height: float = 30.0
+	var status_height: float = 18.0
+	var reload_height: float = 26.0
+	var weapon_height: float = clampf(viewport_size.y * 0.11, 66.0, 84.0)
+	var right_gap: float = 10.0
+	var ammo_bottom: float = -safe_y
+	var ammo_top: float = ammo_bottom - ammo_height
+	var weapon_bottom: float = ammo_top - 22.0
+	var weapon_top: float = weapon_bottom - weapon_height
+	var status_bottom: float = weapon_top - 12.0
+	var status_top: float = status_bottom - status_height
+	var reload_bottom: float = status_top - right_gap
+	var reload_top: float = reload_bottom - reload_height
+
+	ammo_label.offset_left = right_left
+	ammo_label.offset_top = ammo_top
+	ammo_label.offset_right = right_right
+	ammo_label.offset_bottom = ammo_bottom
+	weapon_panel.offset_left = right_left
+	weapon_panel.offset_top = weapon_top
+	weapon_panel.offset_right = right_right
+	weapon_panel.offset_bottom = weapon_bottom
+	status_label.offset_left = right_left
+	status_label.offset_top = status_top
+	status_label.offset_right = right_right
+	status_label.offset_bottom = status_bottom
+	reload_panel.offset_left = right_left
+	reload_panel.offset_top = reload_top
+	reload_panel.offset_right = right_right
+	reload_panel.offset_bottom = reload_bottom
+
+	var game_over_width_max: float = maxf(360.0, viewport_size.x - safe_x * 2.0)
+	var game_over_height_max: float = maxf(330.0, viewport_size.y - safe_y * 2.0)
+	var game_over_width: float = clampf(viewport_size.x * 0.54, 360.0, game_over_width_max)
+	var game_over_height: float = clampf(viewport_size.y * 0.68, 330.0, game_over_height_max)
+	game_over_card.offset_left = -game_over_width * 0.5
+	game_over_card.offset_top = -game_over_height * 0.5
+	game_over_card.offset_right = game_over_width * 0.5
+	game_over_card.offset_bottom = game_over_height * 0.5
+	restart_button.custom_minimum_size = Vector2(minf(220.0, game_over_width * 0.46), 48.0)
+	back_to_level_select_button.custom_minimum_size = Vector2(minf(220.0, game_over_width * 0.46), 44.0)
+
+	var pause_width: float
+	var pause_height: float
+	if settings_screen_open:
+		var settings_width_max: float = maxf(360.0, viewport_size.x - safe_x * 2.0)
+		var settings_height_max: float = maxf(300.0, viewport_size.y - safe_y * 2.0)
+		pause_width = clampf(viewport_size.x * 0.72, 360.0, settings_width_max)
+		pause_height = clampf(viewport_size.y * 0.78, 300.0, settings_height_max)
+		pause_settings_content.custom_minimum_size.y = clampf(pause_height - 240.0, 170.0, 380.0)
+	else:
+		var pause_width_max: float = maxf(320.0, minf(460.0, viewport_size.x - safe_x * 2.0))
+		var pause_height_max: float = maxf(260.0, minf(380.0, viewport_size.y - safe_y * 2.0))
+		pause_width = clampf(viewport_size.x * 0.42, 320.0, pause_width_max)
+		pause_height = clampf(viewport_size.y * 0.58, 260.0, pause_height_max)
+		pause_settings_content.custom_minimum_size.y = 0.0
+
+	var settings_h_separation: int = 12 if settings_screen_open and pause_width >= 540.0 else 10
+	for settings_grid in settings_grid_list:
+		if settings_grid != null:
+			settings_grid.set("theme_override_constants/h_separation", settings_h_separation)
+
+	pause_panel.anchor_left = 0.5
+	pause_panel.anchor_top = 0.5
+	pause_panel.anchor_right = 0.5
+	pause_panel.anchor_bottom = 0.5
+	pause_panel.offset_left = -pause_width * 0.5
+	pause_panel.offset_top = -pause_height * 0.5
+	pause_panel.offset_right = pause_width * 0.5
+	pause_panel.offset_bottom = pause_height * 0.5
+
+	var pause_button_width: float = clampf(pause_width * 0.48, 160.0, 220.0)
+	pause_settings_button.custom_minimum_size = Vector2(pause_button_width, 40.0)
+	resume_button.custom_minimum_size = Vector2(pause_button_width, 44.0)
+	handbook_button.custom_minimum_size = Vector2(pause_button_width, 44.0)
+	pause_restart_button.custom_minimum_size = Vector2(pause_button_width, 44.0)
+	pause_level_select_button.custom_minimum_size = Vector2(pause_button_width, 44.0)
+	reset_settings_button.custom_minimum_size = Vector2(clampf(pause_width * 0.34, 130.0, 180.0), 38.0)
+	var tab_button_width: float = clampf((pause_width - 56.0) / 3.0, 96.0, 180.0)
+	settings_tab_hud_button.custom_minimum_size = Vector2(tab_button_width, 38.0)
+	settings_tab_crosshair_button.custom_minimum_size = Vector2(tab_button_width, 38.0)
+	settings_tab_audio_button.custom_minimum_size = Vector2(tab_button_width, 38.0)
+
+	var wrap_labels: Array[Label] = [
+		pause_summary_label,
+		pause_meta_label,
+		pause_controls_label,
+		pause_session_label,
+		settings_hint_label,
+		game_over_meta_label,
+		game_over_summary_label,
+		game_over_stats_label,
+		game_over_footer_label,
+		game_over_hint_label
+	]
+	for label in wrap_labels:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+	var crosshair_half_extent: float = crosshair_segment_length + ((5.0 + 1.6) * crosshair_gap_scale) + 8.0
+	var crosshair_side: float = maxf(44.0, ceil(crosshair_half_extent * 2.0))
+	crosshair_root.custom_minimum_size = Vector2(crosshair_side, crosshair_side)
+	crosshair_root.size = crosshair_root.custom_minimum_size
+	crosshair_root.pivot_offset = crosshair_root.size * 0.5
+	update_crosshair(0.0)
 
 func _find_required_node(node_name: String) -> Node:
 	var node := find_child(node_name, true, false)
