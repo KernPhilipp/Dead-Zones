@@ -1,3 +1,5 @@
+.DS_Store
+
 # Godot editor cache
 .godot/imported/
 .godot/shader_cache/
@@ -5,6 +7,14 @@
 .godot/editor/export-*
 .godot/editor/*-folding-*.cfg
 .godot/editor/recent_dirs
+.godot/editor/editor_layout.cfg
+.godot/editor/editor_script_doc_cache.res
+.godot/editor/filesystem_cache*
+.godot/editor/project_metadata.cfg
+.godot/editor/script_editor_cache.cfg
+.godot/global_script_class_cache.cfg
+.godot/scene_groups_cache.cfg
+.godot/uid_cache.bin
 
 # Web export files
 index.html

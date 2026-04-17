@@ -15,16 +15,20 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Spiel HTL Projekt"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/menus/level_select.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
-
 [autoload]
 
+LevelFlow="*res://scripts/level_flow.gd"
 AudioManager="*res://scripts/audio/audio_manager.gd"
 
 [dotnet]
 
 project/assembly_name="Spiel HTL Projekt"
+
+[filesystem]
+
+import/blender/enabled=false
 
 [input]
 

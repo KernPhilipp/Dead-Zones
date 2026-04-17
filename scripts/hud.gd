@@ -60,12 +60,14 @@ var master_volume_value_label: Label
 var resume_button: Button
 var handbook_button: Button
 var pause_restart_button: Button
+var pause_level_select_button: Button
 var game_over_panel: PanelContainer
 var game_over_label: Label
 var game_over_summary_label: Label
 var game_over_stats_label: Label
 var game_over_hint_label: Label
 var restart_button: Button
+var back_to_level_select_button: Button
 var health_panel: PanelContainer
 var wave_panel: PanelContainer
 var weapon_panel: PanelContainer
@@ -188,6 +190,7 @@ func _ready():
 	game_over_stats_label.modulate.a = 0.0
 	game_over_hint_label.modulate.a = 0.0
 	restart_button.modulate.a = 0.0
+	back_to_level_select_button.modulate.a = 0.0
 	damage_compass_marker.visible = false
 	damage_compass_marker.modulate.a = 0.0
 	damage_compass_marker_alt_a.visible = false
@@ -201,12 +204,16 @@ func _ready():
 	resume_button.pressed.connect(_on_resume)
 	handbook_button.pressed.connect(_on_handbook_pressed)
 	pause_restart_button.pressed.connect(_on_restart)
+	pause_level_select_button.pressed.connect(_on_return_to_level_select)
 	restart_button.pressed.connect(_on_restart)
+	back_to_level_select_button.pressed.connect(_on_return_to_level_select)
 	_connect_button_audio(pause_settings_button)
 	_connect_button_audio(resume_button)
 	_connect_button_audio(handbook_button)
 	_connect_button_audio(pause_restart_button)
+	_connect_button_audio(pause_level_select_button)
 	_connect_button_audio(restart_button)
+	_connect_button_audio(back_to_level_select_button)
 	_load_pause_settings()
 	_setup_pause_settings()
 	_setup_handbook_overlay()
@@ -271,12 +278,14 @@ func _ensure_nodes():
 	resume_button = _find_required_node("ResumeButton") as Button
 	handbook_button = _find_required_node("HandbookButton") as Button
 	pause_restart_button = _find_required_node("PauseRestartButton") as Button
+	pause_level_select_button = _find_required_node("PauseLevelSelectButton") as Button
 	game_over_panel = _find_required_node("GameOverPanel") as PanelContainer
 	game_over_label = _find_required_node("GameOverLabel") as Label
 	game_over_summary_label = _find_required_node("GameOverSummaryLabel") as Label
 	game_over_stats_label = _find_required_node("GameOverStatsLabel") as Label
 	game_over_hint_label = _find_required_node("GameOverHintLabel") as Label
 	restart_button = _find_required_node("RestartButton") as Button
+	back_to_level_select_button = _find_required_node("BackToLevelSelectButton") as Button
 	health_panel = _find_required_node("HealthPanel") as PanelContainer
 	wave_panel = _find_required_node("WavePanel") as PanelContainer
 	weapon_panel = _find_required_node("WeaponPanel") as PanelContainer
@@ -757,9 +766,10 @@ func show_game_over(stats: Dictionary = {}):
 	game_over_summary_label.modulate.a = 0.0
 	game_over_stats_label.text = _format_game_over_stats(resolved_stats)
 	game_over_stats_label.modulate.a = 0.0
-	game_over_hint_label.text = "Press Restart to redeploy."
+	game_over_hint_label.text = "Restart redeploys the same zone."
 	game_over_hint_label.modulate.a = 0.0
 	restart_button.modulate.a = 0.0
+	back_to_level_select_button.modulate.a = 0.0
 	if game_over_tween:
 		game_over_tween.kill()
 	game_over_tween = create_tween()
@@ -771,6 +781,7 @@ func show_game_over(stats: Dictionary = {}):
 	game_over_tween.parallel().tween_property(game_over_stats_label, "modulate:a", 1.0, 0.18)
 	game_over_tween.tween_property(game_over_hint_label, "modulate:a", 1.0, 0.14)
 	game_over_tween.parallel().tween_property(restart_button, "modulate:a", 1.0, 0.18)
+	game_over_tween.parallel().tween_property(back_to_level_select_button, "modulate:a", 1.0, 0.18)
 
 func toggle_pause_menu():
 	_ensure_nodes()
@@ -862,16 +873,29 @@ func _on_handbook_pressed():
 	call_deferred("_apply_handbook_theme")
 
 func _on_restart():
+	_prepare_scene_transition(Input.MOUSE_MODE_CAPTURED)
+	LevelFlow.restart_current_level()
+
+func _on_return_to_level_select():
+	_prepare_scene_transition(Input.MOUSE_MODE_VISIBLE)
+	LevelFlow.return_to_level_select()
+
+func _prepare_scene_transition(next_mouse_mode: Input.MouseMode):
 	if pause_tween:
 		pause_tween.kill()
+	if game_over_tween:
+		game_over_tween.kill()
 	get_tree().paused = false
 	pause_dimmer.visible = false
 	pause_dimmer.modulate.a = 0.0
+	pause_blood_overlay.visible = false
+	pause_blood_overlay.modulate.a = 0.0
 	pause_panel.visible = false
 	pause_panel.modulate.a = 0.0
 	pause_panel.scale = Vector2(0.94, 0.94)
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	get_tree().reload_current_scene()
+	game_over_panel.visible = false
+	game_over_panel.modulate.a = 0.0
+	Input.mouse_mode = next_mouse_mode
 
 func _update_weapon_icon(weapon_name: String):
 	var weapon_key: String = weapon_name.to_lower()

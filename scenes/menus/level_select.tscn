@@ -1,0 +1,213 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/menus/level_select.gd" id="1_level_select"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 44
+font_color = Color(0.96, 0.98, 1, 1)
+outline_size = 3
+outline_color = Color(0, 0, 0, 0.88)
+
+[sub_resource type="LabelSettings" id="LabelSettings_subtitle"]
+font_size = 16
+font_color = Color(0.72, 0.78, 0.86, 1)
+outline_size = 1
+outline_color = Color(0, 0, 0, 0.84)
+
+[sub_resource type="LabelSettings" id="LabelSettings_body"]
+font_size = 14
+font_color = Color(0.82, 0.86, 0.92, 1)
+outline_size = 1
+outline_color = Color(0, 0, 0, 0.8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.028, 0.032, 0.04, 0.97)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.84, 0.9, 0.98, 0.14)
+shadow_color = Color(0, 0, 0, 0.42)
+shadow_size = 24
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+bg_color = Color(0.06, 0.07, 0.09, 0.98)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.82, 0.88, 0.95, 0.12)
+shadow_color = Color(0, 0, 0, 0.16)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+bg_color = Color(0.11, 0.125, 0.15, 0.98)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.92, 0.96, 1, 0.2)
+shadow_color = Color(0, 0, 0, 0.18)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+bg_color = Color(0.07, 0.085, 0.11, 0.98)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.94, 1, 0.18)
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_focus"]
+draw_center = false
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.98, 1, 0.2)
+shadow_color = Color(0.2, 0.26, 0.34, 0.1)
+shadow_size = 4
+
+[node name="LevelSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_level_select")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.018, 0.022, 0.03, 1)
+
+[node name="TopGlow" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.2
+anchor_top = 0.0
+anchor_right = 0.8
+anchor_bottom = 0.0
+offset_top = 40.0
+offset_bottom = 220.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.14, 0.18, 0.24, 0.18)
+
+[node name="MenuCard" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -220.0
+offset_right = 300.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="MenuCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MenuCard/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="MenuCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "DEAD ZONES"
+label_settings = SubResource("LabelSettings_title")
+
+[node name="SubtitleLabel" type="Label" parent="MenuCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "Select a deployment zone before the run starts."
+label_settings = SubResource("LabelSettings_subtitle")
+
+[node name="Divider" type="ColorRect" parent="MenuCard/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(420, 2)
+layout_mode = 2
+color = Color(0.84, 0.89, 0.95, 0.16)
+
+[node name="LevelOptionOneButton" type="Button" parent="MenuCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(220, 58)
+text = "Training Yard"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="LevelOptionOneDescription" type="Label" parent="MenuCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Original survival arena with stations, pickups, and compact lanes."
+label_settings = SubResource("LabelSettings_body")
+
+[node name="LevelOptionTwoButton" type="Button" parent="MenuCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(220, 58)
+text = "Forest Facility"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="LevelOptionTwoDescription" type="Label" parent="MenuCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Remote woodland compound with long sightlines and facility choke points."
+label_settings = SubResource("LabelSettings_body")
+
+[node name="FooterLabel" type="Label" parent="MenuCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+text = "Restart keeps the same selected map. Pause and game-over both offer a direct route back here."
+label_settings = SubResource("LabelSettings_subtitle")
