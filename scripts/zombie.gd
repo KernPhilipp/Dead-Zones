@@ -488,11 +488,13 @@ func _cache_base_visual_state():
 		base_part_rotations_deg[part_key] = part_node.rotation_degrees
 		base_part_scales[part_key] = part_node.scale
 
-	var weapon_socket: Node3D = $ModelRoot/Arm_R/WeaponSocket_R
-	base_weapon_socket_position = weapon_socket.position
-	base_weapon_socket_rotation_deg = weapon_socket.rotation_degrees
-	base_weapon_socket_scale = weapon_socket.scale
-	base_held_item_scale = held_item.scale
+	var weapon_socket: Node3D = get_node_or_null("ModelRoot/Forearm_R/WeaponSocket_R") as Node3D
+	if weapon_socket != null:
+		base_weapon_socket_position = weapon_socket.position
+		base_weapon_socket_rotation_deg = weapon_socket.rotation_degrees
+		base_weapon_socket_scale = weapon_socket.scale
+	if held_item != null:
+		base_held_item_scale = held_item.scale
 
 	for part_key_variant in hitbox_nodes.keys():
 		var part_key: String = String(part_key_variant)
@@ -579,19 +581,21 @@ func _apply_species_part_profile():
 			base_scale.z * maxf(0.05, part_scale.z)
 		)
 
-	var weapon_socket: Node3D = $ModelRoot/Arm_R/WeaponSocket_R
+	var weapon_socket: Node3D = get_node_or_null("ModelRoot/Forearm_R/WeaponSocket_R") as Node3D
 	var weapon_socket_offset: Vector3 = _read_vec3(species_visual_profile, "weapon_socket_offset", Vector3.ZERO)
 	var weapon_socket_rotation: Vector3 = _read_vec3(species_visual_profile, "weapon_socket_rotation_deg", Vector3.ZERO)
 	var held_item_scale: Vector3 = _read_vec3(species_visual_profile, "held_item_scale", Vector3.ONE)
 
-	weapon_socket.position = base_weapon_socket_position + weapon_socket_offset
-	weapon_socket.rotation_degrees = base_weapon_socket_rotation_deg + weapon_socket_rotation
-	weapon_socket.scale = base_weapon_socket_scale
-	held_item.scale = Vector3(
-		base_held_item_scale.x * maxf(0.0, held_item_scale.x),
-		base_held_item_scale.y * maxf(0.0, held_item_scale.y),
-		base_held_item_scale.z * maxf(0.0, held_item_scale.z)
-	)
+	if weapon_socket != null:
+		weapon_socket.position = base_weapon_socket_position + weapon_socket_offset
+		weapon_socket.rotation_degrees = base_weapon_socket_rotation_deg + weapon_socket_rotation
+		weapon_socket.scale = base_weapon_socket_scale
+	if held_item != null:
+		held_item.scale = Vector3(
+			base_held_item_scale.x * maxf(0.0, held_item_scale.x),
+			base_held_item_scale.y * maxf(0.0, held_item_scale.y),
+			base_held_item_scale.z * maxf(0.0, held_item_scale.z)
+		)
 
 func _apply_species_hitbox_profile():
 	var part_scale_map: Dictionary = species_visual_profile.get("part_scale", {})
