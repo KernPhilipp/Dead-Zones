@@ -146,10 +146,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -660.0
-offset_top = -392.0
-offset_right = 700.0
-offset_bottom = 392.0
-offset_left = -700.0
+offset_top = -360.0
+offset_right = 660.0
+offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_book_shell")
@@ -225,15 +224,15 @@ color = Color(0.7, 0.82, 0.79, 0.9)
 
 [node name="OuterMargin" type="MarginContainer" parent="BookFrame"]
 layout_mode = 2
-theme_override_constants/margin_left = 26
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 26
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="RootVBox" type="VBoxContainer" parent="BookFrame/OuterMargin"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="TopBar" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox"]
 layout_mode = 2
@@ -255,10 +254,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_tabs_bg")
 
 [node name="TabsMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ChapterTabsBg"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="ChapterTabs" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ChapterTabsBg/TabsMargin"]
 layout_mode = 2
@@ -267,19 +266,19 @@ theme_override_constants/separation = 6
 [node name="ContentRow" type="HBoxContainer" parent="BookFrame/OuterMargin/RootVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 16
+theme_override_constants/separation = 10
 
 [node name="LeftColumn" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(390, 0)
+custom_minimum_size = Vector2(360, 0)
 theme_override_styles/panel = SubResource("StyleBoxFlat_left_page")
 
 [node name="LeftMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="LeftVBox" type="VBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/LeftColumn/LeftMargin"]
 layout_mode = 2
@@ -310,10 +309,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_right_page")
 
 [node name="RightMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn"]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
 
 [node name="RightVBox" type="VBoxContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin"]
 layout_mode = 2
@@ -326,10 +325,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_ribbon")
 
 [node name="RibbonMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/TitleRibbon"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
 
 [node name="PageTitle" type="Label" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/TitleRibbon/RibbonMargin"]
 layout_mode = 2
@@ -349,10 +348,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_body_panel")
 
 [node name="BodyMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/BodyPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="PageBody" type="RichTextLabel" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/BodyPanel/BodyMargin"]
 layout_mode = 2
@@ -364,7 +363,7 @@ text = ""
 
 [node name="PortraitPanel" type="PanelContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit"]
 layout_mode = 2
-custom_minimum_size = Vector2(320, 0)
+custom_minimum_size = Vector2(290, 0)
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait_panel")
 
@@ -384,10 +383,10 @@ color = Color(0.42, 0.3, 0.63, 0.08)
 
 [node name="PortraitMargin" type="MarginContainer" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/PortraitPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="PageImage" type="TextureRect" parent="BookFrame/OuterMargin/RootVBox/ContentRow/RightColumn/RightMargin/RightVBox/ContentSplit/PortraitPanel/PortraitMargin"]
 layout_mode = 2
