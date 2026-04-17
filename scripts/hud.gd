@@ -52,6 +52,8 @@ var hud_opacity_slider: HSlider
 var hud_opacity_value_label: Label
 var crosshair_size_slider: HSlider
 var crosshair_size_value_label: Label
+var crosshair_style_option: OptionButton
+var crosshair_style_value_label: Label
 var feedback_intensity_slider: HSlider
 var feedback_intensity_value_label: Label
 var master_volume_slider: HSlider
@@ -112,6 +114,7 @@ var crosshair_dot_base_color: Color = Color(0.95, 0.97, 1.0, 1.0)
 var crosshair_segment_length: float = 4.0
 var crosshair_segment_thickness: float = 2.0
 var crosshair_dot_size: float = 2.0
+var crosshair_gap_scale: float = 1.0
 var damage_compass_markers: Array[Control] = []
 var damage_compass_next_index: int = 0
 var combat_message_priorities: Dictionary = {}
@@ -129,6 +132,7 @@ var last_wave_seen: int = 0
 var last_weapon_seen: String = ""
 var hud_opacity_setting: float = 0.92
 var crosshair_size_setting: float = 1.0
+var crosshair_style_setting: String = "classic"
 var feedback_intensity_setting: float = 0.8
 var master_volume_setting: float = 0.85
 var settings_initialized: bool = false
@@ -255,6 +259,8 @@ func _ensure_nodes():
 	hud_opacity_value_label = _find_required_node("HudOpacityValueLabel") as Label
 	crosshair_size_slider = _find_required_node("CrosshairSizeSlider") as HSlider
 	crosshair_size_value_label = _find_required_node("CrosshairSizeValueLabel") as Label
+	crosshair_style_option = _find_required_node("CrosshairStyleOption") as OptionButton
+	crosshair_style_value_label = _find_required_node("CrosshairStyleValueLabel") as Label
 	feedback_intensity_slider = _find_required_node("FeedbackIntensitySlider") as HSlider
 	feedback_intensity_value_label = _find_required_node("FeedbackIntensityValueLabel") as Label
 	master_volume_slider = _find_required_node("MasterVolumeSlider") as HSlider
@@ -282,9 +288,11 @@ func _setup_pause_settings():
 	crosshair_size_slider.value = crosshair_size_setting
 	feedback_intensity_slider.value = feedback_intensity_setting
 	master_volume_slider.value = master_volume_setting
+	_refresh_crosshair_style_option()
 	pause_settings_button.pressed.connect(_on_pause_settings_toggled)
 	hud_opacity_slider.value_changed.connect(_on_hud_opacity_changed)
 	crosshair_size_slider.value_changed.connect(_on_crosshair_size_changed)
+	crosshair_style_option.item_selected.connect(_on_crosshair_style_selected)
 	feedback_intensity_slider.value_changed.connect(_on_feedback_intensity_changed)
 	master_volume_slider.value_changed.connect(_on_master_volume_changed)
 	_refresh_setting_labels()
@@ -315,6 +323,17 @@ func _on_crosshair_size_changed(value: float):
 	_apply_crosshair_size()
 	_save_pause_settings()
 
+func _on_crosshair_style_selected(index: int):
+	if index == 1:
+		crosshair_style_setting = "tactical"
+	elif index == 2:
+		crosshair_style_setting = "minimal"
+	else:
+		crosshair_style_setting = "classic"
+	_refresh_setting_labels()
+	_apply_crosshair_size()
+	_save_pause_settings()
+
 func _on_feedback_intensity_changed(value: float):
 	feedback_intensity_setting = value
 	_refresh_setting_labels()
@@ -331,13 +350,31 @@ func _refresh_setting_labels():
 		return
 	hud_opacity_value_label.text = "%d%%" % int(round(hud_opacity_setting * 100.0))
 	crosshair_size_value_label.text = "%d%%" % int(round(crosshair_size_setting * 100.0))
+	crosshair_style_value_label.text = crosshair_style_setting.to_upper()
 	feedback_intensity_value_label.text = "%d%%" % int(round(feedback_intensity_setting * 100.0))
 	master_volume_value_label.text = "%d%%" % int(round(master_volume_setting * 100.0))
+	_refresh_crosshair_style_option()
+
+func _refresh_crosshair_style_option():
+	if crosshair_style_option == null:
+		return
+	if crosshair_style_option.item_count == 0:
+		crosshair_style_option.add_item("Classic")
+		crosshair_style_option.add_item("Tactical")
+		crosshair_style_option.add_item("Minimal")
+	var selected_index: int = 0
+	if crosshair_style_setting == "tactical":
+		selected_index = 1
+	elif crosshair_style_setting == "minimal":
+		selected_index = 2
+	if crosshair_style_option.selected != selected_index:
+		crosshair_style_option.select(selected_index)
 
 func _save_pause_settings():
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("hud", "opacity", hud_opacity_setting)
 	config.set_value("hud", "crosshair_size", crosshair_size_setting)
+	config.set_value("hud", "crosshair_style", crosshair_style_setting)
 	config.set_value("hud", "feedback_intensity", feedback_intensity_setting)
 	config.set_value("audio", "master_volume", master_volume_setting)
 	config.save(SETTINGS_PATH)
@@ -349,6 +386,9 @@ func _load_pause_settings():
 		return
 	hud_opacity_setting = clampf(float(config.get_value("hud", "opacity", hud_opacity_setting)), 0.65, 1.0)
 	crosshair_size_setting = clampf(float(config.get_value("hud", "crosshair_size", crosshair_size_setting)), 0.85, 1.25)
+	crosshair_style_setting = str(config.get_value("hud", "crosshair_style", crosshair_style_setting)).to_lower()
+	if crosshair_style_setting != "tactical" and crosshair_style_setting != "minimal":
+		crosshair_style_setting = "classic"
 	feedback_intensity_setting = clampf(float(config.get_value("hud", "feedback_intensity", feedback_intensity_setting)), 0.35, 1.0)
 	master_volume_setting = clampf(float(config.get_value("audio", "master_volume", master_volume_setting)), 0.0, 1.0)
 
@@ -372,9 +412,22 @@ func _apply_crosshair_size():
 	if crosshair_root == null:
 		return
 	crosshair_root.pivot_offset = crosshair_root.size * 0.5
-	crosshair_segment_length = round(lerpf(4.0, 7.0, inverse_lerp(0.85, 1.25, crosshair_size_setting)))
-	crosshair_segment_thickness = round(lerpf(2.0, 3.0, inverse_lerp(0.85, 1.25, crosshair_size_setting)))
-	crosshair_dot_size = round(lerpf(2.0, 3.0, inverse_lerp(0.85, 1.25, crosshair_size_setting)))
+	var size_ratio: float = inverse_lerp(0.85, 1.25, crosshair_size_setting)
+	if crosshair_style_setting == "tactical":
+		crosshair_segment_length = round(lerpf(5.0, 9.0, size_ratio))
+		crosshair_segment_thickness = round(lerpf(2.0, 3.0, size_ratio))
+		crosshair_dot_size = round(lerpf(1.0, 2.0, size_ratio))
+		crosshair_gap_scale = lerpf(1.05, 1.22, size_ratio)
+	elif crosshair_style_setting == "minimal":
+		crosshair_segment_length = round(lerpf(3.0, 5.0, size_ratio))
+		crosshair_segment_thickness = 1.0
+		crosshair_dot_size = round(lerpf(1.0, 2.0, size_ratio))
+		crosshair_gap_scale = lerpf(1.12, 1.28, size_ratio)
+	else:
+		crosshair_segment_length = round(lerpf(4.0, 7.0, size_ratio))
+		crosshair_segment_thickness = round(lerpf(2.0, 3.0, size_ratio))
+		crosshair_dot_size = round(lerpf(2.0, 3.0, size_ratio))
+		crosshair_gap_scale = lerpf(0.95, 1.08, size_ratio)
 
 func _find_required_node(node_name: String) -> Node:
 	var node := find_child(node_name, true, false)
@@ -572,7 +625,7 @@ func update_wave(wave: int, living_zombies: int, remaining_to_spawn: int):
 func update_crosshair(movement_ratio: float):
 	_ensure_nodes()
 	var ratio: float = clampf(movement_ratio, 0.0, 1.0)
-	var target_spread: float = lerpf(2.0, 5.0, ratio) + crosshair_extra_spread
+	var target_spread: float = (lerpf(2.0, 5.0, ratio) + crosshair_extra_spread) * crosshair_gap_scale
 	crosshair_spread = lerpf(crosshair_spread, target_spread, 0.2)
 	var center: float = floor(crosshair_root.size.x * 0.5)
 	var half_thickness: float = floor(crosshair_segment_thickness * 0.5)
@@ -590,6 +643,7 @@ func update_crosshair(movement_ratio: float):
 	crosshair_bottom.size = Vector2(crosshair_segment_thickness, crosshair_segment_length)
 	crosshair_dot.position = Vector2(center - floor(crosshair_dot_size * 0.5), center - floor(crosshair_dot_size * 0.5))
 	crosshair_dot.size = Vector2(crosshair_dot_size, crosshair_dot_size)
+	crosshair_dot.visible = crosshair_dot_size > 0.0
 	crosshair_dot.modulate.a = lerpf(crosshair_dot.modulate.a, lerpf(1.0, 0.68, ratio), 0.22)
 	if ratio > 0.45 and current_ammo_state == "READY":
 		_set_crosshair_state("move")
