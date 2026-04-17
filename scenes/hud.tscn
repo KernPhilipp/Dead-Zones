@@ -815,10 +815,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -244.0
-offset_top = -202.0
-offset_right = 244.0
-offset_bottom = 202.0
+offset_left = -260.0
+offset_top = -222.0
+offset_right = 260.0
+offset_bottom = 222.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gameover_card")
@@ -833,13 +833,20 @@ theme_override_constants/margin_bottom = 24
 [node name="VBoxContainer" type="VBoxContainer" parent="GameOverPanel/GameOverCard/MarginContainer"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
 [node name="GameOverLabel" type="Label" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
 layout_mode = 2
 horizontal_alignment = 1
 text = "GAME OVER"
 label_settings = SubResource("LabelSettings_gameover")
+
+[node name="GameOverMetaLabel" type="Label" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "SESSION TERMINATED"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.56)
 
 [node name="Divider" type="ColorRect" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(320, 3)
@@ -857,6 +864,13 @@ layout_mode = 2
 horizontal_alignment = 1
 text = "SESSION REPORT\nWAVE REACHED  01\nKILLS         0\nHEADSHOTS     0\nACCURACY      0%\nSURVIVAL      00:00"
 label_settings = SubResource("LabelSettings_small_status")
+
+[node name="GameOverFooterLabel" type="Label" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "REDEPLOY AVAILABLE"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.5)
 
 [node name="RestartButton" type="Button" parent="GameOverPanel/GameOverCard/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -885,25 +899,25 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -172.0
-offset_right = 250.0
-offset_bottom = 172.0
+offset_left = -220.0
+offset_top = -156.0
+offset_right = 220.0
+offset_bottom = 156.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pause_panel")
 
 [node name="MarginContainer" type="MarginContainer" parent="PausePanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PausePanel/MarginContainer"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="PauseLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -916,6 +930,13 @@ layout_mode = 2
 horizontal_alignment = 1
 text = "Wave 01 on hold. 0 kills confirmed so far."
 label_settings = SubResource("LabelSettings_stats_highlight")
+
+[node name="PauseMetaLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "SESSION LIVE  |  ESC TO RETURN"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.52)
 
 [node name="PauseDivider" type="ColorRect" parent="PausePanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 2)
@@ -943,26 +964,41 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 
-[node name="PauseSettingsContent" type="VBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer"]
+[node name="PauseSettingsContent" type="ScrollContainer" parent="PausePanel/MarginContainer/VBoxContainer"]
 visible = false
+custom_minimum_size = Vector2(0, 124)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 8
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
 
-[node name="PauseSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent"]
+[node name="PauseSettingsInner" type="VBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 6
+
+[node name="SettingsHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "TUNE HUD, CROSSHAIR, FEEDBACK AND AUDIO LIVE"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.58)
+
+[node name="PauseSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
 layout_mode = 2
 size_flags_horizontal = 4
 columns = 3
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 8
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 6
 
-[node name="HudOpacityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="HudOpacityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 text = "HUD OPACITY"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="HudOpacitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="HudOpacitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -971,20 +1007,20 @@ max_value = 1.0
 step = 0.01
 value = 0.92
 
-[node name="HudOpacityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="HudOpacityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "92%"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairSizeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="CrosshairSizeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 text = "CROSSHAIR"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairSizeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="CrosshairSizeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -993,20 +1029,20 @@ max_value = 1.25
 step = 0.01
 value = 1.0
 
-[node name="CrosshairSizeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="CrosshairSizeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "100%"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairStyleNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="CrosshairStyleNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 text = "STYLE"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairStyleOption" type="OptionButton" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="CrosshairStyleOption" type="OptionButton" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -1019,20 +1055,20 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 
-[node name="CrosshairStyleValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="CrosshairStyleValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "CLASSIC"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="FeedbackIntensityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="FeedbackIntensityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 text = "FEEDBACK FX"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="FeedbackIntensitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="FeedbackIntensitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -1041,20 +1077,20 @@ max_value = 1.0
 step = 0.01
 value = 0.8
 
-[node name="FeedbackIntensityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="FeedbackIntensityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "80%"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="MasterVolumeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="MasterVolumeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 text = "MASTER VOL"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="MasterVolumeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="MasterVolumeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -1062,7 +1098,7 @@ max_value = 1.0
 step = 0.01
 value = 0.85
 
-[node name="MasterVolumeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsGrid"]
+[node name="MasterVolumeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "85%"
@@ -1075,6 +1111,31 @@ horizontal_alignment = 1
 text = "SESSION SNAPSHOT\nHEADSHOTS  0\nACCURACY   0%\nSURVIVAL   00:00"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.74)
+
+[node name="SettingsActions" type="HBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="ResetSettingsButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer/SettingsActions"]
+custom_minimum_size = Vector2(150, 38)
+layout_mode = 2
+text = "Reset Settings"
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="SettingsStateLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/SettingsActions"]
+layout_mode = 2
+size_flags_vertical = 1
+text = "SAVED"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.52)
 
 [node name="ResumeButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
