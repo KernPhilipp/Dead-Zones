@@ -50,6 +50,7 @@ var pause_divider: ColorRect
 var pause_controls_label: Label
 var pause_settings_button: Button
 var pause_settings_content: ScrollContainer
+var pause_settings_grid: GridContainer
 var pause_session_label: Label
 var settings_hint_label: Label
 var reset_settings_button: Button
@@ -78,6 +79,7 @@ var restart_button: Button
 var health_panel: PanelContainer
 var wave_panel: PanelContainer
 var weapon_panel: PanelContainer
+var game_over_card: PanelContainer
 
 var status_timer: SceneTreeTimer
 var damage_flash_tween: Tween
@@ -194,6 +196,7 @@ func _ready():
 	status_label.text = "READY"
 	ammo_state_label.text = "READY"
 	ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
+	ammo_state_label.visible = false
 	ammo_label.text = "030 | 120"
 	last_ammo_value = -1
 	game_over_panel.modulate.a = 0.0
@@ -220,6 +223,9 @@ func _ready():
 	_load_pause_settings()
 	_setup_pause_settings()
 	_setup_handbook_overlay()
+	if not get_viewport().size_changed.is_connected(_on_viewport_resized):
+		get_viewport().size_changed.connect(_on_viewport_resized)
+	_apply_responsive_layout()
 	_show_start_hints()
 
 func _ensure_nodes():
@@ -271,6 +277,7 @@ func _ensure_nodes():
 	pause_controls_label = _find_required_node("PauseControlsLabel") as Label
 	pause_settings_button = _find_required_node("PauseSettingsButton") as Button
 	pause_settings_content = _find_required_node("PauseSettingsContent") as ScrollContainer
+	pause_settings_grid = _find_required_node("PauseSettingsGrid") as GridContainer
 	pause_session_label = _find_required_node("PauseSessionLabel") as Label
 	settings_hint_label = _find_required_node("SettingsHintLabel") as Label
 	reset_settings_button = _find_required_node("ResetSettingsButton") as Button
@@ -299,6 +306,7 @@ func _ensure_nodes():
 	health_panel = _find_required_node("HealthPanel") as PanelContainer
 	wave_panel = _find_required_node("WavePanel") as PanelContainer
 	weapon_panel = _find_required_node("WeaponPanel") as PanelContainer
+	game_over_card = _find_required_node("GameOverCard") as PanelContainer
 	damage_compass_markers = [damage_compass_marker, damage_compass_marker_alt_a, damage_compass_marker_alt_b]
 	nodes_initialized = true
 
@@ -331,14 +339,6 @@ func _apply_pause_screen_mode():
 	if pause_panel == null or pause_settings_button == null:
 		return
 	if settings_screen_open:
-		pause_panel.anchor_left = 0.08
-		pause_panel.anchor_top = 0.08
-		pause_panel.anchor_right = 0.92
-		pause_panel.anchor_bottom = 0.92
-		pause_panel.offset_left = 0.0
-		pause_panel.offset_top = 0.0
-		pause_panel.offset_right = 0.0
-		pause_panel.offset_bottom = 0.0
 		pause_label.text = "SETTINGS"
 		pause_summary_label.visible = false
 		pause_meta_label.text = "LIVE SETTINGS  |  ESC TO GO BACK"
@@ -376,6 +376,7 @@ func _apply_pause_screen_mode():
 		handbook_button.visible = true
 		pause_restart_button.visible = true
 		pause_settings_button.text = "Settings"
+	_apply_responsive_layout()
 
 func _on_reset_settings_pressed():
 	hud_opacity_setting = 0.92
@@ -515,7 +516,6 @@ func _feedback_alpha(alpha: float) -> float:
 func _apply_crosshair_size():
 	if crosshair_root == null:
 		return
-	crosshair_root.pivot_offset = crosshair_root.size * 0.5
 	var size_ratio: float = inverse_lerp(0.85, 1.25, crosshair_size_setting)
 	if crosshair_style_setting == "tactical":
 		crosshair_segment_length = round(lerpf(5.0, 9.0, size_ratio))
@@ -532,6 +532,131 @@ func _apply_crosshair_size():
 		crosshair_segment_thickness = round(lerpf(2.0, 3.0, size_ratio))
 		crosshair_dot_size = round(lerpf(2.0, 3.0, size_ratio))
 		crosshair_gap_scale = lerpf(0.95, 1.08, size_ratio)
+	_apply_responsive_layout()
+
+func _on_viewport_resized():
+	_apply_responsive_layout()
+
+func _apply_responsive_layout():
+	if not nodes_initialized:
+		return
+
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+
+	var safe_x: float = clampf(viewport_size.x * 0.018, 16.0, 28.0)
+	var safe_y: float = clampf(viewport_size.y * 0.022, 16.0, 28.0)
+	var left_panel_width: float = clampf(viewport_size.x * 0.22, 180.0, 286.0)
+	var right_panel_width: float = clampf(viewport_size.x * 0.24, 190.0, 300.0)
+
+	wave_panel.offset_left = safe_x
+	wave_panel.offset_top = safe_y
+	wave_panel.offset_right = safe_x + left_panel_width
+	wave_panel.offset_bottom = safe_y + clampf(viewport_size.y * 0.095, 68.0, 88.0)
+
+	health_panel.offset_left = safe_x
+	health_panel.offset_right = safe_x + left_panel_width
+	health_panel.offset_top = -clampf(viewport_size.y * 0.125, 76.0, 102.0)
+	health_panel.offset_bottom = -safe_y
+
+	var right_left: float = -safe_x - right_panel_width
+	var right_right: float = -safe_x
+	var ammo_height: float = 30.0
+	var status_height: float = 18.0
+	var reload_height: float = 26.0
+	var weapon_height: float = clampf(viewport_size.y * 0.11, 66.0, 84.0)
+	var right_gap: float = 10.0
+	var ammo_bottom: float = -safe_y
+	var ammo_top: float = ammo_bottom - ammo_height
+	var weapon_bottom: float = ammo_top - 22.0
+	var weapon_top: float = weapon_bottom - weapon_height
+	var status_bottom: float = weapon_top - 12.0
+	var status_top: float = status_bottom - status_height
+	var reload_bottom: float = status_top - right_gap
+	var reload_top: float = reload_bottom - reload_height
+
+	ammo_label.offset_left = right_left
+	ammo_label.offset_top = ammo_top
+	ammo_label.offset_right = right_right
+	ammo_label.offset_bottom = ammo_bottom
+	weapon_panel.offset_left = right_left
+	weapon_panel.offset_top = weapon_top
+	weapon_panel.offset_right = right_right
+	weapon_panel.offset_bottom = weapon_bottom
+	status_label.offset_left = right_left
+	status_label.offset_top = status_top
+	status_label.offset_right = right_right
+	status_label.offset_bottom = status_bottom
+	reload_panel.offset_left = right_left
+	reload_panel.offset_top = reload_top
+	reload_panel.offset_right = right_right
+	reload_panel.offset_bottom = reload_bottom
+
+	var game_over_width_max: float = maxf(360.0, viewport_size.x - safe_x * 2.0)
+	var game_over_height_max: float = maxf(330.0, viewport_size.y - safe_y * 2.0)
+	var game_over_width: float = clampf(viewport_size.x * 0.54, 360.0, game_over_width_max)
+	var game_over_height: float = clampf(viewport_size.y * 0.68, 330.0, game_over_height_max)
+	game_over_card.offset_left = -game_over_width * 0.5
+	game_over_card.offset_top = -game_over_height * 0.5
+	game_over_card.offset_right = game_over_width * 0.5
+	game_over_card.offset_bottom = game_over_height * 0.5
+	restart_button.custom_minimum_size = Vector2(minf(220.0, game_over_width * 0.46), 48.0)
+
+	var pause_width: float
+	var pause_height: float
+	if settings_screen_open:
+		var settings_width_max: float = maxf(360.0, viewport_size.x - safe_x * 2.0)
+		var settings_height_max: float = maxf(300.0, viewport_size.y - safe_y * 2.0)
+		pause_width = clampf(viewport_size.x * 0.72, 360.0, settings_width_max)
+		pause_height = clampf(viewport_size.y * 0.78, 300.0, settings_height_max)
+		pause_settings_content.custom_minimum_size.y = clampf(pause_height - 240.0, 170.0, 380.0)
+		pause_settings_grid.set("theme_override_constants/h_separation", 12 if pause_width >= 540.0 else 8)
+	else:
+		var pause_width_max: float = maxf(320.0, minf(460.0, viewport_size.x - safe_x * 2.0))
+		var pause_height_max: float = maxf(260.0, minf(380.0, viewport_size.y - safe_y * 2.0))
+		pause_width = clampf(viewport_size.x * 0.42, 320.0, pause_width_max)
+		pause_height = clampf(viewport_size.y * 0.58, 260.0, pause_height_max)
+		pause_settings_content.custom_minimum_size.y = 0.0
+		pause_settings_grid.set("theme_override_constants/h_separation", 10)
+
+	pause_panel.anchor_left = 0.5
+	pause_panel.anchor_top = 0.5
+	pause_panel.anchor_right = 0.5
+	pause_panel.anchor_bottom = 0.5
+	pause_panel.offset_left = -pause_width * 0.5
+	pause_panel.offset_top = -pause_height * 0.5
+	pause_panel.offset_right = pause_width * 0.5
+	pause_panel.offset_bottom = pause_height * 0.5
+
+	var pause_button_width: float = clampf(pause_width * 0.48, 160.0, 220.0)
+	pause_settings_button.custom_minimum_size = Vector2(pause_button_width, 40.0)
+	resume_button.custom_minimum_size = Vector2(pause_button_width, 44.0)
+	handbook_button.custom_minimum_size = Vector2(pause_button_width, 44.0)
+	pause_restart_button.custom_minimum_size = Vector2(pause_button_width, 44.0)
+	reset_settings_button.custom_minimum_size = Vector2(clampf(pause_width * 0.34, 130.0, 180.0), 38.0)
+
+	var wrap_labels: Array[Label] = [
+		pause_summary_label,
+		pause_meta_label,
+		pause_controls_label,
+		pause_session_label,
+		settings_hint_label,
+		game_over_meta_label,
+		game_over_summary_label,
+		game_over_stats_label,
+		game_over_footer_label,
+		game_over_hint_label
+	]
+	for label in wrap_labels:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+	var crosshair_half_extent: float = crosshair_segment_length + ((5.0 + 1.6) * crosshair_gap_scale) + 8.0
+	var crosshair_side: float = maxf(44.0, ceil(crosshair_half_extent * 2.0))
+	crosshair_root.custom_minimum_size = Vector2(crosshair_side, crosshair_side)
+	crosshair_root.size = crosshair_root.custom_minimum_size
+	crosshair_root.pivot_offset = crosshair_root.size * 0.5
+	update_crosshair(0.0)
 
 func _find_required_node(node_name: String) -> Node:
 	var node := find_child(node_name, true, false)
@@ -653,8 +778,6 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		current_ammo_state = "EMPTY"
 		ammo_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
 		reserve_label.modulate = Color(0.98, 0.52, 0.42, 0.96)
-		ammo_state_label.modulate = Color(1.0, 0.28, 0.22, 1.0)
-		ammo_state_label.text = "MAG EMPTY"
 		_set_crosshair_state("empty")
 		recent_threat_time = maxf(recent_threat_time, 0.8)
 		_start_ammo_warning()
@@ -662,8 +785,6 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		current_ammo_state = "LOW AMMO"
 		ammo_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
 		reserve_label.modulate = Color(1.0, 0.54, 0.46, 0.96)
-		ammo_state_label.modulate = Color(1.0, 0.34, 0.28, 1.0)
-		ammo_state_label.text = "LOW AMMO"
 		_set_crosshair_state("warning")
 		recent_threat_time = maxf(recent_threat_time, 0.4)
 		_start_ammo_warning()
@@ -671,16 +792,12 @@ func update_ammo(current: int, max_val: int, reserve: int):
 		current_ammo_state = "CHECK MAG"
 		ammo_label.modulate = Color(1.0, 0.82, 0.35, 1.0)
 		reserve_label.modulate = Color(0.98, 0.82, 0.38, 0.96)
-		ammo_state_label.modulate = Color(1.0, 0.82, 0.35, 0.96)
-		ammo_state_label.text = "CHECK MAG"
 		_set_crosshair_state("warning")
 		_stop_ammo_warning()
 	else:
 		current_ammo_state = "READY"
 		ammo_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
 		reserve_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
-		ammo_state_label.modulate = Color(0.82, 0.86, 0.92, 0.9)
-		ammo_state_label.text = "READY"
 		_set_crosshair_state("default")
 		_stop_ammo_warning()
 	_apply_adaptive_hud_presence()
@@ -694,8 +811,6 @@ func update_reload(active: bool, progress: float):
 		reload_was_active = true
 		_set_crosshair_state("reload")
 		recent_threat_time = maxf(recent_threat_time, 0.3)
-		ammo_state_label.text = "RELOADING %02d%%" % int(round(progress * 100.0))
-		ammo_state_label.modulate = Color(1.0, 0.8, 0.35, 1.0)
 		ammo_label.modulate = Color(1.0, 0.92, 0.66, 1.0)
 		reserve_label.modulate = Color(1.0, 0.82, 0.42, 0.96)
 		_stop_ammo_warning()
