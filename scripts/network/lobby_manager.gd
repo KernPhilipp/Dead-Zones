@@ -1,6 +1,6 @@
 extends Node
 
-signal lobby_updated(players: Dictionary)
+signal lobby_updated(lobby_data: Dictionary)
 signal all_players_ready
 signal game_starting
 
