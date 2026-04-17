@@ -981,9 +981,21 @@ theme_override_constants/separation = 6
 [node name="SettingsHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
 layout_mode = 2
 horizontal_alignment = 1
-text = "TUNE HUD, CROSSHAIR, FEEDBACK AND AUDIO LIVE"
+text = "ADJUST VISIBILITY, AIM AND AUDIO LIVE"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.58)
+
+[node name="HudCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+text = "HUD"
+label_settings = SubResource("LabelSettings_status")
+modulate = Color(0.86, 0.91, 0.98, 0.9)
+
+[node name="HudCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+text = "MAKE PANELS AND OVERLAYS EASIER TO READ"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.52)
 
 [node name="PauseSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
 layout_mode = 2
@@ -994,7 +1006,7 @@ theme_override_constants/v_separation = 6
 
 [node name="HudOpacityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
-text = "HUD OPACITY"
+text = "VISIBILITY"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
@@ -1014,9 +1026,21 @@ text = "92%"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairSizeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="CrosshairCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
 layout_mode = 2
 text = "CROSSHAIR"
+label_settings = SubResource("LabelSettings_status")
+modulate = Color(0.86, 0.91, 0.98, 0.9)
+
+[node name="CrosshairCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+text = "TUNE SIZE AND STYLE FOR CLEANER AIM"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.52)
+
+[node name="CrosshairSizeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+layout_mode = 2
+text = "SIZE"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
@@ -1038,7 +1062,7 @@ modulate = Color(1, 1, 1, 0.82)
 
 [node name="CrosshairStyleNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
-text = "STYLE"
+text = "PRESET"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
@@ -1064,7 +1088,7 @@ modulate = Color(1, 1, 1, 0.82)
 
 [node name="FeedbackIntensityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
-text = "FEEDBACK FX"
+text = "FX LEVEL"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
@@ -1084,9 +1108,21 @@ text = "80%"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
+[node name="AudioCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+text = "AUDIO"
+label_settings = SubResource("LabelSettings_status")
+modulate = Color(0.86, 0.91, 0.98, 0.9)
+
+[node name="AudioCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+text = "SET OVERALL VOLUME FOR THE SESSION"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.52)
+
 [node name="MasterVolumeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
 layout_mode = 2
-text = "MASTER VOL"
+text = "MASTER"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 

@@ -331,10 +331,14 @@ func _apply_pause_screen_mode():
 	if pause_panel == null or pause_settings_button == null:
 		return
 	if settings_screen_open:
-		pause_panel.offset_left = -300.0
-		pause_panel.offset_top = -220.0
-		pause_panel.offset_right = 300.0
-		pause_panel.offset_bottom = 220.0
+		pause_panel.anchor_left = 0.08
+		pause_panel.anchor_top = 0.08
+		pause_panel.anchor_right = 0.92
+		pause_panel.anchor_bottom = 0.92
+		pause_panel.offset_left = 0.0
+		pause_panel.offset_top = 0.0
+		pause_panel.offset_right = 0.0
+		pause_panel.offset_bottom = 0.0
 		pause_label.text = "SETTINGS"
 		pause_summary_label.visible = false
 		pause_meta_label.text = "LIVE SETTINGS  |  ESC TO GO BACK"
@@ -350,6 +354,10 @@ func _apply_pause_screen_mode():
 		pause_restart_button.visible = false
 		pause_settings_button.text = "Back"
 	else:
+		pause_panel.anchor_left = 0.5
+		pause_panel.anchor_top = 0.5
+		pause_panel.anchor_right = 0.5
+		pause_panel.anchor_bottom = 0.5
 		pause_panel.offset_left = -220.0
 		pause_panel.offset_top = -156.0
 		pause_panel.offset_right = 220.0
@@ -1403,9 +1411,9 @@ func _update_pause_menu_content():
 
 	pause_summary_label.text = "WAVE %02d PAUSED\n%d HOSTILES ELIMINATED" % [wave, kills]
 	pause_meta_label.text = "SESSION LIVE  |  ESC TO RETURN"
-	pause_controls_label.text = "FIELD CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
+	pause_controls_label.text = "CONTROLS\nMOVE  WASD\nFIRE  LMB\nRELOAD  R\nSWAP  1 / 2 / WHEEL\nPAUSE  ESC"
 	pause_session_label.text = "SESSION SNAPSHOT\nHEADSHOTS  %d\nACCURACY   %.0f%%\nSURVIVAL   %02d:%02d" % [headshots, accuracy, minutes, seconds]
-	settings_hint_label.text = "LIVE SETTINGS APPLY IMMEDIATELY AND SAVE TO YOUR PROFILE"
+	settings_hint_label.text = "CHANGES APPLY LIVE AND SAVE AUTOMATICALLY"
 	_refresh_setting_labels()
 
 func _update_adaptive_hud(delta: float):
@@ -1472,7 +1480,7 @@ func _get_session_elimination_count() -> int:
 func _format_game_over_summary(stats: Dictionary) -> String:
 	var wave: int = int(stats.get("wave", 0))
 	var kills: int = int(stats.get("kills", 0))
-	return "WAVE %02d REACHED\n%d HOSTILES ELIMINATED" % [wave, kills]
+	return "%d HOSTILES ELIMINATED\nWAVE %02d REACHED" % [kills, wave]
 
 func _format_game_over_stats(stats: Dictionary) -> String:
 	var wave: int = int(stats.get("wave", 0))
@@ -1482,4 +1490,4 @@ func _format_game_over_stats(stats: Dictionary) -> String:
 	var total_seconds: int = int(stats.get("time_seconds", 0))
 	var minutes: int = total_seconds / 60
 	var seconds: int = total_seconds % 60
-	return "SESSION REPORT\nWAVE REACHED  %02d\nKILLS         %d\nHEADSHOTS     %d\nACCURACY      %.0f%%\nSURVIVAL      %02d:%02d" % [wave, kills, headshots, accuracy, minutes, seconds]
+	return "SESSION REPORT\nHEADSHOTS   %d\nACCURACY    %.0f%%\nSURVIVAL    %02d:%02d\nWAVE        %02d" % [headshots, accuracy, minutes, seconds, wave]
