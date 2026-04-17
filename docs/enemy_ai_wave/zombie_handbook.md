@@ -99,6 +99,25 @@ Designziel:
 - Implementierungsstatus
 - RacheBonus-Flag
 
+## 4.1 DeathSubtype-Visual-Layer (dezent, austauschbar)
+
+Die Todesart wird zusaetzlich ueber einen separaten Visual-Layer angedeutet:
+- `scripts/zombie_death_visuals.gd` (Datenbank pro Subtype)
+- `scripts/zombie_death_visual_controller.gd` (Runtime-Instanzierung)
+- `scripts/zombie.gd` (Anbindung beim Profil-Apply)
+
+Aktiv jetzt:
+- `visual_mode = particle` (dezent, farbcodiert pro Todesart)
+
+Vorbereitet fuer spaeter:
+- `visual_mode = attachment_model`
+- `visual_mode = mesh_overlay`
+
+Wichtig:
+- Species-/Rank-/Mort-Lesbarkeit bleibt erhalten
+- DeathSubtype-Visuals sind von DeathSubtype-Gameplay getrennt
+- aktuelle Partikel sind technische Vorschau, nicht finales VFX
+
 ## 5. Mort-Grad (0..10)
 
 Semantik:
@@ -143,6 +162,33 @@ Attack-Cooldown:
 - `g < 6`: `1.0 - (6-g) * 0.015`
 - `g > 6`: `1.0 + (g-6) * 0.025`
 - Clamp: `0.90 .. 1.25`
+
+### 5.3 Visuelle Mort-Darstellung
+
+Mort-Grad wirkt jetzt auch als separater Visual-Layer:
+- niedriger Mort-Grad: heller
+- hoher Mort-Grad: dunkler
+
+Technische Dunkelheitskurve (Vorlage):
+- Mort 0: 0.00
+- Mort 1: 0.04
+- Mort 2: 0.08
+- Mort 3: 0.12
+- Mort 4: 0.17
+- Mort 5: 0.22
+- Mort 6: 0.28
+- Mort 7: 0.36
+- Mort 8: 0.45
+- Mort 9: 0.55
+- Mort 10: 0.65
+
+Implementierung:
+- `scripts/zombie_mort_visuals.gd` liefert Mort-Visual-Profil und Dunkelheitswerte
+- `scripts/zombie.gd` legt den Mort-Layer ueber die Species-Palette
+
+Wichtig:
+- Species-/Rank-Lesbarkeit bleibt erhalten
+- Mort-Layer ist austauschbar fuer spaetere Art-Polish-Pipelines
 
 ## 6. Rang-Hierarchie
 
@@ -189,3 +235,35 @@ Seiten ohne Bildbedarf (z. B. viele Grundlagen/Meta-Seiten):
 
 - Wellenruntime: [wave_runtime.md](./wave_runtime.md)
 - Todesarten-Status: [death_effects_status.md](./death_effects_status.md)
+- DeathSubtype-Visual-Layer: [death_subtype_visual_layer.md](./death_subtype_visual_layer.md)
+- Jump-Test-Hindernisse: [jump_test_obstacles.md](./jump_test_obstacles.md)
+
+## 10. Sprungtest-Hindernisse (Vorlage)
+
+Im Grundlagen-Kapitel gibt es eine eigene Handbuchseite `Sprungtest-Hindernisse`.
+
+Zweck:
+- Vorbereitung fuer spaetere Zombie-Sprungtests
+- klar abgestufte Hindernisse von `very_low` bis `borderline`
+- keine finale Traversal-Logik in diesem Schritt
+
+Technik:
+- Prefab: `res://scenes/wave/jump_test_obstacle.tscn`
+- Testbereich: `res://scenes/wave/zombie_jump_test_area.tscn`
+- Gruppen/Metadaten fuer spaetere KI-Anbindung sind bereits gesetzt
+
+## 11. Zombie-Sprungbasis
+
+Die einfache Sprungfunktion ist jetzt direkt in der Zombie-Logik vorhanden.
+
+Wesentliche Punkte:
+- klarer Air-State (`is_grounded`, `is_jumping`, `is_falling`)
+- Sprung nur vom Boden, kein Doppelsprung
+- Luftphase mit separater Jump-/Fall-Gravity-Skalierung
+- Landung mit kurzer Recovery
+- waehrend Airborne keine normalen Nahkampfangriffe
+- optionale leichte Vorwaerts-Probe auf `jumpable_candidate`
+
+Technische Details:
+- `scripts/zombie.gd`
+- siehe: [zombie_jump_basics.md](./zombie_jump_basics.md)

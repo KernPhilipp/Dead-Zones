@@ -3,6 +3,8 @@ class_name ZombieHandbookData
 
 const ZombieDefinitions = preload("res://scripts/zombie_definitions.gd")
 const ZombieDeathEffects = preload("res://scripts/zombie_death_effects.gd")
+const ZombieDeathVisuals = preload("res://scripts/zombie_death_visuals.gd")
+const ZombieMortVisuals = preload("res://scripts/zombie_mort_visuals.gd")
 
 const HANDBOOK_CATEGORY_ORDER: Array[int] = [
 	ZombieDefinitions.HandbookCategory.GEWOEHNLICH,
@@ -88,6 +90,9 @@ static func get_mort_grade_glossary() -> Dictionary:
 	return {
 		"name": "Mort-Grad",
 		"description": "Beschreibt den Zerfallszustand als Gameplay-Layer von 0 (frisch) bis 10 (stark verwest).",
+		"visual_note": "Mort-Grad wird zusaetzlich visuell dargestellt: hoeherer Grad = dunklerer Zombie.",
+		"visual_low": "Grad 0 ist am hellsten.",
+		"visual_high": "Grad 10 ist deutlich dunkler, aber weiterhin lesbar.",
 		"neutral_grade": ZombieDefinitions.MORT_GRADE_NEUTRAL,
 		"low_mort": "Niedrige Grade (0-2) sind etwas schneller und gefaehrlicher.",
 		"high_mort": "Hohe Grade (9-10) sind deutlich traeger und schwaecher.",
@@ -112,6 +117,7 @@ static func get_mort_grade_entries() -> Array[Dictionary]:
 	for grade in range(ZombieDefinitions.MORT_GRADE_MIN, ZombieDefinitions.MORT_GRADE_MAX + 1):
 		var modifiers: Dictionary = ZombieDefinitions.get_mort_grade_modifiers(grade)
 		var probability: float = float(probability_table.get(grade, 0.0))
+		var visual_profile: Dictionary = ZombieMortVisuals.get_visual_profile(grade)
 		entries.append({
 			"grade": grade,
 			"probability": probability,
@@ -119,7 +125,9 @@ static func get_mort_grade_entries() -> Array[Dictionary]:
 			"raw_weight": ZombieDefinitions.get_mort_grade_raw_weight(grade),
 			"speed_mult": float(modifiers["speed_mult"]),
 			"damage_mult": float(modifiers["damage_mult"]),
-			"attack_cooldown_mult": float(modifiers["attack_cooldown_mult"])
+			"attack_cooldown_mult": float(modifiers["attack_cooldown_mult"]),
+			"visual_darkness": float(visual_profile.get("darkness", 0.0)),
+			"visual_tier_label": String(visual_profile.get("tier_label", ""))
 		})
 	return entries
 
@@ -198,6 +206,7 @@ static func get_death_subtype_entries() -> Array[Dictionary]:
 		var class_cfg: Dictionary = ZombieDefinitions.get_death_class_data(int(subtype_cfg["death_class"]))
 		var rarity_cfg: Dictionary = ZombieDefinitions.get_death_rarity_data(int(subtype_cfg["rarity"]))
 		var effect_cfg: Dictionary = ZombieDeathEffects.get_effect_profile(subtype_id)
+		var visual_cfg: Dictionary = ZombieDeathVisuals.get_visual_profile(subtype_id)
 		entries.append({
 			"id": String(subtype_cfg["id"]),
 			"name": String(subtype_cfg["display_name"]),
@@ -216,7 +225,14 @@ static func get_death_subtype_entries() -> Array[Dictionary]:
 			"active_hooks": effect_cfg.get("active_hooks", []),
 			"planned_hooks": effect_cfg.get("planned_hooks", []),
 			"image_path": String(effect_cfg["image_path"]),
-			"ai_prompt": String(effect_cfg["ai_prompt"])
+			"ai_prompt": String(effect_cfg["ai_prompt"]),
+			"visual_mode": String(visual_cfg.get("visual_mode", ZombieDeathVisuals.VISUAL_MODE_NONE)),
+			"visual_color_hex": String(visual_cfg.get("display_color_hex", "#7a92a1")),
+			"visual_secondary_color_hex": String(visual_cfg.get("secondary_color_hex", "#4f616b")),
+			"visual_intensity": float(visual_cfg.get("intensity", 0.0)),
+			"visual_anchor": String(visual_cfg.get("spawn_anchor", "torso")),
+			"visual_is_placeholder": bool(visual_cfg.get("is_placeholder", true)),
+			"visual_note": String(visual_cfg.get("note", "Subtile farbcodierte Todesart-Andeutung."))
 		})
 	return entries
 

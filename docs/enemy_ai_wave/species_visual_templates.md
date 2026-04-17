@@ -34,6 +34,16 @@ Pro Species werden aktuell datengetrieben gesetzt:
 - `silhouette_tags`
 - `reference_image`
 
+Zusaetzlicher Mort-Visual-Layer:
+- Quelle: `scripts/zombie_mort_visuals.gd`
+- Regel: hoeherer Mort-Grad = dunklerer Farbwert ueber der Species-Basispalette
+- Die Species-Silhouette bleibt erhalten, nur Helligkeit wird stufenweise reduziert
+
+Zusaetzlicher DeathSubtype-Visual-Layer:
+- Quelle: `scripts/zombie_death_visuals.gd` + `scripts/zombie_death_visual_controller.gd`
+- Regel: subtile farbcodierte Andeutung pro Todesart (aktuell Partikel)
+- bewusst getrennt vom Species-/Mort-Layer, damit spaetere Modellanhaenge einfach andocken koennen
+
 ## 2. Austauschbarkeit
 
 Die Visuals sind bewusst getrennt von der Kern-KI:
@@ -93,3 +103,21 @@ Nicht Bestandteil dieses Schritts:
 Fokus bleibt:
 - schnell lesbare Artenunterschiede
 - merge-sichere, austauschbare technische Vorlage
+
+## 6. Mort-Grad Visualisierung (0-10)
+
+Die technische Dunkelheitskurve:
+- 0: 0.00
+- 1: 0.04
+- 2: 0.08
+- 3: 0.12
+- 4: 0.17
+- 5: 0.22
+- 6: 0.28
+- 7: 0.36
+- 8: 0.45
+- 9: 0.55
+- 10: 0.65
+
+Hinweis:
+- Diese Kurve ist eine austauschbare Vorlage, kein finaler Art-Look.

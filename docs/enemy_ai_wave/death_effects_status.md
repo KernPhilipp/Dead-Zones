@@ -10,6 +10,7 @@ Statuswerte:
 Hinweis:
 - Alle DeathSubtypes sind im Handbuch sichtbar.
 - Ein separater `Todesklassen`-Reiter wurde entfernt; Klassen erscheinen als Gruppen im Reiter `Todesarten`.
+- DeathSubtype-Visuals laufen separat ueber `zombie_death_visuals.gd` und sind nicht mit Gameplay-Hooks vermischt.
 
 ## 1. Voll aktiv (`active_now`)
 
@@ -84,3 +85,12 @@ Wenn `revenge_bonus=true`:
 Todesarten-Eintraege laden zuerst ihr spezifisches Bild.
 Falls ein Bild fehlt oder fehlschlaegt, greift der Platzhalter:
 - `res://assets/handbook/placeholder_missing.svg`
+
+## 7. Visual-Hinweis pro Todesart
+
+Jede Todesart hat jetzt zusaetzlich:
+- eigenen Visual-Farbwert
+- Visual-Modus (`particle` aktiv, `attachment_model`/`mesh_overlay` vorbereitet)
+- Intensitaet und Anchor
+
+Die aktuelle Partikeldarstellung ist absichtlich dezent und austauschbar.

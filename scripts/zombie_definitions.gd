@@ -1011,6 +1011,24 @@ const RANK_DATA: Dictionary = {
 	}
 }
 
+const SPECIES_JUMP_PROFILE_DATA: Dictionary = {
+	Species.WALKER: {"can_jump": true, "force_mult": 1.0, "cooldown_mult": 1.0, "willingness": 1.0},
+	Species.TUMBLER: {"can_jump": true, "force_mult": 0.95, "cooldown_mult": 1.08, "willingness": 0.86},
+	Species.BRUTE: {"can_jump": true, "force_mult": 0.72, "cooldown_mult": 1.35, "willingness": 0.55},
+	Species.TWINK: {"can_jump": true, "force_mult": 1.05, "cooldown_mult": 0.94, "willingness": 1.1},
+	Species.BUFFED: {"can_jump": true, "force_mult": 1.12, "cooldown_mult": 1.05, "willingness": 0.9},
+	Species.CRAWLER: {"can_jump": false, "force_mult": 0.0, "cooldown_mult": 2.5, "willingness": 0.0},
+	Species.GRANNY: {"can_jump": true, "force_mult": 0.84, "cooldown_mult": 1.18, "willingness": 0.68},
+	Species.HIDDER: {"can_jump": true, "force_mult": 1.0, "cooldown_mult": 1.0, "willingness": 1.05},
+	Species.SPRINTER: {"can_jump": true, "force_mult": 1.28, "cooldown_mult": 0.75, "willingness": 1.35},
+	Species.SKINNER: {"can_jump": true, "force_mult": 1.1, "cooldown_mult": 0.9, "willingness": 1.15},
+	Species.BOMB: {"can_jump": true, "force_mult": 0.92, "cooldown_mult": 1.0, "willingness": 0.8},
+	Species.FEEDER: {"can_jump": true, "force_mult": 0.88, "cooldown_mult": 1.12, "willingness": 0.74},
+	Species.CRY_BABY: {"can_jump": true, "force_mult": 0.78, "cooldown_mult": 1.24, "willingness": 0.42},
+	Species.PANICO: {"can_jump": true, "force_mult": 1.22, "cooldown_mult": 0.82, "willingness": 1.25},
+	Species.SKULLY: {"can_jump": true, "force_mult": 1.02, "cooldown_mult": 0.96, "willingness": 1.0}
+}
+
 static func get_species_order() -> Array[int]:
 	return SPECIES_ORDER.duplicate()
 
@@ -1308,6 +1326,109 @@ static func get_rank_spawn_interval_factor(rank: int) -> float:
 static func get_rank_speed_cap(rank: int) -> float:
 	var rank_cfg: Dictionary = get_rank_data(rank)
 	return float(rank_cfg.get("speed_cap", 8.0))
+
+static func get_species_jump_profile(species: int) -> Dictionary:
+	if SPECIES_JUMP_PROFILE_DATA.has(species):
+		return SPECIES_JUMP_PROFILE_DATA[species].duplicate(true)
+	return SPECIES_JUMP_PROFILE_DATA[DEFAULT_SPECIES].duplicate(true)
+
+static func get_mort_jump_modifiers(mort_grade: int) -> Dictionary:
+	var grade: int = clamp_mort_grade(mort_grade)
+	var force_mult: float = 1.0
+	var cooldown_mult: float = 1.0
+	var willingness_mult: float = 1.0
+
+	if grade < MORT_GRADE_NEUTRAL:
+		var delta_up: int = MORT_GRADE_NEUTRAL - grade
+		force_mult = 1.0 + float(delta_up) * 0.02
+		cooldown_mult = 1.0 - float(delta_up) * 0.012
+		willingness_mult = 1.0 + float(delta_up) * 0.015
+	elif grade > MORT_GRADE_NEUTRAL:
+		var delta_down: int = grade - MORT_GRADE_NEUTRAL
+		force_mult = 1.0 - float(delta_down) * 0.045
+		cooldown_mult = 1.0 + float(delta_down) * 0.03
+		willingness_mult = 1.0 - float(delta_down) * 0.04
+
+	return {
+		"force_mult": clampf(force_mult, 0.4, 1.15),
+		"cooldown_mult": clampf(cooldown_mult, 0.85, 1.45),
+		"willingness_mult": clampf(willingness_mult, 0.45, 1.12)
+	}
+
+static func build_jump_runtime_profile(species: int, rank: int, mort_grade: int, leg_state: Dictionary = {}) -> Dictionary:
+	var species_profile: Dictionary = get_species_jump_profile(species)
+	var can_jump_species: bool = bool(species_profile.get("can_jump", true))
+	if not can_jump_species:
+		return {
+			"can_jump": false,
+			"blocked_reason": "species_blocked",
+			"force_mult": 0.0,
+			"cooldown_mult": 999.0,
+			"willingness": 0.0
+		}
+
+	var leg_l_missing: bool = bool(leg_state.get("leg_l_missing", false))
+	var leg_r_missing: bool = bool(leg_state.get("leg_r_missing", false))
+	if leg_l_missing and leg_r_missing:
+		return {
+			"can_jump": false,
+			"blocked_reason": "no_legs",
+			"force_mult": 0.0,
+			"cooldown_mult": 999.0,
+			"willingness": 0.0
+		}
+
+	var leg_l_damaged: bool = bool(leg_state.get("leg_l_damaged", false))
+	var leg_r_damaged: bool = bool(leg_state.get("leg_r_damaged", false))
+	var rank_cfg: Dictionary = get_rank_data(rank)
+	var rank_power: int = int(rank_cfg.get("rank_power", 0))
+	var rank_t: float = clampf(float(rank_power) / 4.0, 0.0, 1.0)
+	var mort_jump_mods: Dictionary = get_mort_jump_modifiers(mort_grade)
+
+	var force_mult: float = float(species_profile.get("force_mult", 1.0))
+	force_mult *= lerpf(1.06, 0.84, rank_t)
+	force_mult *= float(mort_jump_mods.get("force_mult", 1.0))
+
+	var cooldown_mult: float = float(species_profile.get("cooldown_mult", 1.0))
+	cooldown_mult *= lerpf(0.95, 1.3, rank_t)
+	cooldown_mult *= float(mort_jump_mods.get("cooldown_mult", 1.0))
+
+	var willingness: float = float(species_profile.get("willingness", 1.0))
+	willingness *= lerpf(1.08, 0.72, rank_t)
+	willingness *= float(mort_jump_mods.get("willingness_mult", 1.0))
+
+	if leg_l_missing or leg_r_missing:
+		force_mult *= 0.52
+		cooldown_mult *= 1.55
+		willingness *= 0.7
+
+	if leg_l_damaged and leg_r_damaged:
+		force_mult *= 0.62
+		cooldown_mult *= 1.45
+		willingness *= 0.72
+	elif leg_l_damaged or leg_r_damaged:
+		force_mult *= 0.82
+		cooldown_mult *= 1.2
+		willingness *= 0.85
+
+	force_mult = clampf(force_mult, 0.0, 1.6)
+	cooldown_mult = clampf(cooldown_mult, 0.4, 3.0)
+	willingness = clampf(willingness, 0.0, 1.5)
+	var can_jump_runtime: bool = force_mult > 0.05 and willingness > 0.05
+
+	return {
+		"can_jump": can_jump_runtime,
+		"blocked_reason": "" if can_jump_runtime else "runtime_limited",
+		"force_mult": force_mult,
+		"cooldown_mult": cooldown_mult,
+		"willingness": willingness,
+		"rank_power": rank_power,
+		"mort_grade": clamp_mort_grade(mort_grade),
+		"leg_l_missing": leg_l_missing,
+		"leg_r_missing": leg_r_missing,
+		"leg_l_damaged": leg_l_damaged,
+		"leg_r_damaged": leg_r_damaged
+	}
 
 static func _pick_random_key(source: Dictionary, fallback: int, rng: RandomNumberGenerator) -> int:
 	if source.is_empty():

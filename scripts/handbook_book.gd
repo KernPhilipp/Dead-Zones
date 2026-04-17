@@ -157,6 +157,14 @@ func _build_pages():
 			subtype_body += "[b]Gameplay-Folge (geprueft):[/b]\n" + String(subtype_entry["gameplay_followup"]) + "\n\n"
 			subtype_body += "[b]Gefahr:[/b] " + String(subtype_entry["danger_hint"]) + "\n"
 			subtype_body += "[b]Konter:[/b] " + String(subtype_entry["counter_hint"]) + "\n\n"
+			subtype_body += "[b]Visuelle Andeutung:[/b]\n"
+			subtype_body += "- Modus: " + String(subtype_entry.get("visual_mode", "none")) + "\n"
+			subtype_body += "- Primaerfarbe: " + _color_chip(String(subtype_entry.get("visual_color_hex", "#7a92a1"))) + "\n"
+			subtype_body += "- Sekundaerfarbe: " + _color_chip(String(subtype_entry.get("visual_secondary_color_hex", "#4f616b"))) + "\n"
+			subtype_body += "- Intensitaet: %.2f\n" % float(subtype_entry.get("visual_intensity", 0.0))
+			subtype_body += "- Anker: " + String(subtype_entry.get("visual_anchor", "torso")) + "\n"
+			subtype_body += "- Placeholder: " + ("Ja" if bool(subtype_entry.get("visual_is_placeholder", true)) else "Nein") + "\n"
+			subtype_body += "- Hinweis: " + String(subtype_entry.get("visual_note", "Subtile farbcodierte Todesart-Andeutung.")) + "\n\n"
 
 			var active_hook_lines: Array[String] = []
 			for hook_name in subtype_entry.get("active_hooks", []):
@@ -183,6 +191,8 @@ func _build_pages():
 	_add_page("Grundlagen", "", "Mort-Grad", _build_mort_grade_page())
 	_add_page("Grundlagen", "", "Rang-Hierarchie", _build_rank_page())
 	_add_page("Grundlagen", "", "Wellen-System", _build_wave_runtime_page())
+	_add_page("Grundlagen", "", "Zombie-Sprungbasis", _build_zombie_jump_basics_page())
+	_add_page("Grundlagen", "", "Sprungtest-Hindernisse", _build_jump_test_obstacles_page())
 	_add_page("Grundlagen", "", "Seltenheitssystem", _build_rarity_page())
 	_add_page(
 		"Grundlagen",
@@ -202,6 +212,9 @@ func _build_mort_grade_page() -> String:
 	var mort: Dictionary = ZombieHandbookData.get_mort_grade_glossary()
 	var text: String = "[b]" + String(mort["name"]) + "[/b]\n"
 	text += String(mort["description"]) + "\n\n"
+	text += "[b]Visual-Layer:[/b] " + String(mort.get("visual_note", "")) + "\n"
+	text += "- " + String(mort.get("visual_low", "")) + "\n"
+	text += "- " + String(mort.get("visual_high", "")) + "\n\n"
 	text += "[b]Neutralpunkt:[/b] Grad " + str(int(mort["neutral_grade"])) + "\n"
 	text += String(mort["distribution_focus"]) + "\n"
 	text += String(mort["distribution_note"]) + "\n\n"
@@ -218,12 +231,18 @@ func _build_mort_grade_page() -> String:
 		var speed_mult: float = float(entry["speed_mult"])
 		var damage_mult: float = float(entry["damage_mult"])
 		var attack_mult: float = float(entry["attack_cooldown_mult"])
-		text += "- Grad %d | Spawn %.6f%% | Tempo x%.3f | Schaden x%.3f | Attack-CD x%.3f\n" % [
+		var visual_darkness: float = float(entry.get("visual_darkness", 0.0))
+		var visual_tier_label: String = String(entry.get("visual_tier_label", ""))
+		var darkness_bar: String = _build_darkness_bar(visual_darkness)
+		text += "- Grad %d | Spawn %.6f%% | Tempo x%.3f | Schaden x%.3f | Attack-CD x%.3f | Dunkelheit %.2f %s (%s)\n" % [
 			grade,
 			probability_percent,
 			speed_mult,
 			damage_mult,
-			attack_mult
+			attack_mult,
+			visual_darkness,
+			darkness_bar,
+			visual_tier_label
 		]
 	return text
 
@@ -273,6 +292,8 @@ func _build_main_overview_page() -> String:
 	text += "- GL Grundlagen: Mort-Grad\n"
 	text += "- GL Grundlagen: Rang-Hierarchie\n"
 	text += "- GL Grundlagen: Wellen-System\n"
+	text += "- GL Grundlagen: Zombie-Sprungbasis\n"
+	text += "- GL Grundlagen: Sprungtest-Hindernisse\n"
 	text += "- GL Grundlagen: Seltenheitssystem\n"
 	text += "- GL Grundlagen: Systemtrennung\n\n"
 	text += "[b]Tipp:[/b] Im linken Bereich lassen sich Gruppen ein- und ausklappen."
@@ -286,6 +307,8 @@ func _build_main_overview_side_panel() -> String:
 	text += "GL  Mort-Grad\n"
 	text += "GL  Rang-Hierarchie\n"
 	text += "GL  Wellen-System\n"
+	text += "GL  Zombie-Sprungbasis\n"
+	text += "GL  Sprungtest-Hindernisse\n"
 	text += "GL  Seltenheitssystem\n"
 	text += "GL  Systemtrennung"
 	return text
@@ -305,6 +328,73 @@ func _build_wave_runtime_page() -> String:
 	text += "\n[b]Hinweise:[/b]\n"
 	for note_line in runtime_info.get("notes", []):
 		text += "- " + String(note_line) + "\n"
+	return text
+
+func _build_zombie_jump_basics_page() -> String:
+	var text := "[b]Einfache Zombie-Sprungfunktion (Basis)[/b]\n"
+	text += "Die Sprungmechanik ist absichtlich eigenstaendig und ohne komplexe Traversal-Abhaengigkeit umgesetzt.\n\n"
+	text += "[b]Ablauf:[/b]\n"
+	text += "- request_jump() -> can_jump() -> _start_jump()\n"
+	text += "- Luftphase ueber _apply_gravity() + _update_air_state()\n"
+	text += "- Aufwaertsphase: is_jumping\n"
+	text += "- Fallphase: is_falling\n"
+	text += "- Landung: _handle_landing() mit kurzer Recovery\n\n"
+	text += "[b]Wichtige Regeln:[/b]\n"
+	text += "- kein Doppelsprung\n"
+	text += "- Sprung nur vom Boden\n"
+	text += "- waehrend Airborne keine normalen Nahkampfangriffe\n"
+	text += "- Tod deaktiviert Sprungzustand sofort\n\n"
+	text += "[b]Konfigurierbare Parameter (Zombie):[/b]\n"
+	text += "- jump_force\n"
+	text += "- jump_gravity_scale\n"
+	text += "- fall_gravity_scale\n"
+	text += "- air_control_multiplier\n"
+	text += "- jump_cooldown_seconds\n"
+	text += "- landing_recovery_seconds\n"
+	text += "- auto_jump_on_obstacle_probe\n"
+	text += "- jump_obstacle_probe_distance / jump_obstacle_probe_height\n\n"
+	text += "[b]Debug/Test:[/b]\n"
+	text += "- debug_jump_once\n"
+	text += "- debug_auto_jump_enabled + debug_auto_jump_interval\n"
+	text += "- Jump-Flags als Meta sichtbar (grounded/jumping/falling/cooldown)\n\n"
+	text += "[b]Hinweis:[/b] volle Hindernis-Intelligenz/Traversal kommt spaeter, die Basisfunktion ist bereits andockfaehig."
+	return text
+
+func _build_jump_test_obstacles_page() -> String:
+	var text := "[b]Beispiel-Hindernisse fuer spaetere Zombie-Sprungtests[/b]\n"
+	text += "Diese Seite beschreibt die vorbereitete Testvorlage. Aktuell ist noch keine finale Sprung-KI erzwungen.\n\n"
+	text += "[b]Szenen:[/b]\n"
+	text += "- res://scenes/wave/jump_test_obstacle.tscn\n"
+	text += "- res://scenes/wave/zombie_jump_test_area.tscn\n\n"
+	text += "- res://scenes/wave/jump_test_box_variants.tscn\n\n"
+	text += "[b]Hindernis-Typen in Reihenfolge:[/b]\n"
+	text += "- A_very_low_box (very_low)\n"
+	text += "- B_low_box (low)\n"
+	text += "- C_wide_barricade (low, breit)\n"
+	text += "- D_medium_block (medium)\n"
+	text += "- E_borderline_block (borderline)\n"
+	text += "- F_irregular_base + F_irregular_top (unregelmaessig)\n\n"
+	text += "[b]Zusaetzliche Box-Varianten:[/b]\n"
+	text += "- tiny crate\n"
+	text += "- narrow tall\n"
+	text += "- wide flat\n"
+	text += "- long low\n"
+	text += "- medium cube\n"
+	text += "- borderline tall\n"
+	text += "- step base + step top\n\n"
+	text += "[b]Gruppen/Tags fuer spaeteren Anschluss:[/b]\n"
+	text += "- jump_test_obstacle\n"
+	text += "- jumpable_candidate\n"
+	text += "- jump_type_<...>\n"
+	text += "- jump_height_<very_low|low|medium|borderline>\n\n"
+	text += "[b]Metadaten je Hindernis:[/b]\n"
+	text += "- jump_test_id\n"
+	text += "- obstacle_type\n"
+	text += "- obstacle_height_class\n"
+	text += "- traversal_hint\n"
+	text += "- jump_test_enabled\n"
+	text += "- obstacle_dimensions\n\n"
+	text += "[b]Hinweis:[/b] Platzhalter/Testobjekte, keine finale Map-Deko."
 	return text
 
 func _build_rarity_page() -> String:
@@ -697,6 +787,21 @@ func _join_lines(lines: Array[String]) -> String:
 		if i < lines.size() - 1:
 			output += "\n"
 	return output
+
+func _build_darkness_bar(darkness: float) -> String:
+	var clamped: float = clampf(darkness, 0.0, 1.0)
+	var filled_cells: int = int(round(clamped * 10.0))
+	var bar: String = "["
+	for cell in range(10):
+		bar += "#" if cell < filled_cells else "."
+	bar += "]"
+	return bar
+
+func _color_chip(hex_color: String) -> String:
+	var safe_hex: String = hex_color
+	if not safe_hex.begins_with("#"):
+		safe_hex = "#" + safe_hex
+	return "[color=%s]%s[/color] %s" % [safe_hex, "■■■", safe_hex]
 
 func _find_first_entry_item(root: TreeItem) -> TreeItem:
 	var child: TreeItem = root.get_first_child()
