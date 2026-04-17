@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://towerhouse_lostplace01"]
+[gd_scene load_steps=12 format=3 uid="uid://towerhouse_lostplace01"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_concrete"]
 albedo_color = Color(0.86, 0.83, 0.76, 1)
@@ -35,6 +35,20 @@ roughness = 0.85
 albedo_color = Color(0.35, 0.34, 0.32, 1)
 roughness = 0.92
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stone_base"]
+albedo_color = Color(0.56, 0.54, 0.5, 1)
+metallic = 0.04
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stone_light"]
+albedo_color = Color(0.66, 0.64, 0.6, 1)
+metallic = 0.03
+roughness = 0.93
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stone_joint"]
+albedo_color = Color(0.35, 0.34, 0.32, 1)
+roughness = 0.98
+
 [node name="LostPlaceTowerHouse" type="Node3D"]
 
 [node name="Base" type="Node3D" parent="."]
@@ -45,7 +59,129 @@ use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(12.4, 0.5, 10.4)
-material = SubResource("StandardMaterial3D_concrete")
+material = SubResource("StandardMaterial3D_stone_base")
+
+[node name="FoundationStoneFacing" type="Node3D" parent="Base"]
+
+[node name="StoneNorthLower" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(0, 0.11, -5.24)
+use_collision = false
+size = Vector3(12.1, 0.18, 0.08)
+material = SubResource("StandardMaterial3D_stone_light")
+
+[node name="StoneNorthUpper" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(0, 0.36, -5.24)
+use_collision = false
+size = Vector3(12.1, 0.18, 0.08)
+material = SubResource("StandardMaterial3D_stone_base")
+
+[node name="StoneNorthJointA" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-3.8, 0.24, -5.24)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneNorthJointB" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(0.25, 0.24, -5.24)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneNorthJointC" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(4.05, 0.24, -5.24)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneSouthLower" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(0, 0.11, 5.24)
+use_collision = false
+size = Vector3(12.1, 0.18, 0.08)
+material = SubResource("StandardMaterial3D_stone_base")
+
+[node name="StoneSouthUpper" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(0, 0.36, 5.24)
+use_collision = false
+size = Vector3(12.1, 0.18, 0.08)
+material = SubResource("StandardMaterial3D_stone_light")
+
+[node name="StoneSouthJointA" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-4.2, 0.24, 5.24)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneSouthJointB" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-0.15, 0.24, 5.24)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneSouthJointC" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(3.75, 0.24, 5.24)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneWestLower" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-6.24, 0.11, 0)
+use_collision = false
+size = Vector3(0.08, 0.18, 10.1)
+material = SubResource("StandardMaterial3D_stone_light")
+
+[node name="StoneWestUpper" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-6.24, 0.36, 0)
+use_collision = false
+size = Vector3(0.08, 0.18, 10.1)
+material = SubResource("StandardMaterial3D_stone_base")
+
+[node name="StoneWestJointA" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-6.24, 0.24, -3.4)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneWestJointB" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-6.24, 0.24, 0.2)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneWestJointC" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(-6.24, 0.24, 3.8)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneEastLower" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(6.24, 0.11, 0)
+use_collision = false
+size = Vector3(0.08, 0.18, 10.1)
+material = SubResource("StandardMaterial3D_stone_base")
+
+[node name="StoneEastUpper" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(6.24, 0.36, 0)
+use_collision = false
+size = Vector3(0.08, 0.18, 10.1)
+material = SubResource("StandardMaterial3D_stone_light")
+
+[node name="StoneEastJointA" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(6.24, 0.24, -3.8)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneEastJointB" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(6.24, 0.24, -0.2)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
+
+[node name="StoneEastJointC" type="CSGBox3D" parent="Base/FoundationStoneFacing"]
+position = Vector3(6.24, 0.24, 3.4)
+use_collision = false
+size = Vector3(0.09, 0.44, 0.09)
+material = SubResource("StandardMaterial3D_stone_joint")
 
 [node name="GroundSlab" type="CSGBox3D" parent="Base"]
 position = Vector3(0, 0.59, 0)
