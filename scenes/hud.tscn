@@ -1,9 +1,12 @@
-[gd_scene load_steps=22 format=3 uid="uid://hud00001"]
+[gd_scene load_steps=25 format=3 uid="uid://hud00001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Texture2D" path="res://assets/ui/blood_overlay.svg" id="2_blood"]
 [ext_resource type="Texture2D" path="res://assets/ui/pistol_icon.svg" id="3_pistol"]
 [ext_resource type="Texture2D" path="res://assets/ui/rifle_icon.svg" id="4_rifle"]
+[ext_resource type="Texture2D" path="res://assets/ui/settings_hud_icon.svg" id="5_settings_hud"]
+[ext_resource type="Texture2D" path="res://assets/ui/settings_crosshair_icon.svg" id="6_settings_crosshair"]
+[ext_resource type="Texture2D" path="res://assets/ui/settings_audio_icon.svg" id="7_settings_audio"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_health"]
 font_size = 12
@@ -985,32 +988,88 @@ text = "ADJUST VISIBILITY, AIM AND AUDIO LIVE"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.58)
 
-[node name="HudCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+[node name="SettingsTabRow" type="HBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HudTabButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/SettingsTabRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
+toggle_mode = true
+text = "HUD"
+icon = ExtResource("5_settings_hud")
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="CrosshairTabButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/SettingsTabRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
+toggle_mode = true
+text = "Crosshair"
+icon = ExtResource("6_settings_crosshair")
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="AudioTabButton" type="Button" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/SettingsTabRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
+toggle_mode = true
+text = "Audio"
+icon = ExtResource("7_settings_audio")
+theme_override_colors/font_color = Color(0.96, 0.97, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_focus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="HudSettingsSection" type="VBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HudCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection"]
 layout_mode = 2
 text = "HUD"
 label_settings = SubResource("LabelSettings_status")
 modulate = Color(0.86, 0.91, 0.98, 0.9)
 
-[node name="HudCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+[node name="HudCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection"]
 layout_mode = 2
 text = "MAKE PANELS AND OVERLAYS EASIER TO READ"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.52)
 
-[node name="PauseSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+[node name="HudSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection"]
 layout_mode = 2
 size_flags_horizontal = 4
 columns = 3
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 6
 
-[node name="HudOpacityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="HudOpacityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection/HudSettingsGrid"]
 layout_mode = 2
 text = "VISIBILITY"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="HudOpacitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="HudOpacitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection/HudSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -1019,32 +1078,65 @@ max_value = 1.0
 step = 0.01
 value = 0.92
 
-[node name="HudOpacityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="HudOpacityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection/HudSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "92%"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+[node name="FeedbackIntensityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection/HudSettingsGrid"]
+layout_mode = 2
+text = "FX LEVEL"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="FeedbackIntensitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection/HudSettingsGrid"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.35
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="FeedbackIntensityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/HudSettingsSection/HudSettingsGrid"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "80%"
+label_settings = SubResource("LabelSettings_small_status")
+modulate = Color(1, 1, 1, 0.82)
+
+[node name="CrosshairSettingsSection" type="VBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="CrosshairCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection"]
 layout_mode = 2
 text = "CROSSHAIR"
 label_settings = SubResource("LabelSettings_status")
 modulate = Color(0.86, 0.91, 0.98, 0.9)
 
-[node name="CrosshairCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+[node name="CrosshairCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection"]
 layout_mode = 2
 text = "TUNE SIZE AND STYLE FOR CLEANER AIM"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.52)
 
-[node name="CrosshairSizeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="CrosshairSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 6
+
+[node name="CrosshairSizeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection/CrosshairSettingsGrid"]
 layout_mode = 2
 text = "SIZE"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairSizeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="CrosshairSizeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection/CrosshairSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -1053,20 +1145,20 @@ max_value = 1.25
 step = 0.01
 value = 1.0
 
-[node name="CrosshairSizeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="CrosshairSizeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection/CrosshairSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "100%"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairStyleNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="CrosshairStyleNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection/CrosshairSettingsGrid"]
 layout_mode = 2
 text = "PRESET"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="CrosshairStyleOption" type="OptionButton" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="CrosshairStyleOption" type="OptionButton" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection/CrosshairSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -1079,54 +1171,43 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 
-[node name="CrosshairStyleValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="CrosshairStyleValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/CrosshairSettingsSection/CrosshairSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "CLASSIC"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="FeedbackIntensityNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="AudioSettingsSection" type="VBoxContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
 layout_mode = 2
-text = "FX LEVEL"
-label_settings = SubResource("LabelSettings_small_status")
-modulate = Color(1, 1, 1, 0.82)
+theme_override_constants/separation = 6
 
-[node name="FeedbackIntensitySlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
-custom_minimum_size = Vector2(140, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 0.35
-max_value = 1.0
-step = 0.01
-value = 0.8
-
-[node name="FeedbackIntensityValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
-layout_mode = 2
-horizontal_alignment = 2
-text = "80%"
-label_settings = SubResource("LabelSettings_small_status")
-modulate = Color(1, 1, 1, 0.82)
-
-[node name="AudioCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+[node name="AudioCategoryLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/AudioSettingsSection"]
 layout_mode = 2
 text = "AUDIO"
 label_settings = SubResource("LabelSettings_status")
 modulate = Color(0.86, 0.91, 0.98, 0.9)
 
-[node name="AudioCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner"]
+[node name="AudioCategoryHintLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/AudioSettingsSection"]
 layout_mode = 2
 text = "SET OVERALL VOLUME FOR THE SESSION"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.52)
 
-[node name="MasterVolumeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="AudioSettingsGrid" type="GridContainer" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/AudioSettingsSection"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 6
+
+[node name="MasterVolumeNameLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/AudioSettingsSection/AudioSettingsGrid"]
 layout_mode = 2
 text = "MASTER"
 label_settings = SubResource("LabelSettings_small_status")
 modulate = Color(1, 1, 1, 0.82)
 
-[node name="MasterVolumeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="MasterVolumeSlider" type="HSlider" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/AudioSettingsSection/AudioSettingsGrid"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -1134,7 +1215,7 @@ max_value = 1.0
 step = 0.01
 value = 0.85
 
-[node name="MasterVolumeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/PauseSettingsGrid"]
+[node name="MasterVolumeValueLabel" type="Label" parent="PausePanel/MarginContainer/VBoxContainer/PauseSettingsContent/PauseSettingsInner/AudioSettingsSection/AudioSettingsGrid"]
 layout_mode = 2
 horizontal_alignment = 2
 text = "85%"
