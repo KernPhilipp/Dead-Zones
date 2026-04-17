@@ -138,44 +138,57 @@ func _setup_multiplayer_connections():
 func _on_peer_joined(peer_id: int):
 	if not multiplayer.is_server():
 		return
-	_spawn_player_for_peer(peer_id)
+	# Spawn the new peer on everyone
+	_do_spawn_player(peer_id)
+	_net_spawn_player.rpc(peer_id)
+	# Send existing players to the new peer so they can spawn them too
+	for existing_id in multiplayer.get_peers():
+		if existing_id != peer_id:
+			_net_spawn_player.rpc_id(peer_id, existing_id)
+	# Also spawn the server player (id 1) for the new peer
+	_net_spawn_player.rpc_id(peer_id, 1)
 
 func _on_peer_left(peer_id: int):
 	var node_name := "NetPlayer_%d" % peer_id
-	var existing := get_tree().current_scene.get_node_or_null(node_name)
-	if existing != null:
-		existing.queue_free()
+	var scene_root := get_tree().current_scene
+	if scene_root != null:
+		var existing := scene_root.get_node_or_null(node_name)
+		if existing != null:
+			existing.queue_free()
 	players = players.filter(func(p): return is_instance_valid(p))
 	if players.is_empty() and game_active:
 		game_over()
 
+# Called on all clients by the server when a new peer joins
+@rpc("authority", "reliable")
+func _net_spawn_player(peer_id: int):
+	_do_spawn_player(peer_id)
+
 func _spawn_player_for_peer(peer_id: int):
+	# Server spawns its own player at game start (peer 1 = server)
+	_do_spawn_player(peer_id)
+	_net_spawn_player.rpc(peer_id)
+
+func _do_spawn_player(peer_id: int):
 	var scene_root := get_tree().current_scene
 	if scene_root == null:
 		return
+	var node_name := "NetPlayer_%d" % peer_id
+	if scene_root.has_node(node_name):
+		return  # already spawned (e.g. called twice)
 	var p: Node3D = player_scene.instantiate() as Node3D
-	p.name = "NetPlayer_%d" % peer_id
+	p.name = node_name
 	p.set_multiplayer_authority(peer_id)
 	scene_root.add_child.call_deferred(p)
 	await get_tree().process_frame
 	p.global_position = Vector3(0, 1, 0)
 	if p is CharacterBody3D:
 		var cb := p as CharacterBody3D
-		players.append(cb)
+		if cb not in players:
+			players.append(cb)
 		if peer_id == multiplayer.get_unique_id():
 			player = cb
 			_wire_player_to_hud(cb)
-	# Tell the owning client which node is theirs
-	rpc_id(peer_id, "_notify_local_player", p.get_path())
-
-@rpc("authority", "call_local", "reliable")
-func _notify_local_player(player_path: NodePath):
-	var p := get_node_or_null(player_path)
-	if p is CharacterBody3D:
-		player = p as CharacterBody3D
-		if player not in players:
-			players.append(player)
-		_wire_player_to_hud(player)
 
 func _wire_player_to_hud(p: CharacterBody3D):
 	hud = get_node_or_null("../HUD")
