@@ -6,6 +6,11 @@ const ItemDefinitions = preload("res://scripts/player/item_definitions.gd")
 const ItemInventory = preload("res://scripts/player/item_inventory.gd")
 const PlayerProgression = preload("res://scripts/player/player_progression.gd")
 const GrenadeProjectileScene: PackedScene = preload("res://scenes/projectiles/grenade_projectile.tscn")
+const WeaponModelScenes: Dictionary = {
+	"pistol": preload("res://scenes/weapons/pistol_model.tscn"),
+	"rifle": preload("res://scenes/weapons/rifle_model.tscn"),
+	"shotgun": preload("res://scenes/weapons/shotgun_model.tscn"),
+}
 const CAMERA_FIRST_PERSON := "first_person"
 const CAMERA_THIRD_PERSON := "third_person"
 
@@ -150,7 +155,7 @@ var was_on_floor_last_frame: bool = false
 @onready var third_person_pivot: Node3D = $Head/ThirdPersonPivot
 @onready var third_person_arm: SpringArm3D = $Head/ThirdPersonPivot/SpringArm3D
 @onready var third_person_camera: Camera3D = $Head/ThirdPersonPivot/SpringArm3D/ThirdPersonCamera
-@onready var gun_model: MeshInstance3D = $Head/GunModel
+@onready var gun_model: Node3D = $Head/GunModel
 @onready var visual_root: Node3D = $VisualRoot
 @onready var model_root: Node3D = $VisualRoot/ModelRoot
 @onready var model_spine: Node3D = $VisualRoot/ModelRoot/Spine
@@ -798,6 +803,13 @@ func _set_interaction_highlight(next_target: Node) -> void:
 	if highlighted_interaction_target != null and is_instance_valid(highlighted_interaction_target) and highlighted_interaction_target.has_method("set_highlighted"):
 		highlighted_interaction_target.call("set_highlighted", true)
 
+func _update_gun_model(weapon_id: String) -> void:
+	for child in gun_model.get_children():
+		child.queue_free()
+	var scene: PackedScene = WeaponModelScenes.get(weapon_id)
+	if scene:
+		gun_model.add_child(scene.instantiate())
+
 func _sync_current_weapon_view(reset_feedback: bool) -> void:
 	current_weapon_index = weapon_loadout.get_current_slot_index()
 	current_weapon_data = weapon_loadout.get_current_weapon_data()
@@ -806,6 +818,7 @@ func _sync_current_weapon_view(reset_feedback: bool) -> void:
 	ammo = weapon_loadout.current_ammo_in_mag()
 	reserve_ammo = weapon_loadout.current_reserve_ammo()
 	is_weapon_automatic = bool(current_weapon_data.get("is_automatic", false))
+	_update_gun_model(weapon_loadout.get_current_weapon_id())
 	if reset_feedback:
 		current_bloom = 0.0
 		weapon_bloom_ratio = 0.0

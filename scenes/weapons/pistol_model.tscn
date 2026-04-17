@@ -1,0 +1,55 @@
+[gd_scene load_steps=9 format=3 uid="uid://pistol_model_v1"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal"]
+albedo_color = Color(0.08, 0.09, 0.11, 1)
+roughness = 0.68
+metallic = 0.32
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.11, 0.12, 0.14, 1)
+roughness = 0.92
+metallic = 0.04
+
+[sub_resource type="BoxMesh" id="Box_slide"]
+size = Vector3(0.055, 0.030, 0.175)
+
+[sub_resource type="CylinderMesh" id="Cyl_barrel"]
+top_radius = 0.010
+bottom_radius = 0.010
+height = 0.085
+
+[sub_resource type="BoxMesh" id="Box_grip"]
+size = Vector3(0.044, 0.120, 0.058)
+
+[sub_resource type="BoxMesh" id="Box_guard"]
+size = Vector3(0.007, 0.020, 0.052)
+
+[sub_resource type="BoxMesh" id="Box_magbase"]
+size = Vector3(0.043, 0.012, 0.055)
+
+[node name="PistolModel" type="Node3D"]
+
+[node name="Slide" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.022, -0.025)
+mesh = SubResource("Box_slide")
+material_override = SubResource("Mat_metal")
+
+[node name="Barrel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.022, -0.128)
+mesh = SubResource("Cyl_barrel")
+material_override = SubResource("Mat_metal")
+
+[node name="Grip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.068, 0.038)
+mesh = SubResource("Box_grip")
+material_override = SubResource("Mat_grip")
+
+[node name="TriggerGuard" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.018, -0.008)
+mesh = SubResource("Box_guard")
+material_override = SubResource("Mat_metal")
+
+[node name="MagazineBase" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.130, 0.038)
+mesh = SubResource("Box_magbase")
+material_override = SubResource("Mat_grip")
