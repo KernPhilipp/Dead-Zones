@@ -182,10 +182,10 @@ func _do_spawn_player(peer_id: int):
 	var p: Node3D = player_scene.instantiate() as Node3D
 	p.name = node_name
 	p.position = Vector3(0, 1, 0)
+	# Authority must be set BEFORE add_child so _ready() sees the correct value
+	p.set_multiplayer_authority(peer_id)
 	scene_root.add_child.call_deferred(p)
 	await p.tree_entered
-	# Authority must be set after the node is in the tree
-	p.set_multiplayer_authority(peer_id)
 	# Add position/rotation synchronizer so all peers see each other move
 	_add_player_sync(p, peer_id)
 	if p is CharacterBody3D:
@@ -200,10 +200,11 @@ func _add_player_sync(p: Node3D, peer_id: int):
 	var sync := MultiplayerSynchronizer.new()
 	sync.name = "Sync"
 	var cfg := SceneReplicationConfig.new()
-	cfg.add_property(NodePath("%s:position" % p.name))
-	cfg.add_property(NodePath("%s:rotation" % p.name))
+	# Paths are relative to root_path; ":property" means the root node itself
+	cfg.add_property(NodePath(":position"))
+	cfg.add_property(NodePath(":rotation"))
 	sync.replication_config = cfg
-	sync.root_path = NodePath("..")  # parent = the player node
+	sync.root_path = NodePath(".")  # "." = the player node (sync is its child)
 	sync.set_multiplayer_authority(peer_id)
 	p.add_child(sync)
 
