@@ -81,6 +81,9 @@ func _ready():
 	run_start_time_ms = Time.get_ticks_msec()
 
 	if NetworkManager.is_active():
+		# Remove any statically placed player nodes from the scene — we spawn dynamically
+		for static_player in get_tree().get_nodes_in_group("player"):
+			static_player.queue_free()
 		_setup_multiplayer_connections()
 		if multiplayer.is_server():
 			_spawn_player_for_peer(1)

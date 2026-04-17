@@ -584,10 +584,7 @@ func take_part_damage(part: String, amount: int) -> bool:
 		_remove_part(effective_part)
 
 	if health <= 0 or missing_parts["torso"]:
-		if NetworkManager.is_active() and multiplayer.is_server():
-			die.rpc()
-		else:
-			die()
+		die()
 		return true
 
 	if state != ZombieState.SPAWN_RISE:
@@ -595,7 +592,6 @@ func take_part_damage(part: String, amount: int) -> bool:
 	return false
 
 
-@rpc("authority", "call_local", "reliable")
 func die():
 	if state == ZombieState.DEAD:
 		return
