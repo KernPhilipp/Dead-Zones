@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://k7abjd4hyfqr" path="res://assets/models/buildings/Windmill.glb" id="7_windmill_scene"]
 [ext_resource type="Texture2D" uid="uid://bx6dm2o8fo3s5" path="res://assets/models/grass/coast_sand_rocks_02_diff_1k.jpg" id="8_ground_albedo"]
 [ext_resource type="Texture2D" uid="uid://brg2um2teb08m" path="res://assets/models/grass/coast_sand_rocks_02_rough_1k.exr" id="9_ground_roughness"]
+[ext_resource type="Script" path="res://scripts/levels/out_of_bounds_killplane.gd" id="10_killplane_script"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(180, 2, 180)
@@ -171,6 +172,15 @@ size = Vector3(8, 2.2, 1.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_barricade_short"]
 size = Vector3(5, 1.8, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oob_north_south"]
+size = Vector3(196, 28, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oob_east_west"]
+size = Vector3(8, 28, 196)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oob_killplane"]
+size = Vector3(260, 6, 260)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_pole"]
 top_radius = 0.16
@@ -904,6 +914,37 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1, -10)
 
 [node name="LoadingBay" type="Marker3D" parent="Gameplay/ZombieSpawns" unique_id=677866915]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1, -30)
+
+[node name="OutOfBounds" type="Node3D" parent="." unique_id=126000001]
+
+[node name="PerimeterBlockers" type="StaticBody3D" parent="OutOfBounds" unique_id=126000002]
+collision_layer = 4
+collision_mask = 0
+
+[node name="NorthBlocker" type="CollisionShape3D" parent="OutOfBounds/PerimeterBlockers" unique_id=126000003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, -88)
+shape = SubResource("BoxShape3D_oob_north_south")
+
+[node name="SouthBlocker" type="CollisionShape3D" parent="OutOfBounds/PerimeterBlockers" unique_id=126000004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 88)
+shape = SubResource("BoxShape3D_oob_north_south")
+
+[node name="WestBlocker" type="CollisionShape3D" parent="OutOfBounds/PerimeterBlockers" unique_id=126000005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 12, 0)
+shape = SubResource("BoxShape3D_oob_east_west")
+
+[node name="EastBlocker" type="CollisionShape3D" parent="OutOfBounds/PerimeterBlockers" unique_id=126000006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 12, 0)
+shape = SubResource("BoxShape3D_oob_east_west")
+
+[node name="Killplane" type="Area3D" parent="OutOfBounds" unique_id=126000007]
+collision_mask = 1
+monitorable = false
+script = ExtResource("10_killplane_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="OutOfBounds/Killplane" unique_id=126000008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -24, 0)
+shape = SubResource("BoxShape3D_oob_killplane")
 
 [node name="Navigation" type="Node3D" parent="." unique_id=590137712]
 
