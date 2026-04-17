@@ -62,7 +62,7 @@ func on_connected_to_server():
 	var my_id := multiplayer.get_unique_id()
 	rpc_id(1, "register_player", my_id, local_player_name)
 
-func request_ready(is_ready: bool):
+func send_ready(is_ready: bool):
 	var my_id := multiplayer.get_unique_id()
 	if multiplayer.is_server():
 		set_player_ready(my_id, is_ready)

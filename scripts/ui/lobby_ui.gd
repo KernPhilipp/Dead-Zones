@@ -179,7 +179,7 @@ func _on_solo_pressed():
 
 func _on_ready_pressed():
 	var is_ready: bool = _btn_ready.text == "Bereit"
-	_lobby.request_ready(is_ready)
+	_lobby.send_ready(is_ready)
 	_btn_ready.text = "Nicht bereit" if is_ready else "Bereit"
 
 func _on_start_pressed():
