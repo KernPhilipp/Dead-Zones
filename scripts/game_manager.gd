@@ -194,17 +194,20 @@ func _do_spawn_player(peer_id: int):
 			players.append(cb)
 		if peer_id == multiplayer.get_unique_id():
 			player = cb
+			cb.is_local_player = true
 			_wire_player_to_hud(cb)
+		else:
+			cb.is_local_player = false
 
 func _add_player_sync(p: Node3D, peer_id: int):
 	var sync := MultiplayerSynchronizer.new()
 	sync.name = "Sync"
 	var cfg := SceneReplicationConfig.new()
-	# Paths are relative to root_path; ":property" means the root node itself
+	# ".." = parent of sync = the player node; ":position" = its position property
 	cfg.add_property(NodePath(":position"))
 	cfg.add_property(NodePath(":rotation"))
 	sync.replication_config = cfg
-	sync.root_path = NodePath(".")  # "." = the player node (sync is its child)
+	sync.root_path = NodePath("..")
 	sync.set_multiplayer_authority(peer_id)
 	p.add_child(sync)
 

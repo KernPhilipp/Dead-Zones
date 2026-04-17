@@ -165,10 +165,10 @@ var was_on_floor_last_frame: bool = false
 @onready var left_leg: Node3D = $VisualRoot/ModelRoot/LeftLeg
 @onready var right_leg: Node3D = $VisualRoot/ModelRoot/RightLeg
 
+var is_local_player: bool = true  # set to false by game_manager for remote players
+
 func _is_local_player() -> bool:
-	if not NetworkManager.is_active():
-		return true
-	return is_multiplayer_authority()
+	return is_local_player
 
 func _ready() -> void:
 	health = max_health
