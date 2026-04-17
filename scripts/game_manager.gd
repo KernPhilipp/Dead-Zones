@@ -178,13 +178,16 @@ func _do_spawn_player(peer_id: int):
 		return
 	var node_name := "NetPlayer_%d" % peer_id
 	if scene_root.has_node(node_name):
-		return  # already spawned (e.g. called twice)
+		return
 	var p: Node3D = player_scene.instantiate() as Node3D
 	p.name = node_name
-	p.position = Vector3(0, 1, 0)  # set before add_child so global_position is never needed early
-	p.set_multiplayer_authority(peer_id)
+	p.position = Vector3(0, 1, 0)
 	scene_root.add_child.call_deferred(p)
-	await p.tree_entered  # wait until actually in tree before registering
+	await p.tree_entered
+	# Authority must be set after the node is in the tree
+	p.set_multiplayer_authority(peer_id)
+	# Add position/rotation synchronizer so all peers see each other move
+	_add_player_sync(p, peer_id)
 	if p is CharacterBody3D:
 		var cb := p as CharacterBody3D
 		if cb not in players:
@@ -192,6 +195,17 @@ func _do_spawn_player(peer_id: int):
 		if peer_id == multiplayer.get_unique_id():
 			player = cb
 			_wire_player_to_hud(cb)
+
+func _add_player_sync(p: Node3D, peer_id: int):
+	var sync := MultiplayerSynchronizer.new()
+	sync.name = "Sync"
+	var cfg := SceneReplicationConfig.new()
+	cfg.add_property(NodePath("%s:position" % p.name))
+	cfg.add_property(NodePath("%s:rotation" % p.name))
+	sync.replication_config = cfg
+	sync.root_path = NodePath("..")  # parent = the player node
+	sync.set_multiplayer_authority(peer_id)
+	p.add_child(sync)
 
 func _wire_player_to_hud(p: CharacterBody3D):
 	hud = get_node_or_null("../HUD")
