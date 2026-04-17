@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 const ZombieDefinitions = preload("res://scripts/zombie_definitions.gd")
 const ZombieDeathEffects = preload("res://scripts/zombie_death_effects.gd")
+const ZombieSpeciesVisuals = preload("res://scripts/zombie_species_visuals.gd")
 
 enum ZombieState {
 	SPAWN_RISE,
@@ -117,6 +118,7 @@ var cover_nodes: Array[Node3D] = []
 
 var part_health: Dictionary = {}
 var missing_parts: Dictionary = {}
+var species_visual_profile: Dictionary = {}
 
 @onready var body_collision: CollisionShape3D = $CollisionShape3D
 @onready var damage_area: Area3D = $DamageArea
@@ -140,7 +142,25 @@ var missing_parts: Dictionary = {}
 }
 
 var base_model_root_position := Vector3.ZERO
+var base_model_root_rotation := Vector3.ZERO
+var species_base_model_root_position := Vector3.ZERO
+var species_base_model_root_rotation := Vector3.ZERO
 var profile_rng: RandomNumberGenerator
+
+var base_part_positions: Dictionary = {}
+var base_part_rotations_deg: Dictionary = {}
+var base_part_scales: Dictionary = {}
+var hitbox_shape_nodes: Dictionary = {}
+var base_hitbox_transforms: Dictionary = {}
+var base_hitbox_box_sizes: Dictionary = {}
+var base_hitbox_sphere_radii: Dictionary = {}
+var base_body_collision_radius: float = 0.28
+var base_body_collision_height: float = 1.5
+var base_body_collision_y: float = 0.75
+var base_weapon_socket_position := Vector3.ZERO
+var base_weapon_socket_rotation_deg := Vector3.ZERO
+var base_weapon_socket_scale := Vector3.ONE
+var base_held_item_scale := Vector3.ONE
 
 func _ready():
 	randomize()
@@ -148,9 +168,13 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	limp_phase = randf_range(0.0, TAU)
 	base_model_root_position = model_root.position
+	base_model_root_rotation = model_root.rotation
+	species_base_model_root_position = base_model_root_position
+	species_base_model_root_rotation = base_model_root_rotation
 	base_head_rotation = part_nodes["head"].rotation
 	profile_rng = RandomNumberGenerator.new()
 	profile_rng.randomize()
+	_cache_base_visual_state()
 
 	_collect_cover_nodes()
 	_apply_profile_data()
@@ -248,6 +272,7 @@ func _apply_profile_data():
 	_apply_death_effect_profile_modifiers()
 	_reset_death_effect_runtime_state()
 
+	_apply_species_visual_profile()
 	_apply_visual_variant_placeholder()
 	_apply_behavior_pose_reset()
 	set_meta("death_class_id", resolved_death_class_key)
@@ -314,6 +339,219 @@ func _reset_death_effect_runtime_state():
 	external_pull_remaining = 0.0
 	death_crawl_mode = false
 
+func _cache_base_visual_state():
+	base_part_positions.clear()
+	base_part_rotations_deg.clear()
+	base_part_scales.clear()
+	hitbox_shape_nodes.clear()
+	base_hitbox_transforms.clear()
+	base_hitbox_box_sizes.clear()
+	base_hitbox_sphere_radii.clear()
+
+	for part_key_variant in part_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var part_node: Node3D = part_nodes[part_key]
+		base_part_positions[part_key] = part_node.position
+		base_part_rotations_deg[part_key] = part_node.rotation_degrees
+		base_part_scales[part_key] = part_node.scale
+
+	var weapon_socket: Node3D = $ModelRoot/Arm_R/WeaponSocket_R
+	base_weapon_socket_position = weapon_socket.position
+	base_weapon_socket_rotation_deg = weapon_socket.rotation_degrees
+	base_weapon_socket_scale = weapon_socket.scale
+	base_held_item_scale = held_item.scale
+
+	for part_key_variant in hitbox_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var hitbox: StaticBody3D = hitbox_nodes[part_key]
+		var shape_node: CollisionShape3D = _find_hitbox_collision_shape(hitbox)
+		if shape_node == null:
+			continue
+
+		if shape_node.shape != null:
+			shape_node.shape = shape_node.shape.duplicate(true)
+
+		hitbox_shape_nodes[part_key] = shape_node
+		base_hitbox_transforms[part_key] = shape_node.transform
+
+		if shape_node.shape is BoxShape3D:
+			base_hitbox_box_sizes[part_key] = (shape_node.shape as BoxShape3D).size
+		elif shape_node.shape is SphereShape3D:
+			base_hitbox_sphere_radii[part_key] = (shape_node.shape as SphereShape3D).radius
+
+	if body_collision.shape != null:
+		body_collision.shape = body_collision.shape.duplicate(true)
+	if body_collision.shape is CapsuleShape3D:
+		var capsule: CapsuleShape3D = body_collision.shape as CapsuleShape3D
+		base_body_collision_radius = capsule.radius
+		base_body_collision_height = capsule.height
+	base_body_collision_y = body_collision.position.y
+
+func _find_hitbox_collision_shape(hitbox: StaticBody3D) -> CollisionShape3D:
+	for child in hitbox.get_children():
+		if child is CollisionShape3D:
+			return child as CollisionShape3D
+	return null
+
+func _apply_species_visual_profile():
+	species_visual_profile = ZombieSpeciesVisuals.get_species_visual_config(species_id)
+	if species_visual_profile.is_empty():
+		return
+
+	var model_root_offset: Vector3 = _read_vec3(species_visual_profile, "model_root_offset", Vector3.ZERO)
+	var model_root_rotation_deg: Vector3 = _read_vec3(species_visual_profile, "model_root_rotation_deg", Vector3.ZERO)
+
+	species_base_model_root_position = base_model_root_position + model_root_offset
+	species_base_model_root_rotation = base_model_root_rotation + Vector3(
+		deg_to_rad(model_root_rotation_deg.x),
+		deg_to_rad(model_root_rotation_deg.y),
+		deg_to_rad(model_root_rotation_deg.z)
+	)
+
+	model_root.position = species_base_model_root_position
+	model_root.rotation = species_base_model_root_rotation
+
+	_apply_species_part_profile()
+	_apply_species_hitbox_profile()
+	_apply_species_body_collision_profile()
+	_apply_species_placeholder_materials()
+
+	base_head_rotation = part_nodes["head"].rotation
+
+	set_meta("species_visual_template_id", String(species_visual_profile.get("template_id", "default_visual_template")))
+	set_meta("species_visual_reference_image", String(species_visual_profile.get("reference_image", "")))
+	set_meta("species_visual_silhouette_tags", species_visual_profile.get("silhouette_tags", []))
+
+func _apply_species_part_profile():
+	var part_scale_map: Dictionary = species_visual_profile.get("part_scale", {})
+	var part_offset_map: Dictionary = species_visual_profile.get("part_offset", {})
+	var part_rotation_map: Dictionary = species_visual_profile.get("part_rotation_deg", {})
+
+	for part_key_variant in part_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var part_node: Node3D = part_nodes[part_key]
+		var base_position: Vector3 = base_part_positions.get(part_key, part_node.position)
+		var base_rotation_deg: Vector3 = base_part_rotations_deg.get(part_key, part_node.rotation_degrees)
+		var base_scale: Vector3 = base_part_scales.get(part_key, part_node.scale)
+
+		var part_offset: Vector3 = _read_map_vec3(part_offset_map, part_key, Vector3.ZERO)
+		var part_rotation_deg: Vector3 = _read_map_vec3(part_rotation_map, part_key, Vector3.ZERO)
+		var part_scale: Vector3 = _read_map_vec3(part_scale_map, part_key, Vector3.ONE)
+
+		part_node.position = base_position + part_offset
+		part_node.rotation_degrees = base_rotation_deg + part_rotation_deg
+		part_node.scale = Vector3(
+			base_scale.x * maxf(0.05, part_scale.x),
+			base_scale.y * maxf(0.05, part_scale.y),
+			base_scale.z * maxf(0.05, part_scale.z)
+		)
+
+	var weapon_socket: Node3D = $ModelRoot/Arm_R/WeaponSocket_R
+	var weapon_socket_offset: Vector3 = _read_vec3(species_visual_profile, "weapon_socket_offset", Vector3.ZERO)
+	var weapon_socket_rotation: Vector3 = _read_vec3(species_visual_profile, "weapon_socket_rotation_deg", Vector3.ZERO)
+	var held_item_scale: Vector3 = _read_vec3(species_visual_profile, "held_item_scale", Vector3.ONE)
+
+	weapon_socket.position = base_weapon_socket_position + weapon_socket_offset
+	weapon_socket.rotation_degrees = base_weapon_socket_rotation_deg + weapon_socket_rotation
+	weapon_socket.scale = base_weapon_socket_scale
+	held_item.scale = Vector3(
+		base_held_item_scale.x * maxf(0.0, held_item_scale.x),
+		base_held_item_scale.y * maxf(0.0, held_item_scale.y),
+		base_held_item_scale.z * maxf(0.0, held_item_scale.z)
+	)
+
+func _apply_species_hitbox_profile():
+	var part_scale_map: Dictionary = species_visual_profile.get("part_scale", {})
+	var part_offset_map: Dictionary = species_visual_profile.get("part_offset", {})
+	var part_rotation_map: Dictionary = species_visual_profile.get("part_rotation_deg", {})
+	var hitbox_scale_map: Dictionary = species_visual_profile.get("hitbox_scale", {})
+	var hitbox_offset_map: Dictionary = species_visual_profile.get("hitbox_offset", {})
+	var hitbox_rotation_map: Dictionary = species_visual_profile.get("hitbox_rotation_deg", {})
+
+	for part_key_variant in hitbox_shape_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var shape_node: CollisionShape3D = hitbox_shape_nodes[part_key]
+		var base_transform: Transform3D = base_hitbox_transforms.get(part_key, shape_node.transform)
+		shape_node.transform = base_transform
+
+		var offset_from_part: Vector3 = _read_map_vec3(part_offset_map, part_key, Vector3.ZERO)
+		var offset_from_hitbox: Vector3 = _read_map_vec3(hitbox_offset_map, part_key, Vector3.ZERO)
+		shape_node.position += offset_from_part + offset_from_hitbox
+
+		var rotation_from_part: Vector3 = _read_map_vec3(part_rotation_map, part_key, Vector3.ZERO)
+		var rotation_from_hitbox: Vector3 = _read_map_vec3(hitbox_rotation_map, part_key, Vector3.ZERO)
+		shape_node.rotation_degrees += rotation_from_part + rotation_from_hitbox
+
+		var shape_scale: Vector3 = _read_map_vec3(hitbox_scale_map, part_key, _read_map_vec3(part_scale_map, part_key, Vector3.ONE))
+		if shape_node.shape is BoxShape3D:
+			var shape_box: BoxShape3D = shape_node.shape as BoxShape3D
+			var base_size: Vector3 = base_hitbox_box_sizes.get(part_key, shape_box.size)
+			shape_box.size = Vector3(
+				maxf(0.05, base_size.x * maxf(0.05, shape_scale.x)),
+				maxf(0.05, base_size.y * maxf(0.05, shape_scale.y)),
+				maxf(0.05, base_size.z * maxf(0.05, shape_scale.z))
+			)
+		elif shape_node.shape is SphereShape3D:
+			var shape_sphere: SphereShape3D = shape_node.shape as SphereShape3D
+			var base_radius: float = float(base_hitbox_sphere_radii.get(part_key, shape_sphere.radius))
+			var avg_scale: float = (shape_scale.x + shape_scale.y + shape_scale.z) / 3.0
+			shape_sphere.radius = maxf(0.05, base_radius * maxf(0.1, avg_scale))
+
+func _apply_species_body_collision_profile():
+	if not (body_collision.shape is CapsuleShape3D):
+		return
+
+	var body_collision_cfg: Dictionary = species_visual_profile.get("body_collision", {})
+	var radius_mult: float = maxf(0.5, float(body_collision_cfg.get("radius_mult", 1.0)))
+	var height_mult: float = maxf(0.35, float(body_collision_cfg.get("height_mult", 1.0)))
+	var y_offset: float = float(body_collision_cfg.get("y_offset", 0.0))
+
+	var capsule: CapsuleShape3D = body_collision.shape as CapsuleShape3D
+	capsule.radius = maxf(0.1, base_body_collision_radius * radius_mult)
+	capsule.height = maxf(0.35, base_body_collision_height * height_mult)
+	body_collision.position.y = base_body_collision_y + y_offset
+
+func _apply_species_placeholder_materials():
+	var palette: Dictionary = species_visual_profile.get("palette", {})
+	for part_key_variant in part_nodes.keys():
+		var part_key: String = String(part_key_variant)
+		var part_node: MeshInstance3D = part_nodes[part_key]
+		var part_color: Color = _read_color_map(palette, part_key, Color(0.2, 0.45, 0.15, 1.0))
+		part_node.material_override = _build_placeholder_material(part_color)
+
+	var weapon_color: Color = _read_color_map(palette, "weapon", Color(0.18, 0.18, 0.19, 1.0))
+	held_item.material_override = _build_placeholder_material(weapon_color, 0.85)
+
+func _build_placeholder_material(base_color: Color, roughness: float = 0.95) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = base_color
+	material.roughness = clampf(roughness, 0.0, 1.0)
+	return material
+
+func _read_vec3(source: Dictionary, key: String, fallback: Vector3) -> Vector3:
+	if not source.has(key):
+		return fallback
+	var value: Variant = source[key]
+	if value is Vector3:
+		return value
+	return fallback
+
+func _read_map_vec3(source: Dictionary, key: String, fallback: Vector3) -> Vector3:
+	if not source.has(key):
+		return fallback
+	var value: Variant = source[key]
+	if value is Vector3:
+		return value
+	return fallback
+
+func _read_color_map(source: Dictionary, key: String, fallback: Color) -> Color:
+	if not source.has(key):
+		return fallback
+	var value: Variant = source[key]
+	if value is Color:
+		return value
+	return fallback
+
 func _apply_visual_variant_placeholder():
 	var allowed: Array = profile_data.get("allowed_visual_variants", [ZombieDefinitions.DEFAULT_VISUAL_VARIANT])
 	if not allowed.has(visual_variant):
@@ -321,10 +559,10 @@ func _apply_visual_variant_placeholder():
 	set_meta("visual_variant", visual_variant)
 
 func _apply_behavior_pose_reset():
-	model_root.position = base_model_root_position
-	model_root.rotation.x = 0.0
+	model_root.position = species_base_model_root_position
+	model_root.rotation = species_base_model_root_rotation
 	if resolved_behavior_mode == "low_crawl":
-		model_root.position = base_model_root_position + Vector3(0.0, -0.35, 0.0)
+		model_root.position = species_base_model_root_position + Vector3(0.0, -0.35, 0.0)
 
 func _initialize_part_states():
 	part_health.clear()
@@ -619,7 +857,7 @@ func _update_behavior_pose(delta: float):
 	elif death_crawl_mode:
 		model_root.rotation.x = lerp_angle(model_root.rotation.x, deg_to_rad(42.0), minf(1.0, delta * 8.0))
 	else:
-		model_root.rotation.x = lerp_angle(model_root.rotation.x, 0.0, minf(1.0, delta * 8.0))
+		model_root.rotation.x = lerp_angle(model_root.rotation.x, species_base_model_root_rotation.x, minf(1.0, delta * 8.0))
 
 	if part_nodes.has("head") and not bool(missing_parts.get("head", false)):
 		var head_node: Node3D = part_nodes["head"]
@@ -1083,7 +1321,7 @@ func _apply_crawl_transition_if_needed():
 		return
 
 	death_crawl_mode = true
-	model_root.position = base_model_root_position + Vector3(0.0, -0.28, 0.0)
+	model_root.position = species_base_model_root_position + Vector3(0.0, -0.28, 0.0)
 
 func _remove_part(part: String):
 	missing_parts[part] = true

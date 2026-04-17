@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const HANDBOOK_SCENE: PackedScene = preload("res://scenes/handbook_book.tscn")
+
 var health_bar: ProgressBar
 var health_damage_bar: ProgressBar
 var health_value_label: Label
@@ -36,6 +38,7 @@ var blood_overlay: TextureRect
 var pause_dimmer: ColorRect
 var pause_panel: PanelContainer
 var resume_button: Button
+var handbook_button: Button
 var pause_restart_button: Button
 var game_over_panel: PanelContainer
 var game_over_label: Label
@@ -60,6 +63,7 @@ var displayed_health: float = 100.0
 var target_health: float = 100.0
 var nodes_initialized: bool = false
 var crosshair_spread: float = 4.0
+var handbook_book: Control
 
 func _enter_tree():
 	_ensure_nodes()
@@ -102,6 +106,7 @@ func _ready():
 	update_weapon_slots(0)
 	update_crosshair(0.0)
 	resume_button.pressed.connect(_on_resume)
+	handbook_button.pressed.connect(_on_open_handbook)
 	pause_restart_button.pressed.connect(_on_restart)
 	restart_button.pressed.connect(_on_restart)
 
@@ -145,6 +150,7 @@ func _ensure_nodes():
 	pause_dimmer = _find_required_node("PauseDimmer") as ColorRect
 	pause_panel = _find_required_node("PausePanel") as PanelContainer
 	resume_button = _find_required_node("ResumeButton") as Button
+	handbook_button = _find_required_node("HandbookButton") as Button
 	pause_restart_button = _find_required_node("PauseRestartButton") as Button
 	game_over_panel = _find_required_node("GameOverPanel") as PanelContainer
 	game_over_label = _find_required_node("GameOverLabel") as Label
@@ -164,6 +170,9 @@ func _process(delta):
 	health_damage_bar.value = displayed_health
 
 	if Input.is_action_just_pressed("pause_game") and not game_over_panel.visible:
+		if _is_handbook_open():
+			_close_handbook()
+			return
 		toggle_pause_menu()
 
 	low_health_time += delta
@@ -425,6 +434,7 @@ func _hide_legacy_damage_indicators():
 		indicator.modulate.a = 0.0
 
 func _on_resume():
+	_close_handbook()
 	_set_pause_menu_visible(false)
 
 func _on_restart():
@@ -436,8 +446,48 @@ func _on_restart():
 	pause_panel.visible = false
 	pause_panel.modulate.a = 0.0
 	pause_panel.scale = Vector2(0.94, 0.94)
+	_close_handbook()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	get_tree().reload_current_scene()
+
+func _on_open_handbook():
+	_ensure_handbook_book()
+	if handbook_book != null and handbook_book.has_method("open_book"):
+		handbook_book.call("open_book")
+
+func _ensure_handbook_book():
+	if handbook_book != null and is_instance_valid(handbook_book):
+		return
+
+	var scene_root: Node = get_tree().current_scene
+	if scene_root != null:
+		var existing: Node = scene_root.find_child("HandbookBook", true, false)
+		if existing != null and existing is Control and existing.has_method("open_book"):
+			handbook_book = existing as Control
+			return
+
+	if HANDBOOK_SCENE == null:
+		return
+
+	var created: Node = HANDBOOK_SCENE.instantiate()
+	if created == null or not (created is Control):
+		return
+
+	handbook_book = created as Control
+	add_child(handbook_book)
+
+func _close_handbook():
+	if handbook_book == null or not is_instance_valid(handbook_book):
+		return
+	if handbook_book.has_method("close_book"):
+		handbook_book.call("close_book")
+
+func _is_handbook_open() -> bool:
+	if handbook_book == null or not is_instance_valid(handbook_book):
+		return false
+	if handbook_book.has_method("is_open"):
+		return bool(handbook_book.call("is_open"))
+	return bool(handbook_book.visible)
 
 func _update_weapon_icon(weapon_name: String):
 	var weapon_key: String = weapon_name.to_lower()

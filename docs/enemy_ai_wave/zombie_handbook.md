@@ -61,6 +61,26 @@ Handbuch-Kategorien (Anzeige):
 - Ambush
 - Special
 
+## 3.1 Species-Visual-Layer (Placeholder)
+
+Der visuelle Arten-Layer ist separat und austauschbar umgesetzt:
+- zentrale Definition: `scripts/zombie_species_visuals.gd`
+- Runtime-Anwendung: `scripts/zombie.gd` bei `_apply_profile_data()`
+
+Pro Art werden datengetrieben gesetzt:
+- Silhouette/Proportion (`part_scale`, `part_offset`, `part_rotation_deg`)
+- Haltung (`model_root_offset`, `model_root_rotation_deg`)
+- einfache Platzhalterfarbe (`palette`)
+- Treffer-/Koerperprofil (`hitbox_scale`, `hitbox_offset`, `body_collision`)
+
+Referenzbasis:
+- `assets/handbook/species/*` (SVG-Artenkarten)
+
+Designziel:
+- Arten auf den ersten Blick unterscheidbar
+- keine finalen Art-Assets
+- spaeterer Austausch durch Character-/Art-Owner ohne KI-Refactor
+
 ## 4. DeathClass und DeathSubtype
 
 `DeathClass`-Gruppen:
