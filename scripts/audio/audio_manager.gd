@@ -153,6 +153,8 @@ func _prepare_loop_stream(stream: AudioStream, event: Dictionary) -> AudioStream
 		return stream
 	if duplicated_stream is AudioStreamOggVorbis:
 		(duplicated_stream as AudioStreamOggVorbis).loop = true
+	elif duplicated_stream is AudioStreamMP3:
+		(duplicated_stream as AudioStreamMP3).loop = true
 	elif duplicated_stream is AudioStreamWAV:
 		(duplicated_stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
 	return duplicated_stream
