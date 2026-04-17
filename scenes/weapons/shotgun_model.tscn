@@ -1,0 +1,70 @@
+[gd_scene load_steps=11 format=3 uid="uid://shotgun_model_v1"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal"]
+albedo_color = Color(0.07, 0.08, 0.10, 1)
+roughness = 0.70
+metallic = 0.30
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.32, 0.19, 0.10, 1)
+roughness = 0.88
+metallic = 0.00
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.11, 0.12, 0.14, 1)
+roughness = 0.85
+metallic = 0.05
+
+[sub_resource type="BoxMesh" id="Box_receiver"]
+size = Vector3(0.070, 0.065, 0.230)
+
+[sub_resource type="CylinderMesh" id="Cyl_barrel"]
+top_radius = 0.023
+bottom_radius = 0.023
+height = 0.160
+
+[sub_resource type="CylinderMesh" id="Cyl_magtube"]
+top_radius = 0.013
+bottom_radius = 0.013
+height = 0.120
+
+[sub_resource type="BoxMesh" id="Box_stock"]
+size = Vector3(0.065, 0.090, 0.210)
+
+[sub_resource type="BoxMesh" id="Box_grip"]
+size = Vector3(0.054, 0.115, 0.062)
+
+[sub_resource type="BoxMesh" id="Box_pump"]
+size = Vector3(0.072, 0.048, 0.085)
+
+[node name="ShotgunModel" type="Node3D"]
+
+[node name="Receiver" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, -0.020)
+mesh = SubResource("Box_receiver")
+material_override = SubResource("Mat_body")
+
+[node name="Barrel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.030, -0.205)
+mesh = SubResource("Cyl_barrel")
+material_override = SubResource("Mat_metal")
+
+[node name="MagazineTube" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.007, -0.185)
+mesh = SubResource("Cyl_magtube")
+material_override = SubResource("Mat_metal")
+
+[node name="Stock" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.008, 0.150)
+mesh = SubResource("Box_stock")
+material_override = SubResource("Mat_wood")
+
+[node name="PistolGrip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.070, 0.022)
+mesh = SubResource("Box_grip")
+material_override = SubResource("Mat_wood")
+
+[node name="Pump" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.030, -0.170)
+mesh = SubResource("Box_pump")
+material_override = SubResource("Mat_wood")
