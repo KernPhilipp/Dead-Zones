@@ -39,7 +39,10 @@ const SpecialWaveModifierInterface = preload("res://scripts/wave/special_wave_mo
 @export var use_tuned_wave_curve := false
 
 var zombie_scene: PackedScene = preload("res://scenes/zombie.tscn")
-var player: CharacterBody3D
+var player_scene: PackedScene = preload("res://scenes/player.tscn")
+
+var player: CharacterBody3D       # local player node (single-player or own peer)
+var players: Array[CharacterBody3D] = []  # all active players (server uses for distance checks)
 var hud: CanvasLayer
 var game_active: bool = true
 var run_start_time_ms: int = 0
@@ -68,9 +71,25 @@ var spawn_position_validator: RefCounted = SpawnPositionValidator.new()
 var spawn_executor: RefCounted = SpawnExecutor.new()
 var special_wave_modifier: RefCounted = SpecialWaveModifierInterface.new()
 
+func _is_net_server() -> bool:
+	return NetworkManager.is_active() and multiplayer.is_server()
+
+func _is_net_client() -> bool:
+	return NetworkManager.is_active() and not multiplayer.is_server()
+
 func _ready():
 	run_start_time_ms = Time.get_ticks_msec()
-	player = get_tree().get_first_node_in_group("player")
+
+	if NetworkManager.is_active():
+		_setup_multiplayer_connections()
+		if multiplayer.is_server():
+			_spawn_player_for_peer(1)
+		# clients wait for server to spawn their player via RPC
+	else:
+		player = get_tree().get_first_node_in_group("player")
+		if player != null:
+			players.append(player)
+
 	hud = get_node_or_null("../HUD")
 
 	if player != null and hud != null:
@@ -104,19 +123,94 @@ func _ready():
 	_initialize_runtime_state()
 	_setup_debug_overlay()
 
+	if _is_net_client():
+		return  # clients wait for server to drive wave logic
+
 	if wave_start_on_ready:
 		_start_next_wave()
 	else:
 		intermission_remaining = intermission_seconds
+
+func _setup_multiplayer_connections():
+	NetworkManager.peer_joined.connect(_on_peer_joined)
+	NetworkManager.peer_left.connect(_on_peer_left)
+
+func _on_peer_joined(peer_id: int):
+	if not multiplayer.is_server():
+		return
+	_spawn_player_for_peer(peer_id)
+
+func _on_peer_left(peer_id: int):
+	var node_name := "NetPlayer_%d" % peer_id
+	var existing := get_tree().current_scene.get_node_or_null(node_name)
+	if existing != null:
+		existing.queue_free()
+	players = players.filter(func(p): return is_instance_valid(p))
+	if players.is_empty() and game_active:
+		game_over()
+
+func _spawn_player_for_peer(peer_id: int):
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	var p: Node3D = player_scene.instantiate() as Node3D
+	p.name = "NetPlayer_%d" % peer_id
+	p.set_multiplayer_authority(peer_id)
+	scene_root.add_child(p)
+	# Position player near map centre; fine-tune per spawn point if available
+	p.global_position = Vector3(0, 1, 0)
+	if p is CharacterBody3D:
+		var cb := p as CharacterBody3D
+		players.append(cb)
+		if peer_id == multiplayer.get_unique_id():
+			player = cb
+			_wire_player_to_hud(cb)
+	# Tell the owning client which node is theirs
+	rpc_id(peer_id, "_notify_local_player", p.get_path())
+
+@rpc("authority", "call_local", "reliable")
+func _notify_local_player(player_path: NodePath):
+	var p := get_node_or_null(player_path)
+	if p is CharacterBody3D:
+		player = p as CharacterBody3D
+		if player not in players:
+			players.append(player)
+		_wire_player_to_hud(player)
+
+func _wire_player_to_hud(p: CharacterBody3D):
+	hud = get_node_or_null("../HUD")
+	if hud == null or not is_instance_valid(hud):
+		return
+	if p.has_signal("shot_feedback"):
+		if not p.shot_feedback.is_connected(func(hit): hud.has_method("show_shot_feedback") and hud.show_shot_feedback(hit)):
+			p.shot_feedback.connect(func(hit):
+				if hud.has_method("show_shot_feedback"): hud.show_shot_feedback(hit))
+	if p.has_signal("kill_feedback"):
+		p.kill_feedback.connect(func():
+			if hud.has_method("show_kill_feedback"): hud.show_kill_feedback())
+	if p.has_signal("damage_feedback"):
+		p.damage_feedback.connect(func(amt, dir):
+			if hud.has_method("show_damage_feedback"): hud.show_damage_feedback(amt, dir))
 
 func _process(delta: float):
 	if not game_active:
 		return
 
 	_update_hud()
-	if player and is_instance_valid(player) and player.health <= 0:
-		game_over()
-		return
+
+	# Check game-over: client-side for solo, server-side for multiplayer
+	if not _is_net_client():
+		var all_dead := _all_players_dead()
+		if all_dead:
+			if NetworkManager.is_active():
+				_net_game_over.rpc()
+			else:
+				game_over()
+			return
+
+	if _is_net_client():
+		_update_debug_overlay()
+		return  # clients don't drive waves
 
 	if wave_active:
 		_process_active_wave(delta)
@@ -137,7 +231,24 @@ func _unhandled_input(event: InputEvent):
 				_update_debug_overlay()
 			get_viewport().set_input_as_handled()
 
+func _all_players_dead() -> bool:
+	if players.is_empty():
+		return player != null and is_instance_valid(player) and player.health <= 0
+	for p in players:
+		if is_instance_valid(p) and p.has_method("get") and p.get("health") != null:
+			if int(p.get("health")) > 0:
+				return false
+		elif is_instance_valid(p):
+			return false
+	return true
+
+@rpc("authority", "call_local", "reliable")
+func _net_game_over():
+	game_over()
+
 func game_over():
+	if not game_active:
+		return
 	game_active = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if hud and hud.has_method("show_game_over"):
@@ -219,6 +330,8 @@ func _process_active_wave(delta: float):
 func _start_next_wave():
 	if not game_active:
 		return
+	if _is_net_client():
+		return
 
 	_refresh_spawn_sources()
 	current_wave_index += 1
@@ -294,7 +407,9 @@ func _start_next_wave():
 
 	wave_active = true
 	_initialize_runtime_state()
-	if hud != null and is_instance_valid(hud) and hud.has_method("show_wave_announcement"):
+	if NetworkManager.is_active():
+		_net_announce_wave.rpc(current_wave_index)
+	elif hud != null and is_instance_valid(hud) and hud.has_method("show_wave_announcement"):
 		hud.show_wave_announcement(current_wave_index)
 	runtime_state["current_wave"] = current_wave_index
 	runtime_state["elapsed_wave_time"] = 0.0
@@ -302,7 +417,14 @@ func _start_next_wave():
 	runtime_state["alive_count"] = _get_alive_zombie_count()
 	runtime_state["curve_mode"] = curve_mode
 
+@rpc("authority", "call_local", "reliable")
+func _net_announce_wave(wave_index: int):
+	if hud != null and is_instance_valid(hud) and hud.has_method("show_wave_announcement"):
+		hud.show_wave_announcement(wave_index)
+
 func _finish_wave():
+	if _is_net_client():
+		return
 	wave_active = false
 	intermission_remaining = intermission_seconds
 	runtime_state["intermission_remaining"] = intermission_remaining
@@ -328,6 +450,8 @@ func _is_wave_complete(alive_count: int) -> bool:
 	return alive_count <= 0
 
 func _spawn_wave_entry(entry: Dictionary) -> bool:
+	if _is_net_client():
+		return false
 	var scene_root: Node = get_tree().current_scene
 	if scene_root == null:
 		return false
@@ -336,9 +460,11 @@ func _spawn_wave_entry(entry: Dictionary) -> bool:
 	if zombie == null:
 		return false
 
+	# Use nearest live player for spawn distance validation
+	var ref_player: CharacterBody3D = _get_nearest_player(Vector3.ZERO)
 	var spawn_result: Dictionary = spawn_position_validator.find_valid_position(
 		map_spawn_provider,
-		player,
+		ref_player,
 		min_spawn_distance_from_player,
 		spawn_retry_limit,
 		profile_rng
@@ -354,9 +480,25 @@ func _spawn_wave_entry(entry: Dictionary) -> bool:
 	zombie.position = local_spawn_position
 
 	_apply_profile_from_entry(zombie, entry)
+	if NetworkManager.is_active():
+		zombie.set_multiplayer_authority(1)
 	scene_root.add_child(zombie)
 	zombie.global_position = spawn_position
 	return true
+
+func _get_nearest_player(from_pos: Vector3) -> CharacterBody3D:
+	if players.is_empty():
+		return player
+	var nearest: CharacterBody3D = null
+	var best_dist := INF
+	for p in players:
+		if not is_instance_valid(p):
+			continue
+		var d := p.global_position.distance_squared_to(from_pos)
+		if d < best_dist:
+			best_dist = d
+			nearest = p
+	return nearest if nearest != null else player
 
 func _apply_profile_from_entry(zombie: Node, entry: Dictionary):
 	if not zombie.has_method("configure_profile"):

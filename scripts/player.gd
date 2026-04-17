@@ -165,13 +165,19 @@ var was_on_floor_last_frame: bool = false
 @onready var left_leg: Node3D = $VisualRoot/ModelRoot/LeftLeg
 @onready var right_leg: Node3D = $VisualRoot/ModelRoot/RightLeg
 
+func _is_local_player() -> bool:
+	if not NetworkManager.is_active():
+		return true
+	return is_multiplayer_authority()
+
 func _ready() -> void:
 	health = max_health
 	progression = PlayerProgression.new()
 	weapon_loadout = WeaponLoadout.new()
 	weapon_loadout.initialize(DEFAULT_LOADOUT)
 	item_inventory = ItemInventory.new()
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if _is_local_player():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	head_start_pos = head.position
 	base_gun_model_position = gun_model.position
 	base_camera_fov = first_person_camera.fov
@@ -182,7 +188,11 @@ func _ready() -> void:
 	crouched_head_y = standing_head_y - crouch_head_height_offset
 	third_person_pivot.position.x = third_person_shoulder_offset
 	third_person_camera.fov = third_person_camera_fov
-	_set_camera_mode(CAMERA_FIRST_PERSON)
+	if _is_local_player():
+		_set_camera_mode(CAMERA_FIRST_PERSON)
+	else:
+		first_person_camera.current = false
+		third_person_camera.current = false
 	fire_timer = Timer.new()
 	fire_timer.one_shot = true
 	fire_timer.timeout.connect(_on_fire_timer_timeout)
@@ -199,6 +209,12 @@ func _ready() -> void:
 	was_on_floor_last_frame = is_on_floor()
 
 func _physics_process(delta: float) -> void:
+	if not _is_local_player():
+		# Remote player: only apply gravity so the node stays grounded
+		if not is_on_floor():
+			velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
+		move_and_slide()
+		return
 	_update_movement_slow(delta)
 	if Input.is_action_just_pressed("toggle_camera"):
 		toggle_camera_mode()
@@ -245,6 +261,8 @@ func _physics_process(delta: float) -> void:
 	update_interaction_prompt()
 
 func _input(event: InputEvent) -> void:
+	if not _is_local_player():
+		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotation_target_player += -event.relative.x * MOUSE_SENS
 		rotation_target_head += -event.relative.y * MOUSE_SENS
@@ -418,6 +436,7 @@ func toggle_camera_mode() -> void:
 func get_camera_mode() -> String:
 	return active_camera_mode
 
+@rpc("authority", "call_local", "reliable")
 func take_damage(amount: int, source_position: Vector3 = Vector3.ZERO) -> void:
 	var incoming_damage := maxi(amount, 0)
 	if incoming_damage <= 0:
@@ -856,7 +875,11 @@ func _perform_weapon_shot(was_sprinting: bool) -> Array[Dictionary]:
 			continue
 
 		var killed := false
-		if not body_part.is_empty() and damage_target.has_method("take_part_damage"):
+		if NetworkManager.is_active() and damage_target.has_method("take_part_damage_rpc"):
+			# In multiplayer, send damage to server via RPC; result arrives async
+			damage_target.take_part_damage_rpc.rpc_id(1, body_part if not body_part.is_empty() else "torso", pellet_damage)
+			killed = false  # optimistic: feedback handled server-side
+		elif not body_part.is_empty() and damage_target.has_method("take_part_damage"):
 			killed = bool(damage_target.call("take_part_damage", body_part, pellet_damage))
 		elif damage_target.has_method("take_damage"):
 			killed = bool(damage_target.call("take_damage", pellet_damage))

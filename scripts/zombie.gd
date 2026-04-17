@@ -164,6 +164,24 @@ var visual_base_positions: Dictionary = {}
 var visual_base_rotations: Dictionary = {}
 var visual_base_scales: Dictionary = {}
 
+func _is_net_server() -> bool:
+	return NetworkManager.is_active() and multiplayer.is_server()
+
+func _get_chase_target() -> CharacterBody3D:
+	# In multiplayer find the nearest living player
+	if NetworkManager.is_active():
+		var all_players := get_tree().get_nodes_in_group("player")
+		var nearest: CharacterBody3D = null
+		var best := INF
+		for p in all_players:
+			if p is CharacterBody3D and p.has_method("get") and int(p.get("health")) > 0:
+				var d := global_position.distance_squared_to((p as CharacterBody3D).global_position)
+				if d < best:
+					best = d
+					nearest = p as CharacterBody3D
+		return nearest
+	return player
+
 func _ready():
 	randomize()
 	add_to_group("zombie")
@@ -206,6 +224,13 @@ func _ready():
 	state = ZombieState.SPAWN_RISE
 
 func _physics_process(delta):
+	if NetworkManager.is_active() and not multiplayer.is_server():
+		# Clients only apply gravity; position comes from MultiplayerSynchronizer
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		move_and_slide()
+		return
+
 	_process_death_effect_runtime(delta)
 
 	match state:
@@ -534,6 +559,12 @@ func _apply_visual_profile():
 func take_damage(amount: int) -> bool:
 	return take_part_damage("torso", amount)
 
+@rpc("any_peer", "call_local", "reliable")
+func take_part_damage_rpc(part: String, amount: int):
+	if not multiplayer.is_server():
+		return
+	take_part_damage(part, amount)
+
 func take_part_damage(part: String, amount: int) -> bool:
 	if state == ZombieState.DEAD or amount <= 0:
 		return false
@@ -553,7 +584,10 @@ func take_part_damage(part: String, amount: int) -> bool:
 		_remove_part(effective_part)
 
 	if health <= 0 or missing_parts["torso"]:
-		die()
+		if NetworkManager.is_active() and multiplayer.is_server():
+			die.rpc()
+		else:
+			die()
 		return true
 
 	if state != ZombieState.SPAWN_RISE:
@@ -561,6 +595,7 @@ func take_part_damage(part: String, amount: int) -> bool:
 	return false
 
 
+@rpc("authority", "call_local", "reliable")
 func die():
 	if state == ZombieState.DEAD:
 		return
