@@ -1,0 +1,71 @@
+[gd_scene load_steps=12 format=3 uid="uid://rifle_model_v1"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal"]
+albedo_color = Color(0.10, 0.11, 0.13, 1)
+roughness = 0.72
+metallic = 0.28
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.13, 0.15, 0.18, 1)
+roughness = 0.86
+metallic = 0.05
+
+[sub_resource type="BoxMesh" id="Box_receiver"]
+size = Vector3(0.050, 0.045, 0.270)
+
+[sub_resource type="CylinderMesh" id="Cyl_barrel"]
+top_radius = 0.010
+bottom_radius = 0.010
+height = 0.200
+
+[sub_resource type="BoxMesh" id="Box_stock"]
+size = Vector3(0.048, 0.065, 0.175)
+
+[sub_resource type="BoxMesh" id="Box_grip"]
+size = Vector3(0.040, 0.108, 0.056)
+
+[sub_resource type="BoxMesh" id="Box_magazine"]
+size = Vector3(0.038, 0.105, 0.058)
+
+[sub_resource type="BoxMesh" id="Box_handguard"]
+size = Vector3(0.052, 0.042, 0.100)
+
+[sub_resource type="BoxMesh" id="Box_rail"]
+size = Vector3(0.014, 0.010, 0.220)
+
+[node name="RifleModel" type="Node3D"]
+
+[node name="Receiver" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.018, -0.065)
+mesh = SubResource("Box_receiver")
+material_override = SubResource("Mat_body")
+
+[node name="Barrel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.018, -0.255)
+mesh = SubResource("Cyl_barrel")
+material_override = SubResource("Mat_metal")
+
+[node name="Stock" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.020, 0.147)
+mesh = SubResource("Box_stock")
+material_override = SubResource("Mat_body")
+
+[node name="PistolGrip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.062, 0.025)
+mesh = SubResource("Box_grip")
+material_override = SubResource("Mat_body")
+
+[node name="Magazine" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.082, -0.040)
+mesh = SubResource("Box_magazine")
+material_override = SubResource("Mat_body")
+
+[node name="HandGuard" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.016, -0.180)
+mesh = SubResource("Box_handguard")
+material_override = SubResource("Mat_body")
+
+[node name="TopRail" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.043, -0.075)
+mesh = SubResource("Box_rail")
+material_override = SubResource("Mat_metal")

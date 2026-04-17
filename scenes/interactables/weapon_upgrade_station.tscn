@@ -1,0 +1,79 @@
+[gd_scene load_steps=9 format=3 uid="uid://weapon_upgrade_station_001"]
+
+[ext_resource type="Script" path="res://scripts/interactables/weapon_upgrade_station.gd" id="1_upgrade_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_upgrade_station"]
+size = Vector3(1.4, 1.8, 1.0)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_upgrade_station"]
+top_radius = 0.48
+bottom_radius = 0.56
+height = 1.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_upgrade_ring"]
+top_radius = 0.72
+bottom_radius = 0.72
+height = 0.08
+
+[sub_resource type="BoxMesh" id="BoxMesh_upgrade_fin"]
+size = Vector3(0.12, 1.1, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_upgrade_dark"]
+albedo_color = Color(0.08, 0.07, 0.06, 1)
+roughness = 0.78
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_upgrade_glow"]
+albedo_color = Color(1, 0.72, 0.28, 1)
+emission_enabled = true
+emission = Color(0.82, 0.42, 0.08, 1)
+emission_energy_multiplier = 1.35
+roughness = 0.18
+
+[sub_resource type="LabelSettings" id="LabelSettings_upgrade_station"]
+font_size = 30
+outline_size = 8
+outline_color = Color(0, 0, 0, 0.88)
+
+[node name="WeaponUpgradeStation" type="StaticBody3D" groups=["interactable"]]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_upgrade_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("BoxShape3D_upgrade_station")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualRoot"]
+mesh = SubResource("CylinderMesh_upgrade_station")
+
+[node name="BaseRing" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.66, 0)
+mesh = SubResource("CylinderMesh_upgrade_ring")
+material_override = SubResource("StandardMaterial3D_upgrade_dark")
+
+[node name="GlowRing" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, 0)
+mesh = SubResource("CylinderMesh_upgrade_ring")
+material_override = SubResource("StandardMaterial3D_upgrade_glow")
+
+[node name="FinA" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.92, -0.38, 0, 0.38, 0.92, 0.38, 0, 0)
+mesh = SubResource("BoxMesh_upgrade_fin")
+material_override = SubResource("StandardMaterial3D_upgrade_dark")
+
+[node name="FinB" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(-1, 0, 0, 0, 0.92, 0.38, 0, 0.38, -0.92, -0.38, 0, 0)
+mesh = SubResource("BoxMesh_upgrade_fin")
+material_override = SubResource("StandardMaterial3D_upgrade_dark")
+
+[node name="Label3D" type="Label3D" parent="VisualRoot"]
+transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, 0, 1.22, 0)
+billboard = 1
+text = "UPGRADE"
+font_size = 30
+outline_size = 8
+label_settings = SubResource("LabelSettings_upgrade_station")
+horizontal_alignment = 1

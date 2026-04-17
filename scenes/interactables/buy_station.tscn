@@ -1,0 +1,77 @@
+[gd_scene load_steps=9 format=3 uid="uid://buy_station_001"]
+
+[ext_resource type="Script" path="res://scripts/interactables/buy_station.gd" id="1_station_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_station"]
+size = Vector3(1.4, 1.8, 0.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_station"]
+size = Vector3(1.1, 1.4, 0.4)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_station_base"]
+top_radius = 0.5
+bottom_radius = 0.62
+height = 0.28
+
+[sub_resource type="BoxMesh" id="BoxMesh_station_top"]
+size = Vector3(1.02, 0.12, 0.56)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_station_dark"]
+albedo_color = Color(0.07, 0.08, 0.1, 1)
+roughness = 0.86
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_station_glow"]
+albedo_color = Color(0.2, 0.82, 1, 1)
+emission_enabled = true
+emission = Color(0.12, 0.5, 0.64, 1)
+emission_energy_multiplier = 1.2
+roughness = 0.24
+
+[sub_resource type="LabelSettings" id="LabelSettings_station"]
+font_size = 30
+outline_size = 8
+outline_color = Color(0, 0, 0, 0.88)
+
+[node name="BuyStation" type="StaticBody3D" groups=["interactable"]]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_station_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("BoxShape3D_station")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualRoot"]
+mesh = SubResource("BoxMesh_station")
+
+[node name="BasePedestal" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.78, 0)
+mesh = SubResource("CylinderMesh_station_base")
+material_override = SubResource("StandardMaterial3D_station_dark")
+
+[node name="TopPlate" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86, 0)
+mesh = SubResource("BoxMesh_station_top")
+material_override = SubResource("StandardMaterial3D_station_glow")
+
+[node name="SidePillarLeft" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(0.18, 0, 0, 0, 1.18, 0, 0, 0, 0.18, -0.52, -0.08, 0)
+mesh = SubResource("BoxMesh_station")
+material_override = SubResource("StandardMaterial3D_station_dark")
+
+[node name="SidePillarRight" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(0.18, 0, 0, 0, 1.18, 0, 0, 0, 0.18, 0.52, -0.08, 0)
+mesh = SubResource("BoxMesh_station")
+material_override = SubResource("StandardMaterial3D_station_dark")
+
+[node name="Label3D" type="Label3D" parent="VisualRoot"]
+transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, 0, 1.18, 0)
+billboard = 1
+text = "STATION"
+font_size = 30
+outline_size = 8
+label_settings = SubResource("LabelSettings_station")
+horizontal_alignment = 1

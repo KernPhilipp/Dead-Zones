@@ -8,18 +8,31 @@ func refresh_from_scene(context_node: Node):
 	if context_node == null:
 		return
 
-	if context_node.has_node("../SpawnPoints"):
-		var spawn_root: Node = context_node.get_node("../SpawnPoints")
-		for child in spawn_root.get_children():
-			if child is Node3D:
-				spawn_points.append(child as Node3D)
-
 	var tree: SceneTree = context_node.get_tree()
 	if tree == null:
 		return
 
+	var current_scene: Node = tree.current_scene
+	if current_scene != null:
+		_collect_marker_children(current_scene.find_child("ZombieSpawns", true, false))
+		_collect_marker_children(current_scene.find_child("SpawnPoints", true, false))
+
+	if context_node.has_node("../SpawnPoints"):
+		_collect_marker_children(context_node.get_node("../SpawnPoints"))
+
 	for group_node in tree.get_nodes_in_group("map_spawn_point"):
 		var spawn_point: Node3D = group_node as Node3D
+		if spawn_point == null:
+			continue
+		if spawn_points.has(spawn_point):
+			continue
+		spawn_points.append(spawn_point)
+
+func _collect_marker_children(spawn_root: Node):
+	if spawn_root == null:
+		return
+	for child in spawn_root.get_children():
+		var spawn_point: Node3D = child as Node3D
 		if spawn_point == null:
 			continue
 		if spawn_points.has(spawn_point):

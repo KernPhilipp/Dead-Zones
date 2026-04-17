@@ -17,3 +17,9 @@ func _find_zombie_owner() -> Node:
 			return current
 		current = current.get_parent()
 	return null
+
+func get_body_part() -> String:
+	return body_part
+
+func get_zombie_owner() -> Node:
+	return _find_zombie_owner()

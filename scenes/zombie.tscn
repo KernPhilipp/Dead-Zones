@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://zombie001"]
+[gd_scene load_steps=25 format=3 uid="uid://zombie001"]
 
 [ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
 [ext_resource type="Script" path="res://scripts/zombie_hitbox.gd" id="2_hitbox"]
@@ -7,34 +7,87 @@
 radius = 0.28
 height = 1.5
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_zombie"]
-albedo_color = Color(0.2, 0.45, 0.15, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_skin"]
+albedo_color = Color(0.34, 0.42, 0.25, 1)
+roughness = 0.96
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flesh"]
+albedo_color = Color(0.42, 0.12, 0.11, 1)
+roughness = 0.88
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shirt"]
+albedo_color = Color(0.14, 0.16, 0.15, 1)
+roughness = 0.97
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pants"]
+albedo_color = Color(0.19, 0.18, 0.16, 1)
 roughness = 0.95
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_weapon"]
-albedo_color = Color(0.18, 0.18, 0.18, 1)
-roughness = 0.8
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bone"]
+albedo_color = Color(0.72, 0.68, 0.58, 1)
+roughness = 0.82
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
+albedo_color = Color(0.2, 0.2, 0.22, 1)
+metallic = 0.25
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
+albedo_color = Color(1, 0.48, 0.16, 1)
+emission_enabled = true
+emission = Color(1, 0.42, 0.12, 1)
+emission_energy_multiplier = 0.55
+roughness = 0.1
 
 [sub_resource type="BoxMesh" id="BoxMesh_torso"]
-size = Vector3(0.55, 0.7, 0.3)
-material = SubResource("StandardMaterial3D_zombie")
+size = Vector3(0.58, 0.82, 0.34)
+material = SubResource("StandardMaterial3D_shirt")
+
+[sub_resource type="BoxMesh" id="BoxMesh_pelvis"]
+size = Vector3(0.42, 0.24, 0.28)
+material = SubResource("StandardMaterial3D_pants")
 
 [sub_resource type="SphereMesh" id="SphereMesh_head"]
-radius = 0.19
-height = 0.38
-material = SubResource("StandardMaterial3D_zombie")
+radius = 0.2
+height = 0.42
+material = SubResource("StandardMaterial3D_skin")
+
+[sub_resource type="BoxMesh" id="BoxMesh_jaw"]
+size = Vector3(0.18, 0.08, 0.14)
+material = SubResource("StandardMaterial3D_bone")
+
+[sub_resource type="SphereMesh" id="SphereMesh_eye"]
+radius = 0.035
+height = 0.07
+material = SubResource("StandardMaterial3D_eye")
 
 [sub_resource type="BoxMesh" id="BoxMesh_arm"]
-size = Vector3(0.18, 0.55, 0.18)
-material = SubResource("StandardMaterial3D_zombie")
+size = Vector3(0.18, 0.48, 0.18)
+material = SubResource("StandardMaterial3D_skin")
+
+[sub_resource type="BoxMesh" id="BoxMesh_forearm"]
+size = Vector3(0.16, 0.44, 0.16)
+material = SubResource("StandardMaterial3D_skin")
+
+[sub_resource type="BoxMesh" id="BoxMesh_claw"]
+size = Vector3(0.03, 0.14, 0.03)
+material = SubResource("StandardMaterial3D_bone")
 
 [sub_resource type="BoxMesh" id="BoxMesh_leg"]
-size = Vector3(0.22, 0.65, 0.22)
-material = SubResource("StandardMaterial3D_zombie")
+size = Vector3(0.22, 0.56, 0.22)
+material = SubResource("StandardMaterial3D_pants")
+
+[sub_resource type="BoxMesh" id="BoxMesh_shin"]
+size = Vector3(0.2, 0.44, 0.2)
+material = SubResource("StandardMaterial3D_skin")
 
 [sub_resource type="BoxMesh" id="BoxMesh_weapon"]
-size = Vector3(0.08, 0.55, 0.08)
-material = SubResource("StandardMaterial3D_weapon")
+size = Vector3(0.06, 0.72, 0.06)
+material = SubResource("StandardMaterial3D_metal")
+
+[sub_resource type="BoxMesh" id="BoxMesh_meat"]
+size = Vector3(0.16, 0.12, 0.08)
+material = SubResource("StandardMaterial3D_flesh")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_damage"]
 radius = 1.35
@@ -61,36 +114,81 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("CapsuleShape3D_zbody")
 
 [node name="ModelRoot" type="Node3D" parent="."]
+transform = Transform3D(0.996195, 0, -0.0871557, 0, 1, 0, 0.0871557, 0, 0.996195, 0, 0, 0)
+
+[node name="Pelvis" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 0.72, 0.02)
+mesh = SubResource("BoxMesh_pelvis")
 
 [node name="Torso" type="MeshInstance3D" parent="ModelRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 0)
+transform = Transform3D(1, 0, 0, 0, 0.927184, 0.374607, 0, -0.374607, 0.927184, 0, 1.08, 0)
 mesh = SubResource("BoxMesh_torso")
 
+[node name="RibWound" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -0.19, 1.05, 0.18)
+mesh = SubResource("BoxMesh_meat")
+
 [node name="Head" type="MeshInstance3D" parent="ModelRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+transform = Transform3D(0.984808, -0.122788, 0.122788, 0.173648, 0.696364, -0.696364, 0, 0.707107, 0.707107, 0, 1.67, -0.06)
 mesh = SubResource("SphereMesh_head")
 
+[node name="Jaw" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.984808, -0.122788, 0.122788, 0.173648, 0.696364, -0.696364, 0, 0.707107, 0.707107, 0.01, 1.52, 0.08)
+mesh = SubResource("BoxMesh_jaw")
+
+[node name="Eye_L" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07, 1.67, 0.12)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="Eye_R" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.03, 1.64, 0.13)
+mesh = SubResource("SphereMesh_eye")
+
 [node name="Arm_L" type="MeshInstance3D" parent="ModelRoot"]
-transform = Transform3D(0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 0, 0, 1, -0.42, 1.08, 0)
+transform = Transform3D(0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0, 1, -0.43, 1.14, -0.02)
 mesh = SubResource("BoxMesh_arm")
+
+[node name="Forearm_L" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.866025, 0.5, 0, -0.5, 0.866025, 0, 0, 0, 1, -0.52, 0.76, 0.07)
+mesh = SubResource("BoxMesh_forearm")
+
+[node name="Claw_L1" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.866025, 0.5, 0, -0.5, 0.866025, 0, 0, 0, 1, -0.55, 0.52, 0.11)
+mesh = SubResource("BoxMesh_claw")
+
+[node name="Claw_L2" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.766044, 0.642788, 0, -0.642788, 0.766044, 0, 0, 0, 1, -0.49, 0.5, 0.09)
+mesh = SubResource("BoxMesh_claw")
 
 [node name="Arm_R" type="MeshInstance3D" parent="ModelRoot"]
-transform = Transform3D(0.984808, -0.173648, 0, 0.173648, 0.984808, 0, 0, 0, 1, 0.42, 1.08, 0)
+transform = Transform3D(0.866025, -0.5, 0, 0.5, 0.866025, 0, 0, 0, 1, 0.42, 1.11, 0.08)
 mesh = SubResource("BoxMesh_arm")
 
-[node name="WeaponSocket_R" type="Node3D" parent="ModelRoot/Arm_R"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, -0.3, 0)
+[node name="Forearm_R" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 1, 0.52, 0.78, 0.14)
+mesh = SubResource("BoxMesh_forearm")
 
-[node name="HeldItem" type="MeshInstance3D" parent="ModelRoot/Arm_R/WeaponSocket_R"]
+[node name="WeaponSocket_R" type="Node3D" parent="ModelRoot/Forearm_R"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0.04, -0.24, 0.02)
+
+[node name="HeldItem" type="MeshInstance3D" parent="ModelRoot/Forearm_R/WeaponSocket_R"]
 mesh = SubResource("BoxMesh_weapon")
 
 [node name="Leg_L" type="MeshInstance3D" parent="ModelRoot"]
-transform = Transform3D(0.996195, 0.0871557, 0, -0.0871557, 0.996195, 0, 0, 0, 1, -0.16, 0.38, 0)
+transform = Transform3D(0.996195, 0.0871557, 0, -0.0871557, 0.996195, 0, 0, 0, 1, -0.15, 0.46, 0)
 mesh = SubResource("BoxMesh_leg")
 
+[node name="Shin_L" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 0, 0, 1, -0.17, 0.03, 0.03)
+mesh = SubResource("BoxMesh_shin")
+
 [node name="Leg_R" type="MeshInstance3D" parent="ModelRoot"]
-transform = Transform3D(0.996195, -0.0871557, 0, 0.0871557, 0.996195, 0, 0, 0, 1, 0.16, 0.38, 0)
+transform = Transform3D(0.984808, -0.173648, 0, 0.173648, 0.984808, 0, 0, 0, 1, 0.16, 0.46, 0.02)
 mesh = SubResource("BoxMesh_leg")
+
+[node name="Shin_R" type="MeshInstance3D" parent="ModelRoot"]
+transform = Transform3D(0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0, 1, 0.19, 0.04, 0.06)
+mesh = SubResource("BoxMesh_shin")
 
 [node name="Hitboxes" type="Node3D" parent="."]
 

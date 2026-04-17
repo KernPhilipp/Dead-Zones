@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://player001"]
+[gd_scene load_steps=12 format=3 uid="uid://player001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 
@@ -9,6 +9,36 @@ height = 1.8
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_gun"]
 radius = 0.02
 height = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_hips"]
+size = Vector3(0.44, 0.28, 0.24)
+
+[sub_resource type="BoxMesh" id="BoxMesh_torso"]
+size = Vector3(0.56, 0.72, 0.28)
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.2
+height = 0.4
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_arm"]
+radius = 0.09
+mid_height = 0.34
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_leg"]
+radius = 0.11
+mid_height = 0.48
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body_dark"]
+albedo_color = Color(0.078, 0.094, 0.121, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body_mid"]
+albedo_color = Color(0.207, 0.258, 0.305, 1)
+roughness = 0.82
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body_light"]
+albedo_color = Color(0.815, 0.75, 0.67, 1)
+roughness = 0.95
 
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 collision_layer = 1
@@ -26,11 +56,88 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 current = true
 fov = 75.0
 
+[node name="ThirdPersonPivot" type="Node3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.58, -0.12, 0.08)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Head/ThirdPersonPivot"]
+spring_length = 3.4
+margin = 0.18
+collision_mask = 4
+
+[node name="ThirdPersonCamera" type="Camera3D" parent="Head/ThirdPersonPivot/SpringArm3D"]
+fov = 78.0
+
 [node name="RayCast3D" type="RayCast3D" parent="Head"]
 target_position = Vector3(0, 0, -100)
 collision_mask = 2
 enabled = true
 
-[node name="GunModel" type="MeshInstance3D" parent="Head"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.3, -0.2, -0.5)
+[node name="InteractionRayCast3D" type="RayCast3D" parent="Head"]
+target_position = Vector3(0, 0, -3.2)
+collision_mask = 8
+enabled = true
+
+[node name="GunModel" type="Node3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.2, -0.5)
+
+[node name="VisualRoot" type="Node3D" parent="."]
+visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+
+[node name="ModelRoot" type="Node3D" parent="VisualRoot"]
+
+[node name="HipsMesh" type="MeshInstance3D" parent="VisualRoot/ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("BoxMesh_hips")
+material_override = SubResource("StandardMaterial3D_body_mid")
+
+[node name="Spine" type="Node3D" parent="VisualRoot/ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+
+[node name="TorsoMesh" type="MeshInstance3D" parent="VisualRoot/ModelRoot/Spine"]
+mesh = SubResource("BoxMesh_torso")
+material_override = SubResource("StandardMaterial3D_body_dark")
+
+[node name="Neck" type="Node3D" parent="VisualRoot/ModelRoot/Spine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.54, 0)
+
+[node name="HeadMesh" type="MeshInstance3D" parent="VisualRoot/ModelRoot/Spine/Neck"]
+mesh = SubResource("SphereMesh_head")
+material_override = SubResource("StandardMaterial3D_body_light")
+
+[node name="LeftArm" type="Node3D" parent="VisualRoot/ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.36, 1.5, 0)
+
+[node name="UpperArmMesh" type="MeshInstance3D" parent="VisualRoot/ModelRoot/LeftArm"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.36, 0)
+mesh = SubResource("CapsuleMesh_arm")
+material_override = SubResource("StandardMaterial3D_body_mid")
+
+[node name="RightArm" type="Node3D" parent="VisualRoot/ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.36, 1.5, 0)
+
+[node name="UpperArmMesh" type="MeshInstance3D" parent="VisualRoot/ModelRoot/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.36, 0)
+mesh = SubResource("CapsuleMesh_arm")
+material_override = SubResource("StandardMaterial3D_body_mid")
+
+[node name="WeaponProxy" type="MeshInstance3D" parent="VisualRoot/ModelRoot/RightArm"]
+transform = Transform3D(1.2, 0, 0, 0, 0.2, -0.45, 0, 0.45, 0.2, -0.1, -0.54, -0.22)
 mesh = SubResource("CapsuleMesh_gun")
+material_override = SubResource("StandardMaterial3D_body_dark")
+
+[node name="LeftLeg" type="Node3D" parent="VisualRoot/ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.88, 0)
+
+[node name="UpperLegMesh" type="MeshInstance3D" parent="VisualRoot/ModelRoot/LeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.46, 0)
+mesh = SubResource("CapsuleMesh_leg")
+material_override = SubResource("StandardMaterial3D_body_mid")
+
+[node name="RightLeg" type="Node3D" parent="VisualRoot/ModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.88, 0)
+
+[node name="UpperLegMesh" type="MeshInstance3D" parent="VisualRoot/ModelRoot/RightLeg"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.46, 0)
+mesh = SubResource("CapsuleMesh_leg")
+material_override = SubResource("StandardMaterial3D_body_mid")

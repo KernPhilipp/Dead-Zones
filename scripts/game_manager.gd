@@ -42,6 +42,7 @@ var zombie_scene: PackedScene = preload("res://scenes/zombie.tscn")
 var player: CharacterBody3D
 var hud: CanvasLayer
 var game_active: bool = true
+var run_start_time_ms: int = 0
 var debug_layer: CanvasLayer
 var debug_label: Label
 var curve_mode: String = "default"
@@ -68,19 +69,9 @@ var spawn_executor: RefCounted = SpawnExecutor.new()
 var special_wave_modifier: RefCounted = SpecialWaveModifierInterface.new()
 
 func _ready():
-	player = get_tree().get_first_node_in_group("player")
-	hud = get_node_or_null("../HUD")
-
-	if player != null and hud != null:
-		player.shot_feedback.connect(func(hit): if hud.has_method("show_shot_feedback"): hud.show_shot_feedback(hit))
-		player.kill_feedback.connect(func(): if hud.has_method("show_kill_feedback"): hud.show_kill_feedback())
-		player.reload_feedback.connect(func(msg, col): if hud.has_method("show_status"): hud.show_status(msg, col))
-		player.damage_feedback.connect(func(amt, dir): if hud.has_method("show_damage_feedback"): hud.show_damage_feedback(amt, dir))
-		player.combat_text_feedback.connect(func(msg, col): if hud.has_method("show_combat_text"): hud.show_combat_text(msg, col))
-		if hud.has_method("update_weapon"):
-			hud.update_weapon(player.weapon_name)
-		if hud.has_method("update_weapon_slots"):
-			hud.update_weapon_slots(player.current_weapon_index)
+	run_start_time_ms = Time.get_ticks_msec()
+	_resolve_scene_nodes()
+	_connect_player_feedback()
 
 	profile_rng = RandomNumberGenerator.new()
 	profile_rng.randomize()
@@ -110,6 +101,50 @@ func _process(delta: float):
 
 	_update_debug_overlay()
 
+func _resolve_scene_nodes():
+	var current_scene: Node = get_tree().current_scene
+	player = get_tree().get_first_node_in_group("player")
+
+	if current_scene != null:
+		hud = current_scene.find_child("HUD", true, false) as CanvasLayer
+		var player_start := current_scene.find_child("PlayerStart", true, false) as Marker3D
+		if player != null and player_start != null:
+			player.global_position = player_start.global_position
+			var player_rotation: Vector3 = player.global_rotation
+			player_rotation.y = player_start.global_rotation.y
+			player.global_rotation = player_rotation
+
+	if hud == null:
+		hud = get_node_or_null("../HUD")
+
+func _connect_player_feedback():
+	if player == null or hud == null:
+		return
+
+	player.shot_feedback.connect(func(hit):
+		if hud.has_method("show_shot_feedback"):
+			hud.show_shot_feedback(hit))
+	player.kill_feedback.connect(func():
+		if hud.has_method("show_kill_feedback"):
+			hud.show_kill_feedback())
+	player.reload_feedback.connect(func(msg, col):
+		if hud.has_method("show_status"):
+			hud.show_status(msg, col))
+	player.damage_feedback.connect(func(amt, dir):
+		if hud.has_method("show_damage_feedback"):
+			hud.show_damage_feedback(amt, dir))
+	player.combat_text_feedback.connect(func(msg, col):
+		if hud.has_method("show_combat_text"):
+			hud.show_combat_text(msg, col))
+	player.unlock_feedback.connect(func(_type, _id, display_name):
+		if hud.has_method("show_unlock_feedback"):
+			hud.show_unlock_feedback(display_name))
+
+	if hud.has_method("update_weapon"):
+		hud.update_weapon(player.weapon_name)
+	if hud.has_method("update_weapon_slots"):
+		hud.update_weapon_slots(player.current_weapon_index)
+
 func _unhandled_input(event: InputEvent):
 	if not allow_runtime_curve_toggle:
 		return
@@ -126,7 +161,11 @@ func game_over():
 	game_active = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if hud and hud.has_method("show_game_over"):
-		hud.show_game_over()
+		var stats: Dictionary = {}
+		if player != null and is_instance_valid(player) and player.has_method("build_game_over_stats"):
+			var run_time_seconds: int = maxi(int((Time.get_ticks_msec() - run_start_time_ms) / 1000), 0)
+			stats = player.build_game_over_stats(current_wave_index, run_time_seconds)
+		hud.show_game_over(stats)
 	get_tree().paused = true
 
 func get_runtime_state() -> Dictionary:
@@ -141,8 +180,14 @@ func _update_hud():
 		return
 	if hud.has_method("update_health"):
 		hud.update_health(player.health)
+	if hud.has_method("update_armor"):
+		hud.update_armor(player.armor, player.max_armor)
 	if hud.has_method("update_ammo"):
 		hud.update_ammo(player.ammo, player.max_ammo, player.reserve_ammo)
+	if hud.has_method("update_currency"):
+		hud.update_currency(player.points)
+	if hud.has_method("update_inventory"):
+		hud.update_inventory(player.item_inventory.build_state(player.progression.get_unlocked_items()))
 	if hud.has_method("update_weapon"):
 		hud.update_weapon(player.weapon_name)
 	if hud.has_method("update_weapon_slots"):

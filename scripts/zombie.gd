@@ -102,6 +102,7 @@ var health: int = 0
 var can_attack: bool = false
 var attack_timer: Timer
 var hurt_timer: Timer
+var idle_sound_timer: Timer
 
 var rise_elapsed := 0.0
 var rise_start_position := Vector3.ZERO
@@ -114,6 +115,7 @@ var base_head_rotation := Vector3.ZERO
 var behavior_triggered: bool = false
 var hidder_ground_mode: bool = false
 var cover_nodes: Array[Node3D] = []
+var current_barricade_target: Node3D = null
 
 var part_health: Dictionary = {}
 var missing_parts: Dictionary = {}
@@ -121,7 +123,24 @@ var missing_parts: Dictionary = {}
 @onready var body_collision: CollisionShape3D = $CollisionShape3D
 @onready var damage_area: Area3D = $DamageArea
 @onready var model_root: Node3D = $ModelRoot
-@onready var held_item: Node3D = $ModelRoot/Arm_R/WeaponSocket_R/HeldItem
+@onready var pelvis_mesh: MeshInstance3D = $ModelRoot/Pelvis
+@onready var torso_mesh: MeshInstance3D = $ModelRoot/Torso
+@onready var rib_wound_mesh: MeshInstance3D = $ModelRoot/RibWound
+@onready var head_mesh: MeshInstance3D = $ModelRoot/Head
+@onready var jaw_mesh: MeshInstance3D = $ModelRoot/Jaw
+@onready var eye_left_mesh: MeshInstance3D = $ModelRoot/Eye_L
+@onready var eye_right_mesh: MeshInstance3D = $ModelRoot/Eye_R
+@onready var arm_left_mesh: MeshInstance3D = $ModelRoot/Arm_L
+@onready var forearm_left_mesh: MeshInstance3D = $ModelRoot/Forearm_L
+@onready var claw_left_mesh_a: MeshInstance3D = $ModelRoot/Claw_L1
+@onready var claw_left_mesh_b: MeshInstance3D = $ModelRoot/Claw_L2
+@onready var arm_right_mesh: MeshInstance3D = $ModelRoot/Arm_R
+@onready var forearm_right_mesh: MeshInstance3D = $ModelRoot/Forearm_R
+@onready var held_item: MeshInstance3D = $ModelRoot/Forearm_R/WeaponSocket_R/HeldItem
+@onready var leg_left_mesh: MeshInstance3D = $ModelRoot/Leg_L
+@onready var shin_left_mesh: MeshInstance3D = $ModelRoot/Shin_L
+@onready var leg_right_mesh: MeshInstance3D = $ModelRoot/Leg_R
+@onready var shin_right_mesh: MeshInstance3D = $ModelRoot/Shin_R
 @onready var part_nodes: Dictionary = {
 	"head": $ModelRoot/Head,
 	"torso": $ModelRoot/Torso,
@@ -141,6 +160,9 @@ var missing_parts: Dictionary = {}
 
 var base_model_root_position := Vector3.ZERO
 var profile_rng: RandomNumberGenerator
+var visual_base_positions: Dictionary = {}
+var visual_base_rotations: Dictionary = {}
+var visual_base_scales: Dictionary = {}
 
 func _ready():
 	randomize()
@@ -149,6 +171,7 @@ func _ready():
 	limp_phase = randf_range(0.0, TAU)
 	base_model_root_position = model_root.position
 	base_head_rotation = part_nodes["head"].rotation
+	_capture_visual_base_pose()
 	profile_rng = RandomNumberGenerator.new()
 	profile_rng.randomize()
 
@@ -166,6 +189,11 @@ func _ready():
 	hurt_timer.one_shot = true
 	hurt_timer.timeout.connect(_on_hurt_timer_timeout)
 	add_child(hurt_timer)
+
+	idle_sound_timer = Timer.new()
+	idle_sound_timer.one_shot = true
+	idle_sound_timer.timeout.connect(_on_idle_sound_timer_timeout)
+	add_child(idle_sound_timer)
 
 	damage_area.body_entered.connect(_on_damage_area_body_entered)
 
@@ -321,10 +349,77 @@ func _apply_visual_variant_placeholder():
 	set_meta("visual_variant", visual_variant)
 
 func _apply_behavior_pose_reset():
+	_restore_visual_base_pose()
 	model_root.position = base_model_root_position
 	model_root.rotation.x = 0.0
 	if resolved_behavior_mode == "low_crawl":
 		model_root.position = base_model_root_position + Vector3(0.0, -0.35, 0.0)
+
+func _capture_visual_base_pose():
+	visual_base_positions.clear()
+	visual_base_rotations.clear()
+	visual_base_scales.clear()
+
+	for node in [
+		model_root,
+		pelvis_mesh,
+		torso_mesh,
+		rib_wound_mesh,
+		head_mesh,
+		jaw_mesh,
+		eye_left_mesh,
+		eye_right_mesh,
+		arm_left_mesh,
+		forearm_left_mesh,
+		claw_left_mesh_a,
+		claw_left_mesh_b,
+		arm_right_mesh,
+		forearm_right_mesh,
+		held_item,
+		leg_left_mesh,
+		shin_left_mesh,
+		leg_right_mesh,
+		shin_right_mesh
+	]:
+		_store_visual_pose(node)
+
+func _restore_visual_base_pose():
+	for node in [
+		model_root,
+		pelvis_mesh,
+		torso_mesh,
+		rib_wound_mesh,
+		head_mesh,
+		jaw_mesh,
+		eye_left_mesh,
+		eye_right_mesh,
+		arm_left_mesh,
+		forearm_left_mesh,
+		claw_left_mesh_a,
+		claw_left_mesh_b,
+		arm_right_mesh,
+		forearm_right_mesh,
+		held_item,
+		leg_left_mesh,
+		shin_left_mesh,
+		leg_right_mesh,
+		shin_right_mesh
+	]:
+		_restore_visual_pose(node)
+
+func _store_visual_pose(node: Node3D):
+	if node == null:
+		return
+	visual_base_positions[node.name] = node.position
+	visual_base_rotations[node.name] = node.rotation
+	visual_base_scales[node.name] = node.scale
+
+func _restore_visual_pose(node: Node3D):
+	if node == null:
+		return
+	node.position = visual_base_positions.get(node.name, node.position)
+	node.rotation = visual_base_rotations.get(node.name, node.rotation)
+	node.scale = visual_base_scales.get(node.name, node.scale)
 
 func _initialize_part_states():
 	part_health.clear()
@@ -354,7 +449,87 @@ func _initialize_part_states():
 		part_health[part] = max(1, int(round(float(base_part_health) * part_health_mult)))
 		missing_parts[part] = false
 
+	_apply_visual_profile()
 	_apply_starting_part_losses()
+
+func _apply_visual_profile():
+	_restore_visual_base_pose()
+
+	var skin_color: Color = Color(0.34, 0.42, 0.25, 1.0)
+	var shirt_color: Color = Color(0.14, 0.16, 0.15, 1.0)
+	var pants_color: Color = Color(0.19, 0.18, 0.16, 1.0)
+	var flesh_color: Color = Color(0.42, 0.12, 0.11, 1.0)
+	var bone_color: Color = Color(0.72, 0.68, 0.58, 1.0)
+	var metal_color: Color = Color(0.2, 0.2, 0.22, 1.0)
+	var eye_color: Color = Color(1.0, 0.48, 0.16, 1.0)
+	var eye_energy: float = 0.55
+
+	match species_id:
+		ZombieDefinitions.Species.BRUTE:
+			model_root.scale *= 1.12
+			torso_mesh.scale = Vector3(1.22, 1.18, 1.08)
+			pelvis_mesh.scale = Vector3(1.18, 1.0, 1.0)
+			arm_left_mesh.scale = Vector3(1.2, 1.15, 1.15)
+			arm_right_mesh.scale = Vector3(1.2, 1.15, 1.15)
+			forearm_left_mesh.scale = Vector3(1.14, 1.12, 1.12)
+			forearm_right_mesh.scale = Vector3(1.14, 1.12, 1.12)
+			skin_color = Color(0.31, 0.36, 0.24, 1.0)
+			shirt_color = Color(0.18, 0.14, 0.12, 1.0)
+			pants_color = Color(0.12, 0.11, 0.1, 1.0)
+			held_item.visible = false
+		ZombieDefinitions.Species.SPRINTER:
+			model_root.scale *= 0.92
+			torso_mesh.scale = Vector3(0.88, 1.02, 0.92)
+			pelvis_mesh.scale = Vector3(0.9, 0.95, 0.92)
+			arm_left_mesh.scale = Vector3(0.88, 1.08, 0.88)
+			arm_right_mesh.scale = Vector3(0.88, 1.08, 0.88)
+			leg_left_mesh.scale = Vector3(0.92, 1.08, 0.92)
+			leg_right_mesh.scale = Vector3(0.92, 1.08, 0.92)
+			model_root.rotation.x += 0.08
+			skin_color = Color(0.36, 0.43, 0.24, 1.0)
+			shirt_color = Color(0.09, 0.1, 0.1, 1.0)
+			pants_color = Color(0.16, 0.15, 0.14, 1.0)
+			eye_energy = 0.78
+			held_item.visible = false
+		ZombieDefinitions.Species.SKULLY:
+			model_root.scale *= 1.03
+			torso_mesh.scale = Vector3(0.98, 1.0, 0.9)
+			skin_color = bone_color
+			shirt_color = Color(0.08, 0.08, 0.09, 1.0)
+			pants_color = Color(0.1, 0.1, 0.11, 1.0)
+			flesh_color = Color(0.28, 0.08, 0.08, 1.0)
+			eye_color = Color(0.74, 0.92, 1.0, 1.0)
+			eye_energy = 0.95
+			held_item.visible = true
+		_:
+			held_item.visible = species_id == ZombieDefinitions.Species.WALKER
+
+	if class_id == ZombieDefinitions.ZombieClass.ARMORED:
+		shirt_color = shirt_color.darkened(0.18)
+		pants_color = pants_color.darkened(0.1)
+		metal_color = Color(0.28, 0.29, 0.31, 1.0)
+	if class_id == ZombieDefinitions.ZombieClass.FERAL:
+		eye_energy += 0.16
+		flesh_color = flesh_color.lightened(0.08)
+
+	_set_mesh_material_color(head_mesh, skin_color)
+	_set_mesh_material_color(arm_left_mesh, skin_color)
+	_set_mesh_material_color(forearm_left_mesh, skin_color)
+	_set_mesh_material_color(arm_right_mesh, skin_color)
+	_set_mesh_material_color(forearm_right_mesh, skin_color)
+	_set_mesh_material_color(shin_left_mesh, skin_color)
+	_set_mesh_material_color(shin_right_mesh, skin_color)
+	_set_mesh_material_color(torso_mesh, shirt_color)
+	_set_mesh_material_color(pelvis_mesh, pants_color)
+	_set_mesh_material_color(leg_left_mesh, pants_color)
+	_set_mesh_material_color(leg_right_mesh, pants_color)
+	_set_mesh_material_color(rib_wound_mesh, flesh_color)
+	_set_mesh_material_color(jaw_mesh, bone_color)
+	_set_mesh_material_color(claw_left_mesh_a, bone_color)
+	_set_mesh_material_color(claw_left_mesh_b, bone_color)
+	_set_mesh_material_color(held_item, metal_color)
+	_set_mesh_material_color(eye_left_mesh, eye_color, eye_energy)
+	_set_mesh_material_color(eye_right_mesh, eye_color, eye_energy)
 
 func take_damage(amount: int) -> bool:
 	return take_part_damage("torso", amount)
@@ -385,11 +560,15 @@ func take_part_damage(part: String, amount: int) -> bool:
 		_enter_hurt_state()
 	return false
 
+
 func die():
 	if state == ZombieState.DEAD:
 		return
 
 	_broadcast_ally_death_event()
+	current_barricade_target = null
+	if idle_sound_timer != null:
+		idle_sound_timer.stop()
 
 	if resolved_death_behavior == "explode":
 		_die_with_explosion()
@@ -406,6 +585,7 @@ func die():
 	body_collision.set_deferred("disabled", true)
 	_disable_all_hitboxes()
 	_apply_death_subtype_burst()
+	_play_world_sound("zombie_death")
 
 	var fall_direction: float = 1.0
 	if randf() < 0.5:
@@ -422,6 +602,7 @@ func _die_with_explosion():
 	state = ZombieState.DEAD
 	remove_from_group("zombie")
 	can_attack = false
+	current_barricade_target = null
 	damage_area.monitoring = false
 	damage_area.monitorable = false
 	body_collision.set_deferred("disabled", true)
@@ -429,6 +610,7 @@ func _die_with_explosion():
 
 	_apply_death_subtype_burst()
 	_apply_explosion_damage()
+	_play_world_sound("zombie_explode")
 	model_root.visible = false
 	queue_free()
 
@@ -459,6 +641,8 @@ func _process_spawn_rise(delta: float):
 		damage_area.monitorable = true
 		can_attack = true
 		state = ZombieState.CHASE
+		_play_world_sound("zombie_spawn")
+		_schedule_idle_sound()
 
 func _process_chase(delta: float):
 	_apply_gravity(delta)
@@ -511,11 +695,14 @@ func _process_chase(delta: float):
 		velocity.z = move_toward(velocity.z, 0.0, 12.0 * delta)
 
 	move_and_slide()
+	_refresh_barricade_target()
 
 	if hidder_ground_mode:
 		return
 
 	if can_attack and _is_player_in_damage_area():
+		state = ZombieState.ATTACK
+	elif can_attack and _has_attackable_barricade():
 		state = ZombieState.ATTACK
 
 func _process_attack(delta: float):
@@ -526,10 +713,16 @@ func _process_attack(delta: float):
 	_apply_gravity(delta)
 	velocity.x = move_toward(velocity.x, 0.0, 16.0 * delta)
 	velocity.z = move_toward(velocity.z, 0.0, 16.0 * delta)
-	_look_at_player()
+	if _is_player_in_damage_area():
+		_look_at_player()
+	elif _has_attackable_barricade():
+		_look_at_barricade_target()
+	else:
+		current_barricade_target = null
+		_look_at_player()
 	move_and_slide()
 
-	if not _is_player_in_damage_area():
+	if not _is_player_in_damage_area() and not _has_attackable_barricade():
 		if _try_species_ranged_attack():
 			state = ZombieState.CHASE
 			return
@@ -698,6 +891,72 @@ func _look_at_player():
 		return
 	_look_at_point(player.global_position)
 
+func _look_at_barricade_target():
+	if not _has_attackable_barricade():
+		return
+	_look_at_point(current_barricade_target.global_position)
+
+func _refresh_barricade_target():
+	if _has_attackable_barricade():
+		return
+
+	current_barricade_target = null
+	for collision_index in range(get_slide_collision_count()):
+		var collision: KinematicCollision3D = get_slide_collision(collision_index)
+		if collision == null:
+			continue
+		var collider: Object = collision.get_collider()
+		if _is_valid_barricade_target(collider):
+			current_barricade_target = collider as Node3D
+			return
+
+	if not player or not is_instance_valid(player):
+		return
+
+	var player_direction: Vector3 = (player.global_position - global_position)
+	player_direction.y = 0.0
+	if player_direction.length_squared() <= 0.0001:
+		return
+	player_direction = player_direction.normalized()
+
+	var best_distance := INF
+	for barricade in get_tree().get_nodes_in_group("barricade"):
+		if not _is_valid_barricade_target(barricade):
+			continue
+		var barricade_node: Node3D = barricade as Node3D
+		if barricade_node == null:
+			continue
+		var delta_to_barricade: Vector3 = barricade_node.global_position - global_position
+		delta_to_barricade.y = 0.0
+		var distance: float = delta_to_barricade.length()
+		if distance > 1.95 or distance <= 0.001:
+			continue
+		var forward_alignment: float = delta_to_barricade.normalized().dot(player_direction)
+		if forward_alignment < 0.3 or distance >= best_distance:
+			continue
+		best_distance = distance
+		current_barricade_target = barricade_node
+
+func _is_valid_barricade_target(target: Object) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	if not (target is Node):
+		return false
+	var target_node: Node = target as Node
+	if not target_node.is_in_group("barricade"):
+		return false
+	if not target_node.has_method("blocks_zombies"):
+		return false
+	return bool(target_node.call("blocks_zombies"))
+
+func _has_attackable_barricade() -> bool:
+	if not _is_valid_barricade_target(current_barricade_target):
+		current_barricade_target = null
+		return false
+	var barricade_position: Vector3 = current_barricade_target.global_position
+	barricade_position.y = global_position.y
+	return global_position.distance_to(barricade_position) <= 1.95
+
 func _look_at_point(point: Vector3):
 	var look_target: Vector3 = Vector3(point.x, global_position.y, point.z)
 	if global_position.distance_to(look_target) > 0.1:
@@ -725,6 +984,7 @@ func _try_species_ranged_attack() -> bool:
 
 	if player.has_method("take_damage"):
 		var ranged_damage: int = max(1, int(round(float(_get_current_damage()) * 0.7)))
+		_play_world_sound("zombie_ranged_attack")
 		player.take_damage(ranged_damage)
 
 	_start_attack_cooldown(1.2)
@@ -736,10 +996,19 @@ func _perform_attack():
 		_start_attack_cooldown()
 		return
 
-	if player and is_instance_valid(player) and player.has_method("take_damage"):
+	if _is_player_in_damage_area() and player and is_instance_valid(player) and player.has_method("take_damage"):
+		_play_world_sound("zombie_attack")
 		player.take_damage(target_damage)
 		_apply_touch_effect_on_player()
 		_apply_on_attack_self_heal()
+		_start_attack_cooldown()
+		return
+
+	if _has_attackable_barricade() and current_barricade_target.has_method("take_zombie_damage"):
+		_play_world_sound("zombie_barricade_hit")
+		current_barricade_target.call("take_zombie_damage", target_damage)
+		_start_attack_cooldown(1.05)
+		return
 
 	_start_attack_cooldown()
 
@@ -1121,6 +1390,7 @@ func _enter_hurt_state():
 	if randf() < resolved_pain_resistance:
 		return
 
+	_play_world_sound("zombie_hurt")
 	state = ZombieState.HURT
 	var reduced_hurt_time: float = maxf(0.03, hurt_recovery_time * lerpf(1.0, 0.15, resolved_pain_resistance))
 	hurt_timer.start(reduced_hurt_time)
@@ -1165,9 +1435,45 @@ func _on_corpse_fall_finished():
 	tween.tween_property(model_root, "scale", Vector3.ZERO, 0.6)
 	tween.tween_callback(queue_free)
 
+func _on_idle_sound_timer_timeout() -> void:
+	if state == ZombieState.DEAD or state == ZombieState.SPAWN_RISE:
+		return
+	_play_world_sound("zombie_idle")
+	_schedule_idle_sound()
+
 func despawn_immediately():
 	if not is_instance_valid(self):
 		return
+	if idle_sound_timer != null:
+		idle_sound_timer.stop()
 	var tween = create_tween()
 	tween.tween_property(model_root, "scale", Vector3.ZERO, 0.3)
 	tween.tween_callback(queue_free)
+
+func _schedule_idle_sound() -> void:
+	if idle_sound_timer == null:
+		return
+	idle_sound_timer.start(profile_rng.randf_range(2.8, 6.5))
+
+func _set_mesh_material_color(mesh_instance: MeshInstance3D, color: Color, emission_energy: float = -1.0):
+	if mesh_instance == null:
+		return
+
+	var source_material: StandardMaterial3D = mesh_instance.material_override as StandardMaterial3D
+	if source_material == null and mesh_instance.mesh != null:
+		source_material = mesh_instance.mesh.surface_get_material(0) as StandardMaterial3D
+	if source_material == null:
+		source_material = StandardMaterial3D.new()
+
+	var material: StandardMaterial3D = source_material.duplicate()
+	material.albedo_color = color
+	if emission_energy >= 0.0:
+		material.emission_enabled = true
+		material.emission = color
+		material.emission_energy_multiplier = emission_energy
+	mesh_instance.material_override = material
+
+func _play_world_sound(event_id: String) -> void:
+	if event_id.is_empty():
+		return
+	AudioManager.play_sfx(event_id, global_position, true)
