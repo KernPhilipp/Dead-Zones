@@ -181,10 +181,10 @@ func _do_spawn_player(peer_id: int):
 		return  # already spawned (e.g. called twice)
 	var p: Node3D = player_scene.instantiate() as Node3D
 	p.name = node_name
+	p.position = Vector3(0, 1, 0)  # set before add_child so global_position is never needed early
 	p.set_multiplayer_authority(peer_id)
 	scene_root.add_child.call_deferred(p)
-	await get_tree().process_frame
-	p.global_position = Vector3(0, 1, 0)
+	await p.tree_entered  # wait until actually in tree before registering
 	if p is CharacterBody3D:
 		var cb := p as CharacterBody3D
 		if cb not in players:
